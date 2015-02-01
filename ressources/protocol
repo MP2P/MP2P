@@ -1,18 +1,18 @@
   FROM  |   TO   |                         WHEN                         |     TYPE      |                    MESSAGE                    |     NOTES
 --------|--------|------------------------------------------------------|---------------|-----------------------------------------------|---------------
- Client | Master | The client wants to upload a file to the servers     |   < 0 |  >    | < FSIZE | FNAME >                             |
- Client | Master | The client wants to download a file from the servers |   < 0 |  >    | < FSIZE | FNAME >                             |
- Client | Master | The client wants to delete a file from the servers   |   < 0 |  >    | < FNAME >                                     |
+ Client | Master | The client wants to upload a file to the servers     | < 0 | 0 >     | < FSIZE | FNAME >                             |
+ Client | Master | The client wants to download a file from the servers | < 0 | 1 >     | < FSIZE | FNAME >                             |
+ Client | Master | The client wants to delete a file from the servers   | < 0 | 2 >     | < FNAME >                                     |
 --------|--------|------------------------------------------------------|---------------|-----------------------------------------------|---------------
- Master | Client | The download location                                   |   < 1 |  >    |                                               |
- Master | Client | The upload location                                     |   < 1 |  >    |                                               |
- Master | Client | The Storage server's IP table                           |   < 1 |  >    |                                               |
+ Master | Client | The Storage server's IP table                        |   < 1 | 0 >   | < STTABLE >                                   |
+ Master | Client | The upload location                                  |   < 1 | 1 >   | < STLIST >                                    |
+ Master | Client | The download location                                |   < 1 | 2 >   | < STLIST >                                    |
 
 ================================================================================================================================================================================
 
  BLOCK NAME |    Size in bytes    |                       Content                       |                                                        NOTES
 ------------|---------------------|-----------------------------------------------------|---------------------------------------------------------------------------------------
- FSIZE      | 0 to 1TB            | < the | file | size | on 5 | bytes >                | The file size.
+ FSIZE      | 5                   | < the | file | size | on 5 | bytes >                | The file size.
  FNAME      | 1 to 256 ^ 4 - 8    | < 0-255 | ... | >                                   | The name of the file.
 ------------|---------------------|-----------------------------------------------------|---------------------------------------------------------------------------------------
  IP         | 4                   | < four | bytes | as an | unsigned int >             | An IP address.
