@@ -4,26 +4,28 @@
  Client | Master | The client wants to download a file from the servers | < 0 | 1 >     | < FSIZE | FNAME >                             |
  Client | Master | The client wants to delete a file from the servers   | < 0 | 2 >     | < FNAME >                                     |
 --------|--------|------------------------------------------------------|---------------|-----------------------------------------------|---------------
- Master | Client | The Storage server's IP table                        |   < 1 | 0 >   | < STTABLE >                                   |
- Master | Client | The upload location                                  |   < 1 | 1 >   | < STLIST >                                    |
- Master | Client | The download location                                |   < 1 | 2 >   | < STLIST >                                    |
+ Master | Client | The Storage server's IP table                        | < 1 | 0 >     | < STTABLE >                                   |
+ Master | Client | The upload location                                  | < 1 | 1 >     | < FDETAILS >                                  |
+ Master | Client | The download location                                | < 1 | 2 >     | < FDETAILS >                                  |
 
-================================================================================================================================================================================
+========================================================================================================================================================================================
 
- BLOCK NAME |    Size in bytes    |                       Content                       |                                                        NOTES
-------------|---------------------|-----------------------------------------------------|---------------------------------------------------------------------------------------
- FSIZE      | 5                   | < the | file | size | on 5 | bytes >                | The file size.
- FNAME      | 1 to 256 ^ 4 - 8    | < 0-255 | ... | >                                   | The name of the file.
-------------|---------------------|-----------------------------------------------------|---------------------------------------------------------------------------------------
- IP         | 4                   | < four | bytes | as an | unsigned int >             | An IP address.
-------------|---------------------|-----------------------------------------------------|---------------------------------------------------------------------------------------
- MESSAGE    | 0 to 256 ^ 4 - 3    | < | ... | >                                         | Containing the data.
-------------|---------------------|-----------------------------------------------------|---------------------------------------------------------------------------------------
- PACKET     | 6 to 256 ^ 4 + 3    | < SIZE | TYPE | MESSAGE >                           | The whole byte array you send and receive.
-------------|---------------------|-----------------------------------------------------|---------------------------------------------------------------------------------------
- SIZE       | 4                   | < four | bytes | as an | unsigned int >             | The size of TYPE + MESSAGE.
- STID       | 2                   | < two bytes | as an uint16 >                        | From 0 to 65535, which is the maximum number of Storage servers.
- STLIST     | 4 to 2 + 65535 * 2  | < two bytes | as an uint16 | STID | ... | >         | The first two bytes are the number of servers to communicate with. At least one STID.
- STTABLE    | 8 to 2 + 65535 * 6  | < two bytes | as an uint16 | STID | IP | ... | >    | The first two bytes are the number of servers. At least one couple STID + IP.
-------------|---------------------|-----------------------------------------------------|---------------------------------------------------------------------------------------
- TYPE       | 2                   | < two bytes | as an uint16 >                        | The type of the transfered data, to know what's the MESSAGE. See table above.
+ BLOCK NAME |     Size in bytes     |                           Content                           |                                                        NOTES
+------------|-----------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------
+ FDETAILS   | 12 to 10 + 65535 * 2  | < FID | STLIST >                                            | The ID of the file, and a list of the Storage servers. Each index corresponds to a piece.
+ FID        | 8                     | < eight | bytes | as an | unsigned | int | on | 64 | bits > | For more than 18 billions of billions of different files. That should be enough.
+ FNAME      | 1 to 256 ^ 4 - 9      | < 0-255 | ... | >                                           | The name of the file.
+ FSIZE      | 6                     | < the | file | size | on | 6 | bytes >                      | The file size. A file larger than 281TB cannot be stored.
+------------|-----------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------
+ IP         | 4                     | < four | bytes | as an | unsigned int >                     | An IP address.
+------------|-----------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------
+ MESSAGE    | 0 to 256 ^ 4 - 3      | < | ... | >                                                 | Containing the data.
+------------|-----------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------
+ PACKET     | 6 to 256 ^ 4 + 3      | < SIZE | TYPE | MESSAGE >                                   | The whole byte array you send and receive.
+------------|-----------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------
+ SIZE       | 4                     | < four | bytes | as an | unsigned int >                     | The size of TYPE + MESSAGE.
+ STID       | 2                     | < two bytes | as an uint16 >                                | From 0 to 65535, which is the maximum number of Storage servers.
+ STLIST     | 4 to 2 + 65535 * 2    | < two bytes | as an uint16 | STID | ... | >                 | The first two bytes are the number of servers to communicate with. At least one STID.
+ STTABLE    | 8 to 2 + 65535 * 6    | < two bytes | as an uint16 | STID | IP | ... | >            | The first two bytes are the number of servers. At least one couple STID + IP.
+------------|-----------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------
+ TYPE       | 2                     | < two bytes | as an uint16 >                                | The type of the transfered data, to know what's the MESSAGE. See table above.
