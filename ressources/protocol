@@ -1,73 +1,33 @@
-  FROM   |   TO    |                         WHEN                         |     TYPE      |                    MESSAGE                    |     NOTES
----------|---------|------------------------------------------------------|---------------|-----------------------------------------------|---------------
- Client  | Master  | The client wants to upload a file to the servers     | < 0 | 0 >     | < FSIZE | FNAME >                             |
- Client  | Master  | The client wants to download a file from the servers | < 0 | 1 >     | < FNAME >                                     |
- Client  | Master  | The client wants to delete a file from the servers   | < 0 | 2 >     | < FNAME >                                     |
----------|---------|------------------------------------------------------|---------------|-----------------------------------------------|---------------
- Master  | Client  | The Storage server's IP table                        | < 1 | 0 >     | < STTABLE >                                   |
- Master  | Client  | The upload location                                  | < 1 | 1 >     | < FDETAILS >                                  |
- Master  | Client  | The download location                                | < 1 | 2 >     | < FDETAILS >                                  |
- Master  | Client  | The cluster is full                                  | < 1 | 4 >     | < >                                           |
----------|---------|------------------------------------------------------|---------------|-----------------------------------------------|---------------
- Client  | Storage | The client wants to send a piece                     | < 2 | 0 >     | < PARTID >                                    |
- Client  | Storage | The client sends a piece                             | < 2 | 1 >     | < PARTID | MD5 | DATA >                       |
- Client  | Storage |  | < 2 | 2 >     |                             |
- Client  | Storage |  | < 2 | 3 >     |                             |
----------|---------|------------------------------------------------------|---------------|-----------------------------------------------|---------------
- Storage | Client  | Go for upload (2 | 1)                                | < 3 | 0 >     | < PARTID >                                          |
- Storage | Client  | NoGO for upload                                      | < 3 | 1 >     | < PARTID >                             |
- Storage | Client  | Upload succeded (MD5)                                | < 3 | 2 >     | < PARTID >                                     |
- Storage | Client  | Upload failed (MD5)                                  | < 3 | 3 >     | < PARTID >                                     |
----------|---------|------------------------------------------------------|---------------|-----------------------------------------------|---------------
- Master  | Storage | PARTID ok                                            | < 4 | 0 >     | < PARTID >
- Master  | Storage | PARTID error                                         | < 4 | 1 >     | < PARTID >
- Master  | Storage | STTABLE update                                       | < 4 | 3 >     | < STTABLE >
- Master  | Storage | Reception acknowledgement, redundancy list           | < 4 | 4 >     | < PARTID | STLIST>
----------|---------|------------------------------------------------------|---------------|-----------------------------------------------|---------------
- Storage | Master  | up message                                           | < 5 | 0 >     | < PARTID >
- Storage | Master  | PARTID check                                         | < 5 | 1 >     | < PARTID >
- Storage | Master  | Part received ok, gimme the redundancy list, bitch!  | < 5 | 2 >     | < PARTID >
- Storage | Master  |                                | < 5 | 3 >     |
----------|---------|------------------------------------------------------|---------------|-----------------------------------------------|---------------
- Master  | Master  |                                | < 6 | 0 >     |
- Master  | Master  |                                | < 6 | 1 >     |
- Master  | Master  |                                | < 6 | 2 >     |
----------|---------|------------------------------------------------------|---------------|-----------------------------------------------|---------------
- Storage | Storage | Take the part for redundancy                         | < 7 | 0 >     | < PARTID | MD5 | IP | DATA >                  | Source Master IP
- Storage | Storage |                                | < 7 | 1 >     |
- Storage | Storage |                                | < 7 | 2 >     |
-
-==============================================================================================================================================================================================================
-
- BLOCK NAME |  MIN Size (bytes)  |  MAX Size (bytes)  |                           Content                           |                                                        NOTES
-------------|--------------------|--------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------
- FDETAILS   | 12                 | 10 + 65535 * 2     | < FID | STLIST >                                            | The ID of the file, and a list of the Storage servers. Each index corresponds to a piece.
- FID        | 8                  | 8                  | < eight | bytes | as an | unsigned | int | on | 64 | bits > | For more than 18 billions of billions of different files. That should be enough.
- FNAME      | 1                  | 256 ^ 4 - 9        | < 0-255 | ... | >                                           | The name of the file.
- FSIZE      | 6                  | 6                  | < the | file | size | on | 6 | bytes >                      | The file size. A file larger than 256TB cannot be stored.
-------------|--------------------|--------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------
- IP         | 4                  | 4                  | < four | bytes | as an | unsigned int >                     | An IP address.
-------------|--------------------|--------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------
- PACKET     | 6                  | 256 ^ 4 + 3        | < SIZE | TYPE | MESSAGE >                                   | The whole byte array you send and receive.
- MD5
- DATA
- PARTID (FID + part number)
-------------|--------------------|--------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------
- MESSAGE    | 0                  | 256 ^ 4 - 3        | < | ... | >                                                 | Containing the data.
-------------|--------------------|--------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------
- SIZE       | 4                  | 4                  | < four | bytes | as an | unsigned int >                     | The size of TYPE + MESSAGE.
- STID       | 2                  | 2                  | < two bytes | as an uint16 >                                | From 0 to 65535, which is the maximum number of Storage servers.
- STLIST     | 4                  | 2 + 65535 * 2      | < two bytes | as an uint16 | STID | ... | >                 | The first two bytes are the number of servers to communicate with. At least one STID.
- STTABLE    | 8                  | 2 + 65535 * 6      | < two bytes | as an uint16 | STID | IP | ... | >            | The first two bytes are the number of servers. At least one couple STID + IP.
-------------|--------------------|--------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------
- TYPE       | 2                  | 2                  | < two bytes | as an uint16 >                                | The type of the transfered data, to know what's the MESSAGE. See table above.
-
-
-==== MESSAGE explanations ====
-
-BYTES(MAX(MESSAGE)) = 256^4 - 3 (DEFINED)
-
-MIN(SIZE) = 0
-MAX(SIZE) = 2^8^4 - 1 = 256^4 - 1
-
-BYTES(PACKET) = BYTES(SIZE) + BYTES(TYPE) + BYTES(MESSAGE) = 4 + 2 + 256^4 - 3 = 256^4 + 3
+         -->          |       TYPE      |                                       |                             |               |
+   FROM   |    TO     | FROMTO |  WHAT  |            WHEN                       |  MESSAGE                    |   NEXT STEP   |  NOTES
+----------|-----------|--------|--------|---------------------------------------|-----------------------------|---------------|---------------------------------------------------------------------
+Client    |  Master   |  0     |  0     |  Error                                |  < >                        |               |
+Client    |  Master   |  0     |  1     |  The client wants to upload a file    |  < FSIZE | FNAME >          |  1;0 | 1;2    |
+Client    |  Master   |  0     |  2     |  The client wants to download a file  |  < FNAME >                  |  1;0 | 1;2    |
+Client    |  Master   |  0     |  3     |  The client wants to delete a file    |  < FNAME >                  |  4;1          |
+----------|-----------|--------|--------|---------------------------------------|-----------------------------|---------------|---------------------------------------------------------------------
+Master    |  Client   |  1     |  0     |  Error                                |  < >                        |               |
+Master    |  Client   |  1     |  1     |  The Storage server's IP table        |  < STTABLE >                |  none         |  Not used anymore as the STID is as long as an IP.
+Master    |  Client   |  1     |  2     |  The pieces locations                 |  < FDETAILS >               |  2;1 | 2;2    |  This MESSAGE is the same for uploading (2;1) and downloading (2;2).
+Master    |  Client   |  1     |  3     |  Successfully received part           |  < PARTID >                 |  none         |
+----------|-----------|--------|--------|---------------------------------------|-----------------------------|---------------|---------------------------------------------------------------------
+Client    |  Storage  |  2     |  0     |  Error                                |  < >                        |               |
+Client    |  Storage  |  2     |  1     |  The client sends a piece             |  < PARTID | SHA1 | DATA >   |  5;2 | 3;2    |
+Client    |  Storage  |  2     |  2     |  The clients wants a piece            |  < PARTID >                 |  3;3          |
+----------|-----------|--------|--------|---------------------------------------|-----------------------------|---------------|---------------------------------------------------------------------
+Storage   |  Client   |  3     |  0     |  Error                                |  < >                        |               |
+Storage   |  Client   |  3     |  1     |                                       |                             |               |
+Storage   |  Client   |  3     |  2     |  Upload failed (SHA1)                 |  < PARTID >                 |  2;1          |
+Storage   |  Client   |  3     |  3     |  The Storage sends a piece            |  < PARTID | SHA1 | DATA >   |  2;2 | none   |
+----------|-----------|--------|--------|---------------------------------------|-----------------------------|---------------|---------------------------------------------------------------------
+Master    |  Storage  |  4     |  0     |  Error                                |  < >                        |               |
+Master    |  Storage  |  4     |  1     |  The Master deletes a piece           |  < PARTID >                 |  5;0 | 5;1    |
+Master    |  Storage  |  4     |  2     |  Part received acknowledgement        |  < PARTID >                 |  3;4          |
+----------|-----------|--------|--------|---------------------------------------|-----------------------------|---------------|---------------------------------------------------------------------
+Storage   |  Master   |  5     |  0     |  Error                                |  < >                        |               |
+Storage   |  Master   |  5     |  1     |  Part deletion succeeded              |  < PARTID >                 |  none         |
+Storage   |  Master   |  5     |  2     |  Part received                        |  < PARTID | IP >            |  1;3          |  The client's IP
+----------|-----------|--------|--------|---------------------------------------|-----------------------------|---------------|---------------------------------------------------------------------
+Master    |  Master   |  6     |  0     |  Error                                |  < >                        |               |
+----------|-----------|--------|--------|---------------------------------------|-----------------------------|---------------|---------------------------------------------------------------------
+Storage   |  Storage  |  7     |  0     |  Error                                |  < >                        |               |
