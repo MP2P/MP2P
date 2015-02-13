@@ -31,3 +31,35 @@ Storage   |  Master   |  5     |  2     |  Part received                        
 Master    |  Master   |  6     |  0     |  Error                                |  < >                        |               |
 ----------|-----------|--------|--------|---------------------------------------|-----------------------------|---------------|---------------------------------------------------------------------
 Storage   |  Storage  |  7     |  0     |  Error                                |  < >                        |               |
+
+=======================================================================================================================================================================================================================
+
+BLOCK NAME  |  MIN SIZE (bytes) |  MAX SIZE (bytes)   |                   CONTENT                     |                                                 NOTES
+------------|-------------------|---------------------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------
+FDETAILS    |  16               |  10 + 6 * 256^4     |  < FID | STLIST >                             |   The ID of the file, and a list of the Storage servers. Each index corresponds to a Storage.
+FID         |  8                |  8                  |  < UINT64 >                                   |   For more than 18 billions of billions of different files. That should be enough.
+FNAME       |  1                |  256^4 - 9          |  < unsigned char | ... >                      |   The name of the file.
+FROMTO      |  1                |  1                  |  < unsigned char >                            |   A number representing who is communicating with who.
+FSIZE       |  6                |  6                  |  < a | file | size | on | 6 | bytes >         |   The file size. A file larger than 256TB cannot be stored.
+------------|-------------------|---------------------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------
+IPV4        |  4                |  4                  |  < ipv4 | address | on 4 | bytes >            |   An IPV4 address.
+------------|-------------------|---------------------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------
+MESSAGE     |  0                |  256^4 - 3          |  < ... >                                      |   Containing the data.
+------------|-------------------|---------------------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------
+PACKET      |  6                |  256^4 + 3          |  < SIZE | TYPE | MESSAGE >                    |   The whole byte array you send and receive.
+PARTID      |  12               |  12                 |  < FID | PARTNUM >                            |   The id of the file plus the number of one of it's part
+PARTNUM     |  4                |  4                  |  < UINT64 >                                   |   A file part number
+------------|-------------------|---------------------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------
+SHA1        |  20               |  20                 |  < sha1sum | hash | on | ... | 16 | bytes >   |   SHA1 checksum for parts
+SIZE        |  4                |  4                  |  < UINT32 >                                   |   The size of TYPE + MESSAGE.
+STID        |  4                |  4                  |  < UINT32 >                                   |   The maximum number of Storage servers.
+STLIST      |  8                |  6 * 256^4 + 2      |  < UINT16 | STID | UINT16 | ... | ... >       |   An STID + number list, not empty. The number corresponds to the number of parts to send to the given Storage
+STTABLE     |  6                |  8 * 256^4          |  < STID | IP | ... | ... >                    |   A table containing (STID/IP) assocations
+------------|-------------------|---------------------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------
+TYPE        |  2                |  2                  |  < FROMTO | WHAT >                            |   The type of the transfered data, to know what's the MESSAGE. See the "Scenario" sheet.
+------------|-------------------|---------------------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------
+UINT16      |  2                |  2                  |  < a 2 bytes | number >                       |   Just an uint16_t.
+UINT32      |  4                |  4                  |  < a 4 bytes | ... | number >                 |   Just an uint32_t.
+UINT64      |  8                |  8                  |  < a 8 bytes | ... | number >                 |   Just an uint64_t.
+------------|-------------------|---------------------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------
+WHAT        |  1                |  1                  |  < an unsigned char >                         |   A number representing the nature of the communication.
