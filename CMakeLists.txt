@@ -10,6 +10,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 #The tools library
 add_subdirectory(${SOURCE_DIR}/libtools)
 
+#The client
+add_subdirectory(${SOURCE_DIR}/client)
+
+#The server
+add_subdirectory(${SOURCE_DIR}/server)
+
 # The "tests" target
 add_subdirectory(${SOURCE_DIR}/tests)
 
