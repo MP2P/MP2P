@@ -1,6 +1,7 @@
 file(GLOB_RECURSE LIBSOURCES *.cc)
 add_library(libtools ${LIBSOURCES})
-target_include_directories(libtools PUBLIC include)
+#target_include_directories(libtools PUBLIC include)
+target_include_directories(libtools PUBLIC .)
 #set_target_properties(libtools PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(libtools PROPERTIES OUTPUT_NAME tools)
 set_target_properties(libtools PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
