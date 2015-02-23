@@ -1,0 +1,6 @@
+-Ilibtools
+-std=c++14
+-pedantic
+-Wall
+-Wextra
+-Werror
