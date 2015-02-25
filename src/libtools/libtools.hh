@@ -4,9 +4,11 @@
 # include <forward_list>
 # include <libconfig.h++>
 # include <thread>
+# include <boost/asio.hpp>
 
 # include <libtools.hh>
 
+using namespace boost::asio;
 
 void start();
 
@@ -27,25 +29,39 @@ namespace network
       uint8_t fromto_;
       uint8_t what_;
       std::string message_;
+
     public:
       Packet(uint32_t size, uint8_t fromto, uint8_t what, std::string message);
       ~Packet();
   };
 
-  void send_packet(Packet& packet);
+  void send_packet(Packet& packet); // FIXME
+  void handle_master();
+  void handle_storage();
+  void handle_zeus();
+  auto get_handle_fun();
 
-  /// Each Thread instanciates a Server
   class Server
   {
+    private:
+      ip::tcp::acceptor acceptor_;
+      ip::tcp::socket socket_;
+      void handle(Node node);
+    public:
+      Server(io_service& io_service, const unsigned port, Node node);
+      ~Server();
   };
 
   class Master
   {
     private:
-      std::unique_ptr<libconfig::Config> config_;
+      std::unique_ptr<libconfig::Config> config_; // FIXME: Useless?
       std::forward_list<std::thread> threads_;
       unsigned port_;
       unsigned concurent_threads_;
+      io_service io_service_; // Do not need instantiation
+      std::unique_ptr<Server> server_;
+
     public:
       Master(std::unique_ptr<libconfig::Config>&& config);
       ~Master();
@@ -73,6 +89,7 @@ namespace utils
   unsigned get_port(std::unique_ptr<libconfig::Config>& config);
   unsigned get_concurent_threads(std::unique_ptr<libconfig::Config>& config);
 
+  bool is_system_ok();
 }
 
 #endif /* MP2P_LIBTOOLS */

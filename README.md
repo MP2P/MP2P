@@ -37,10 +37,18 @@ cd src/client; mkdir build && cd build; cmake ..; make;
 * Boost >= 1.55
 * libconfig >= 1.4.9
 
+## Details
+
+The Server application includes the Master and also the Storage application.
+
+It listens both for ipv4 & ipv6 connections
+(see http://stackoverflow.com/a/1618259).
+
 
 ## Tests
 
-We are using the [Catch Unit](https://github.com/philsquared/Catch) test framework.
+We ~~are~~ will be using the [Catch Unit](https://github.com/philsquared/Catch)
+test framework.
 
 ## How to configure .vimrc with Syntastic so that it detects header locations?
 

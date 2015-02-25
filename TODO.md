@@ -21,3 +21,5 @@ Update management
 Failure recovery
 Compression
 Cyphering
+IPV6
+Log system
