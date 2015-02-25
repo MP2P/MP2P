@@ -1,0 +1,51 @@
+#include <iostream>
+#include <algorithm>
+#include <libtools.hh>
+
+namespace network
+{
+  Master::Master(std::unique_ptr<libconfig::Config>&& config)
+    : config_{std::move(config)},
+      threads_{}
+  {
+    port_ = utils::get_port(config_);
+    concurent_threads_ = utils::get_concurent_threads(config_);
+
+    std::cout << "Concurency level = " << concurent_threads_
+              << std::endl << "Bind port = " << port_ << std::endl;
+  }
+
+  Master::~Master()
+  {
+    if (!threads_.empty())
+      stop();
+  }
+
+  void f(unsigned i)
+  {
+    std::cout << "Thread " << i + 1 << " launched!" << std::endl;
+  }
+
+  /// Creates threads & make them bind the same port defined in the config.
+  void Master::run()
+  {
+    /// Creating (concurent_threads) threads
+    for (unsigned i = 0; i < concurent_threads_; ++i)
+      threads_.emplace_front(std::thread(f, i));
+  }
+
+  /// Causes the server to stop it's running threads if any.
+  void Master::stop()
+  {
+    /// Send a stop signal for all threads
+    // TODO
+
+    /// Join all threads
+    std::for_each(threads_.begin(), threads_.end(),
+                  [](std::thread& t) { t.join(); });
+
+    // Delete all threads
+    while(!threads_.empty())
+      threads_.pop_front();
+  }
+}

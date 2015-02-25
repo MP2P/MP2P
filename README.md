@@ -31,6 +31,13 @@ cd src/server; mkdir build && cd build; cmake ..; make;
 cd src/client; mkdir build && cd build; cmake ..; make;
 ```
 
+## Requirements
+
+* C++ >= 14
+* Boost >= 1.55
+* libconfig >= 1.4.9
+
+
 ## Tests
 
 We are using the [Catch Unit](https://github.com/philsquared/Catch) test framework.

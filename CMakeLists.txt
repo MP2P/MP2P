@@ -1,23 +1,44 @@
+# Notation [XX][dWW-YY-..] -> ElementId=XX / Depends from WW & YY
+
 cmake_minimum_required(VERSION 2.8)
+
+# ********[00] PROJECT VARIABLES ******** #
 project(MP2P)
 
-set(CMAKE_CXX_COMPILER "clang++")
-set(CXX_FLAGS "-Wall -Wextra -Werror -pedantic -std=c++1y")
-set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
+# ********[01] CMAKE OPTIONS ********* #
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-#The tools library
-add_subdirectory(${SOURCE_DIR}/libtools)
 
-#The client
-add_subdirectory(${SOURCE_DIR}/client)
+# ********[02] COMPILER OPTIONS ******** #
+set(CMAKE_CXX_COMPILER "clang++")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -Wall -Wextra -Werror -pedantic -pthread")
 
-#The server
-add_subdirectory(${SOURCE_DIR}/server)
 
-# The "tests" target
-add_subdirectory(${SOURCE_DIR}/tests)
+# ********[03] ADDING BOOST LIBRARY ******** #
+set(BOOST_ROOT /opt/boost)
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost COMPONENTS system)
+include_directories(${Boost_INCLUDE_DIR})
+
+
+# ********[04][d01] ADDING LIBCONFIG LIBRARY ******** #
+#set(LibConfig++_DIR /usr/include)
+find_package(LibConfig++ REQUIRED)
+include_directories(${LIBCONFIG++_INCLUDE_DIR})
+
+
+# ********[05][d01-02-03-04] SOURCE FILES ******** #
+add_subdirectory(${SOURCE_DIR}/libtools) # The tools library
+add_subdirectory(${SOURCE_DIR}/client)   # The client
+add_subdirectory(${SOURCE_DIR}/server)   # The server
+add_subdirectory(${SOURCE_DIR}/tests)    # The "tests" target
+
+
+
+
 
 #add_executable(${PROJECT_NAME} ${SOURCES})
 #set_target_properties(td42 PROPERTIES COMPILE_FLAGS "${CXX_FLAGS} -O3")
