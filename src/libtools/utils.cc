@@ -53,15 +53,17 @@ namespace utils
     return cfg;
   }
 
+  /// Getting the port number to be binded
   unsigned get_port(std::unique_ptr<libconfig::Config>& config)
   {
     unsigned port = 0;
-    /// Getting the port number to be binded
-    if (!config->lookupValue("server.master.bind_port", port))
+    config->lookupValue("server.master.bind_port", port);
+    if (port == 0)
       port = 3727; // #MP2P
     return port;
   }
 
+  /// Getting the concurency level
   unsigned get_concurent_threads(std::unique_ptr<libconfig::Config>& config)
   {
     unsigned concurent_threads = 0;

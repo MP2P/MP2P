@@ -28,7 +28,7 @@ namespace network
     /// Creating (concurent_threads) threads
     for (unsigned i = 0; i < concurent_threads_; ++i)
       threads_.emplace_front(std::thread(
-            [&]()
+            [i, this]()
             {
               std::cout << "Thread " << i + 1 << " launched!" << std::endl;
               io_service_.run();
