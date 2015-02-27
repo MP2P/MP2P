@@ -14,14 +14,6 @@ void start();
 
 namespace network
 {
-  enum Node
-  {
-    CLIENT = 0,
-    MASTER = 1,
-    STORAGE = 2,
-    ZEUS = 3
-  };
-
   class Packet
   {
     private:
@@ -47,9 +39,10 @@ namespace network
       ip::tcp::acceptor acceptor_;
       ip::tcp::socket socket_;
       std::function<void()> handler_;
-      void handle(Node node);
+
+      void handle_accept();
     public:
-      Server(io_service& io_service, const unsigned port, Node node, std::function<void()> handler);
+      Server(io_service& io_service, const unsigned port, std::function<void()> handler);
       ~Server();
   };
 

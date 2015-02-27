@@ -5,30 +5,7 @@
 
 namespace network
 {
-  void handle_master()
-  {
-    std::cout << "Master handling..." << std::endl;
-  }
-  void handle_storage()
-  {
-    std::cout << "Storage handling..." << std::endl;
-  }
-
-  void handle_zeus()
-  {
-    std::cout << "Zeus handling..." << std::endl;
-  }
-
-  auto get_handle_fun(Node node)
-  {
-    if (node == MASTER)
-      return handle_master;
-    else if (node == STORAGE)
-      return handle_storage;
-    return handle_zeus;
-  }
-
-  Server::Server(io_service& io_service, const unsigned port, Node node, std::function<void()> handler)
+  Server::Server(io_service& io_service, const unsigned port, std::function<void()> handler)
     : acceptor_{io_service},
       socket_{io_service},
       handler_{handler}
@@ -42,31 +19,24 @@ namespace network
     acceptor_.set_option(ip::tcp::acceptor::reuse_address(true));
     acceptor_.bind(endpoint);
     acceptor_.listen();
-
-    (void)node;
-    handler_();
   }
 
 
   Server::~Server()
   {}
 
-  void Server::handle(Node node)
+  void Server::handle_accept()
   {
     std::cout << "Handling" << std::endl;
     acceptor_.async_accept(socket_,
-        [this, node](boost::system::error_code ec)
+        [this](boost::system::error_code ec)
         {
           if (!ec)
           {
-            std::cout << "Connection accepted. (Thread "
-                      << std::this_thread::get_id() << ")" << std::endl;
+            handler_();
 
-            /// Call to the needed function.
-            get_handle_fun(node)();
-
-            /// At the end of each request & treatment, we call listen again.
-            handle(node);
+            // At the end of each request & treatment, we call listen again.
+            handle_accept();
           }
         }
     );

@@ -13,7 +13,7 @@ namespace network
     std::cout << "Concurency level = " << concurent_threads_
               << std::endl << "Bind port = " << port_ << std::endl;
 
-    server_ = std::make_unique<Server>(io_service_, port_, MASTER, [](){
+    server_ = std::make_unique<Server>(io_service_, port_, [](){
           std::cout << "MY FUCKING FUNCTOR" << std::endl;
           });
   }
@@ -22,6 +22,12 @@ namespace network
   {
     if (!threads_.empty())
       stop();
+  }
+
+  void Master::handle()
+  {
+    std::cout << "Connection accepted. (Thread "
+                      << std::this_thread::get_id() << ")" << std::endl;
   }
 
   /// Creates threads & make them bind the same port defined in the config.
