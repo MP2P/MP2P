@@ -28,9 +28,10 @@ namespace network
     return handle_zeus;
   }
 
-  Server::Server(io_service& io_service, const unsigned port, Node node)
+  Server::Server(io_service& io_service, const unsigned port, Node node, std::function<void()> handler)
     : acceptor_{io_service},
-      socket_{io_service}
+      socket_{io_service},
+      handler_{handler}
   {
     // Use of ipv6 by default, with IPV6_V6ONLY disabled, it will listen to
     // both ipv4 & ipv6. 
@@ -42,7 +43,8 @@ namespace network
     acceptor_.bind(endpoint);
     acceptor_.listen();
 
-    handle(node);
+    (void)node;
+    handler_();
   }
 
 

@@ -13,7 +13,9 @@ namespace network
     std::cout << "Concurency level = " << concurent_threads_
               << std::endl << "Bind port = " << port_ << std::endl;
 
-    server_ = std::make_unique<Server>(io_service_, port_, MASTER);
+    server_ = std::make_unique<Server>(io_service_, port_, MASTER, [](){
+          std::cout << "MY FUCKING FUNCTOR" << std::endl;
+          });
   }
 
   Master::~Master()

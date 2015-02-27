@@ -46,9 +46,10 @@ namespace network
     private:
       ip::tcp::acceptor acceptor_;
       ip::tcp::socket socket_;
+      std::function<void()> handler_;
       void handle(Node node);
     public:
-      Server(io_service& io_service, const unsigned port, Node node);
+      Server(io_service& io_service, const unsigned port, Node node, std::function<void()> handler);
       ~Server();
   };
 
@@ -61,6 +62,8 @@ namespace network
       unsigned concurent_threads_;
       io_service io_service_; // Do not need instantiation
       std::unique_ptr<Server> server_;
+
+      void handle();
 
     public:
       Master(std::unique_ptr<libconfig::Config>&& config);
