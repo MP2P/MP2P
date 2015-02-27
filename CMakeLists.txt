@@ -15,11 +15,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 # ********[02] COMPILER OPTIONS ******** #
 set(CMAKE_CXX_COMPILER "clang++")
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -Wall -Wextra -Werror -pedantic")
-else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -Wall -Wextra -Werror -pedantic -pthread")
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -Wall -Wextra -Werror -pedantic -O3")
+
+if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+endif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 # ********[03] ADDING BOOST LIBRARY ******** #
 set(BOOST_ROOT /opt/boost)
