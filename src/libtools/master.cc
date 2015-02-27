@@ -1,21 +1,19 @@
 #include <iostream>
 #include <algorithm>
+#include <utility>
 #include <libtools.hh>
 
 namespace network
 {
   Master::Master(std::unique_ptr<libconfig::Config>&& config)
     : config_{std::move(config)},
-      threads_{}
+      port_{utils::get_port(config_)},
+      server_{io_service_, port_, std::bind(&Master::handle, this)}
   {
     port_ = utils::get_port(config_);
     concurent_threads_ = utils::get_concurent_threads(config_);
     std::cout << "Concurency level = " << concurent_threads_
               << std::endl << "Bind port = " << port_ << std::endl;
-
-    server_ = std::make_unique<Server>(io_service_, port_, [](){
-          std::cout << "MY FUCKING FUNCTOR" << std::endl;
-          });
   }
 
   Master::~Master()

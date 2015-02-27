@@ -19,15 +19,17 @@ namespace network
     acceptor_.set_option(ip::tcp::acceptor::reuse_address(true));
     acceptor_.bind(endpoint);
     acceptor_.listen();
+
+    listen();
   }
 
 
   Server::~Server()
   {}
 
-  void Server::handle_accept()
+  void Server::listen()
   {
-    std::cout << "Handling" << std::endl;
+    std::cout << "Listening" << std::endl;
     acceptor_.async_accept(socket_,
         [this](boost::system::error_code ec)
         {
@@ -36,7 +38,7 @@ namespace network
             handler_();
 
             // At the end of each request & treatment, we call listen again.
-            handle_accept();
+            listen();
           }
         }
     );

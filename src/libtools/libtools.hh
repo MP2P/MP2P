@@ -40,7 +40,7 @@ namespace network
       ip::tcp::socket socket_;
       std::function<void()> handler_;
 
-      void handle_accept();
+      void listen();
     public:
       Server(io_service& io_service, const unsigned port, std::function<void()> handler);
       ~Server();
@@ -53,8 +53,8 @@ namespace network
       std::forward_list<std::thread> threads_;
       unsigned port_;
       unsigned concurent_threads_;
-      io_service io_service_; // Do not need instantiation
-      std::unique_ptr<Server> server_;
+      io_service io_service_; // Does not need instantiation
+      Server server_;
 
       void handle();
 
@@ -62,10 +62,10 @@ namespace network
       Master(std::unique_ptr<libconfig::Config>&& config);
       ~Master();
 
-      /// Creates threads & make them bind the same port defined in config.
+      // Creates threads & make them bind the same port defined in config.
       void run();
 
-      /// Causes the server to stop it's running threads if any.
+      // Causes the server to stop it's running threads if any.
       void stop();
   };
 }
