@@ -19,6 +19,7 @@ namespace network
     acceptor_.set_option(ip::tcp::acceptor::reuse_address(true));
     acceptor_.bind(endpoint);
     acceptor_.listen();
+    listen();
   }
 
 

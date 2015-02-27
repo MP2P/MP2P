@@ -39,7 +39,7 @@ namespace network
             boost::asio::streambuf::const_buffers_type bufs = buff.data();
             line = std::string(boost::asio::buffers_begin(bufs),
                              boost::asio::buffers_begin(bufs) + length);
-            std::cout << line;
+            std::cout << line << std::endl;
             buff.consume(length);
           }
           // If the message is wait : then don't close the socket
@@ -63,10 +63,9 @@ namespace network
       threads_.emplace_front(std::thread(
             [i, this]()
             {
-              std::cout << "Thread " << i + 1 << " launched!" << std::endl;
               try
               {
-                server_.listen(); // Each thread should have the server listening
+                std::cout << "Thread " << i + 1 << " launched!" << std::endl;
                 io_service_.run();
               }
               catch (std::exception& e)
