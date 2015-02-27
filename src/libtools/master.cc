@@ -24,8 +24,35 @@ namespace network
 
   void Master::handle()
   {
-    std::cout << "Connection accepted. (Thread "
-                      << std::this_thread::get_id() << ")" << std::endl;
+    std::cout << "Master handle called" << std::endl;
+    auto& buff = server_.buff_get();
+    auto& socket = server_.socket_get();
+    // Read until we see a newline
+    boost::asio::async_read_until(socket,
+                                  buff,
+                                  '\n',
+        [this, &buff](boost::system::error_code ec, std::size_t length)
+        {
+          std::string line;
+          if (!ec)
+          {
+            boost::asio::streambuf::const_buffers_type bufs = buff.data();
+            line = std::string(boost::asio::buffers_begin(bufs),
+                             boost::asio::buffers_begin(bufs) + length);
+            std::cout << line;
+            buff.consume(length);
+          }
+          // If the message is wait : then don't close the socket
+          if (line == std::string("wait\r\n"))
+          {
+            handle();
+          }
+          else // Close the socket and listen for more
+          {
+            server_.socket_get().close();
+            server_.listen();
+          }
+        });
   }
 
   /// Creates threads & make them bind the same port defined in the config.
@@ -37,8 +64,17 @@ namespace network
             [i, this]()
             {
               std::cout << "Thread " << i + 1 << " launched!" << std::endl;
-              io_service_.run();
-            }));
+              try
+              {
+                server_.listen(); // Each thread should have the server listening
+                io_service_.run();
+              }
+              catch (std::exception& e)
+              {
+                std::cerr << "Fail: " << e.what() << std::endl;
+              }
+            })
+      );
   }
 
   /// Causes the server to stop it's running threads if any.

@@ -39,11 +39,17 @@ namespace network
       ip::tcp::acceptor acceptor_;
       ip::tcp::socket socket_;
       std::function<void()> handler_;
+      boost::asio::streambuf buff_; // Buffer containing the result string
 
-      void listen();
     public:
-      Server(io_service& io_service, const unsigned port, std::function<void()> handler);
+      Server(io_service& io_service,
+             const unsigned port,
+             std::function<void()> handler);
       ~Server();
+
+      boost::asio::streambuf& buff_get();
+      ip::tcp::socket& socket_get();
+      void listen(); // Listen to accept connections
   };
 
   class Master
