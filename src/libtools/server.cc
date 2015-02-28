@@ -5,10 +5,48 @@
 
 namespace network
 {
-  Server::Server(io_service& io_service, const unsigned port, std::function<void()> handler)
+
+  Session::Session(ip::tcp::socket&& socket, std::function<void(Session&)> handler)
+    : socket_{std::forward<ip::tcp::socket>(socket)},
+      handler_{std::move(handler)}
+  {
+    recieve();
+  }
+
+  streambuf& Session::buff_get()
+  {
+    return buff_;
+  }
+
+  unsigned Session::length_get()
+  {
+    return length_;
+  }
+
+  void Session::recieve()
+  {
+    boost::asio::async_read_until(socket_,
+                                  buff_,
+                                  '\n',
+          [this](boost::system::error_code ec, std::size_t length)
+          {
+            if (!ec)
+            {
+              length_ = length;
+              handler_(*this);
+              recieve(); // Keep the socket alive
+              //socket_.close(); // Close the socket
+            }
+          }
+    );
+  }
+
+  Server::Server(io_service& io_service,
+                 const unsigned port,
+                 std::function<void(Session&)> handler)
     : acceptor_{io_service},
       socket_{io_service},
-      handler_{handler}
+      handler_{std::move(handler)}
   {
     // Use of ipv6 by default, with IPV6_V6ONLY disabled, it will listen to
     // both ipv4 & ipv6.
@@ -19,7 +57,7 @@ namespace network
     acceptor_.set_option(ip::tcp::acceptor::reuse_address(true));
     acceptor_.bind(endpoint);
     acceptor_.listen();
-    listen();
+    do_listen();
   }
 
 
@@ -31,12 +69,7 @@ namespace network
     return buff_;
   }
 
-  boost::asio::ip::tcp::socket& Server::socket_get()
-  {
-    return socket_;
-  }
-
-  void Server::listen()
+  void Server::do_listen()
   {
     std::ostringstream msg;
     msg << "Listening";
@@ -49,9 +82,11 @@ namespace network
           {
             std::cout << "Connection accepted. (Thread "
                       << std::this_thread::get_id() << ")" << std::endl;
-            handler_(); // Call the handler to handle the connection
+            auto session = std::make_shared<Session>(std::move(socket_), handler_);
+            sessions_.emplace_back(session);
 
             // At the end of each request & treatment, we call listen again.
+            do_listen();
           }
         }
     );
