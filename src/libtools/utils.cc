@@ -6,9 +6,45 @@
 
 const bool debug = true;
 
+static const std::string WHITE = "\033[0m";
+static const std::string RED = "\033[91m";
+static const std::string GREEN = "\033[92m";
+static const std::string YELLOW = "\033[93m";
+static const std::string BLUE = "\033[94m";
+static const std::string PURPLE = "\033[95m";
+static const std::string CYAN = "\033[96m";
 
 namespace utils
 {
+  std::ostream& w(std::ostream& o/*=std::cout*/)
+  {
+    return o << WHITE;
+  }
+  std::ostream& r(std::ostream& o/*=std::cout*/)
+  {
+    return o << RED;
+  }
+  std::ostream& b(std::ostream& o/*=std::cout*/)
+  {
+    return o << BLUE;
+  }
+  std::ostream& c(std::ostream& o/*=std::cout*/)
+  {
+    return o << CYAN;
+  }
+  std::ostream& g(std::ostream& o/*=std::cout*/)
+  {
+    return o << GREEN;
+  }
+  std::ostream& y(std::ostream& o/*=std::cout*/)
+  {
+    return o << YELLOW;
+  }
+  std::ostream& p(std::ostream& o/*=std::cout*/)
+  {
+    return o << PURPLE;
+  }
+
   bool is_system_ok()
   {
     int sock = socket(PF_INET6, SOCK_STREAM, 0);
@@ -27,6 +63,22 @@ namespace utils
   {
     if (debug)
       std::cout << info << std::endl;
+  }
+
+  void print(std::ostream& out, std::mutex& wmutex, const std::string& msg)
+  {
+    time_t now = time(0);
+    struct tm  tstruct;
+    char buf[80];
+    tstruct = *localtime(&now);
+    //strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+    strftime(buf, sizeof(buf), "%X", &tstruct);
+    wmutex.lock();
+    g(out);
+    out << "<" << buf << "> ";
+    w(out);
+    out << msg << std::endl;
+    wmutex.unlock();
   }
 
   std::unique_ptr<libconfig::Config> get_config(const std::string& path)

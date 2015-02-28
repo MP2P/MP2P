@@ -16,9 +16,8 @@ int main()
   if (!config)
     return 1;
 
-  std::unique_ptr<network::Master> master =
-    std::make_unique<network::Master>(std::move(config));
+  network::Master master(std::move(config));
 
-  master->run();
-  master->stop();
+  master.run();
+  master.stop();
 }

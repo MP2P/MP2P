@@ -5,6 +5,7 @@
 # include <libconfig.h++>
 # include <thread>
 # include <boost/asio.hpp>
+# include <mutex>
 
 # include <libtools.hh>
 
@@ -14,14 +15,6 @@ void start();
 
 namespace network
 {
-  enum Node
-  {
-    CLIENT = 0,
-    MASTER = 1,
-    STORAGE = 2,
-    ZEUS = 3
-  };
-
   class Packet
   {
     private:
@@ -46,10 +39,18 @@ namespace network
     private:
       ip::tcp::acceptor acceptor_;
       ip::tcp::socket socket_;
-      void handle(Node node);
+      std::function<void()> handler_;
+      boost::asio::streambuf buff_; // Buffer containing the result string
+
     public:
-      Server(io_service& io_service, const unsigned port, Node node);
+      Server(io_service& io_service,
+             const unsigned port,
+             std::function<void()> handler);
       ~Server();
+
+      boost::asio::streambuf& buff_get();
+      ip::tcp::socket& socket_get();
+      void listen(); // Listen to accept connections
   };
 
   class Master
@@ -59,17 +60,20 @@ namespace network
       std::forward_list<std::thread> threads_;
       unsigned port_;
       unsigned concurent_threads_;
-      io_service io_service_; // Do not need instantiation
-      std::unique_ptr<Server> server_;
+      io_service io_service_; // Does not need instantiation
+      Server server_;
+      std::mutex w_mutex_; // Just for testing purposes.
+
+      void handle();
 
     public:
       Master(std::unique_ptr<libconfig::Config>&& config);
       ~Master();
 
-      /// Creates threads & make them bind the same port defined in config.
+      // Creates threads & make them bind the same port defined in config.
       void run();
 
-      /// Causes the server to stop it's running threads if any.
+      // Causes the server to stop it's running threads if any.
       void stop();
   };
 }
@@ -81,6 +85,8 @@ namespace files
 namespace utils
 {
   void print_debug(const std::string& info);
+
+  void print(std::ostream& out, std::mutex& wmutex, const std::string& msg);
 
   /// Creates a Config instance with the given path, if file does not exists,
   /// or parse failed it returns NULL
