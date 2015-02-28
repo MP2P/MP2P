@@ -11,28 +11,26 @@
 
 using namespace boost::asio;
 
-void start();
-
 namespace network
 {
   class Packet
   {
     private:
-      uint32_t size_;
-      uint8_t fromto_;
-      uint8_t what_;
+      size_t size_;
+      char fromto_;
+      char what_;
       std::string message_;
 
     public:
-      Packet(uint32_t size, uint8_t fromto, uint8_t what, std::string message);
+      Packet(size_t size, char fromto, char what, std::string message);
       ~Packet();
-  };
 
-  void send_packet(Packet& packet); // FIXME
-  void handle_master();
-  void handle_storage();
-  void handle_zeus();
-  auto get_handle_fun();
+      size_t size_get();
+      char fromto_get();
+      char what_get();
+      std::string& message_get();
+      std::string serialize();
+  };
 
   class Session
   {
@@ -56,7 +54,6 @@ namespace network
       ip::tcp::acceptor acceptor_;
       ip::tcp::socket socket_;
       std::function<void(Session&)> handler_;
-      boost::asio::streambuf buff_; // Buffer containing the result string
       std::vector<std::shared_ptr<Session>> sessions_;
 
     public:
@@ -66,7 +63,7 @@ namespace network
       ~Server();
 
       boost::asio::streambuf& buff_get();
-      void do_listen(); // Listen to accept connections
+      void listen(); // Listen to accept connections
   };
 
   class Master

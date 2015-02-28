@@ -57,19 +57,14 @@ namespace network
     acceptor_.set_option(ip::tcp::acceptor::reuse_address(true));
     acceptor_.bind(endpoint);
     acceptor_.listen();
-    do_listen();
+    listen();
   }
 
 
   Server::~Server()
   {}
 
-  boost::asio::streambuf& Server::buff_get()
-  {
-    return buff_;
-  }
-
-  void Server::do_listen()
+  void Server::listen()
   {
     std::ostringstream msg;
     msg << "Listening";
@@ -86,7 +81,7 @@ namespace network
             sessions_.emplace_back(session);
 
             // At the end of each request & treatment, we call listen again.
-            do_listen();
+            listen();
           }
         }
     );
