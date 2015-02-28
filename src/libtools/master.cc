@@ -1,6 +1,8 @@
 #include <iostream>
 #include <algorithm>
 #include <libtools.hh>
+#include <iterator>
+#include <algorithm>
 
 namespace network
 {
@@ -27,12 +29,27 @@ namespace network
   {
     /// Creating (concurent_threads) threads
     for (unsigned i = 0; i < concurent_threads_; ++i)
-      threads_.emplace_front(std::thread(
-            [i, this]()
+    {
+      unsigned j = i;
+           if (i == 0)
+        threads_.emplace_front(std::thread(
+              [i, this]()
+              {
+                std::cout << "Thread " << i + 1 << " launched!" << std::endl;
+              }));
+      else
+      {
+        auto it = threads_.begin();
+        std::advance(it, i - 1);
+
+        threads_.insert_after(it, std::thread(
+            [&i, j, this]()
             {
-              std::cout << "Thread " << i + 1 << " launched!" << std::endl;
+              std::cout << "Thread " << i + 1 << " j= " << j << " launched!" << std::endl;
               io_service_.run();
             }));
+      }
+    }
   }
 
   /// Causes the server to stop it's running threads if any.
