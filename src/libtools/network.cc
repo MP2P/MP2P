@@ -37,10 +37,11 @@ namespace network
       void start()
       {
         message_ = make_daytime_string();
-        boost::asio::async_write(socket_, boost::asio::buffer(message_),
-            boost::bind(&tcp_connection::handle_write, shared_from_this(),
-              boost::asio::placeholders::error,
-              boost::asio::placeholders::bytes_transferred));
+        boost::asio::async_write(socket_,
+                                 boost::asio::buffer(message_),
+                                 boost::bind(&tcp_connection::handle_write, shared_from_this(),
+                                 boost::asio::placeholders::error,
+                                 boost::asio::placeholders::bytes_transferred));
       }
 
     private:
@@ -72,12 +73,13 @@ namespace network
     private:
       void start_accept()
       {
-        tcp_connection::pointer new_connection =
-          tcp_connection::create(acceptor_.get_io_service());
+        tcp_connection::pointer new_connection = tcp_connection::create(acceptor_.get_io_service());
 
         acceptor_.async_accept(new_connection->socket(),
-            boost::bind(&tcp_server::handle_accept, this, new_connection,
-              boost::asio::placeholders::error));
+        boost::bind(&tcp_server::handle_accept,
+        this,
+        new_connection,
+        boost::asio::placeholders::error));
       }
       void handle_accept(tcp_connection::pointer new_connection,
           const boost::system::error_code& error)
@@ -100,15 +102,15 @@ namespace network
       message_(message)
     {
       std::ostringstream o;
-      o << "Packet(" 
-        << size_ << ", " << int(fromto_) 
+      o << "Packet("
+        << size_ << ", " << int(fromto_)
         << ", " << int(what_) << ", " << message_
         << ")";
       utils::print_debug(o.str());
     }
   Packet::~Packet()
     {}
-  
+
 
   /**** END CLASS PACKET ****/
 
@@ -117,7 +119,7 @@ namespace network
   {
     try
     {
-      
+
       auto p_1 = std::make_shared<Packet>(5, 1, 2, "lolilol");
       boost::asio::io_service io_service;
       tcp_server server(io_service);

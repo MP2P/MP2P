@@ -6,14 +6,17 @@
 namespace network
 {
   Master::Master(std::unique_ptr<libconfig::Config>&& config)
-    : config_{std::move(config)},
-      port_{utils::get_port(config_)},
+    : config_{std::move(config)}, port_{utils::get_port(config_)},
       server_{io_service_, port_, std::bind(&Master::handle, this)}
   {
     port_ = utils::get_port(config_);
     concurent_threads_ = utils::get_concurent_threads(config_);
-    std::cout << "Concurency level = " << concurent_threads_
-              << std::endl << "Bind port = " << port_ << std::endl;
+    std::ostringstream msg;
+    msg << "Concurency level = " << concurent_threads_;
+    utils::print(std::cout, w_mutex_, msg.str());
+    msg.str("");
+    msg << "Bind port = " << port_;
+    utils::print(std::cout, w_mutex_, msg.str());
   }
 
   Master::~Master()
@@ -24,7 +27,10 @@ namespace network
 
   void Master::handle()
   {
-    std::cout << "Master handle called" << std::endl;
+    //std::ostringstream msg;
+    //msg << "Connection accepted. (Thread " << std::this_thread::get_id()
+              //<< ")" << std::endl;
+    utils::print(std::cout, w_mutex_, "Master handle called");
     auto& buff = server_.buff_get();
     auto& socket = server_.socket_get();
     // Read until we see a newline
@@ -65,7 +71,9 @@ namespace network
             {
               try
               {
-                std::cout << "Thread " << i + 1 << " launched!" << std::endl;
+                std::ostringstream msg;
+                msg << "Thread " << i + 1 << " launched!";
+                utils::print(std::cout, w_mutex_, msg.str());
                 io_service_.run();
               }
               catch (std::exception& e)
@@ -83,8 +91,7 @@ namespace network
     // TODO
 
     /// Join all threads
-    std::for_each(threads_.begin(), threads_.end(),
-                  [](std::thread& t) { t.join(); });
+    std::for_each(threads_.begin(), threads_.end(), [](std::thread& t){ t.join(); });
 
     // Delete all threads
     while (!threads_.empty())
