@@ -26,7 +26,7 @@ namespace network
   }
 
   // Handle the session after filling the buffer
-  void Master::handle(Session& session)
+  KeepAlive Master::handle(Session& session)
   {
     // FIXME : Use some kind of stringstream
     // utils::print(std::cout, w_mutex_, "Master handle called");
@@ -43,13 +43,20 @@ namespace network
     std::cout << line;
     buff.consume(length);
 
+    // For testing purposes, just send "WAIT" through telnet to test keep-alive
+    if (line == "WAIT\r\n")
+      return KeepAlive::Live;
+
     // For testing purposes, just send "SEND" through telnet to test sending
     if (line == "SEND\r\n")
     {
       std::string message("TESTING SENDING");
       Packet p{1, 2, message};
       session.send(p);
+      return KeepAlive::Live;
     }
+
+    return KeepAlive::Die;
   }
 
   /// Creates threads & make them bind the same port defined in the config.

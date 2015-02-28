@@ -13,6 +13,13 @@ using namespace boost::asio;
 
 namespace network
 {
+
+  enum class KeepAlive
+  {
+    Live,
+    Die
+  };
+
   class Packet
   {
     private:
@@ -40,10 +47,10 @@ namespace network
       ip::tcp::socket socket_;
       streambuf buff_;
       unsigned length_;
-      std::function<void(Session&)> handler_;
+      std::function<KeepAlive(Session&)> handler_;
 
     public:
-      Session(ip::tcp::socket&& socket, std::function<void(Session&)> handler);
+      Session(ip::tcp::socket&& socket, std::function<KeepAlive(Session&)> handler);
       ip::tcp::socket& socket_get();
       streambuf& buff_get();
       unsigned length_get();
@@ -56,13 +63,13 @@ namespace network
     private:
       ip::tcp::acceptor acceptor_;
       ip::tcp::socket socket_;
-      std::function<void(Session&)> handler_;
+      std::function<KeepAlive(Session&)> handler_;
       std::vector<std::shared_ptr<Session>> sessions_;
 
     public:
       Server(io_service& io_service,
              const unsigned port,
-             std::function<void(Session&)> handler);
+             std::function<KeepAlive(Session&)> handler);
       ~Server();
 
       boost::asio::streambuf& buff_get();
@@ -80,7 +87,7 @@ namespace network
       Server server_;
       std::mutex w_mutex_; // Just for testing purposes.
 
-      void handle(Session& session);
+      KeepAlive handle(Session& session);
 
     public:
       Master(std::unique_ptr<libconfig::Config>&& config);
