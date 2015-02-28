@@ -42,6 +42,14 @@ namespace network
                      boost::asio::buffers_begin(bufs) + length);
     std::cout << line;
     buff.consume(length);
+
+    // For testing purposes, just send "SEND" through telnet to test sending
+    if (line == "SEND\r\n")
+    {
+      std::string message("TESTING SENDING");
+      Packet p{1, 2, message};
+      session.send(p);
+    }
   }
 
   /// Creates threads & make them bind the same port defined in the config.

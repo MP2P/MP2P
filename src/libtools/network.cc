@@ -13,15 +13,14 @@ using boost::asio::ip::tcp;
 namespace network
 {
 
-  Packet::Packet(size_t size,
-                 char fromto,
-                 char what,
+  Packet::Packet(unsigned fromto,
+                 unsigned what,
                  std::string message)
-    : size_(size),
-      fromto_(fromto),
+    : fromto_(fromto),
       what_(what),
       message_(message)
     {
+      size_ = sizeof(fromto) + sizeof(what) + message.size();
       std::ostringstream o;
       o << "Packet("
         << size_ << ", " << int(fromto_)
@@ -37,12 +36,12 @@ namespace network
     return size_;
   }
 
-  char Packet::fromto_get()
+  unsigned Packet::fromto_get()
   {
     return fromto_;
   }
 
-  char Packet::what_get()
+  unsigned Packet::what_get()
   {
     return what_;
   }
@@ -52,7 +51,7 @@ namespace network
     return message_;
   }
 
-  std::string Packet::serialize()
+  const std::string Packet::serialize() const
   {
     std::ostringstream packet;
     packet << size_ << "|"

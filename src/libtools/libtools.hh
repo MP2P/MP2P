@@ -17,19 +17,21 @@ namespace network
   {
     private:
       size_t size_;
-      char fromto_;
-      char what_;
+      unsigned fromto_;
+      unsigned what_;
       std::string message_;
 
     public:
-      Packet(size_t size, char fromto, char what, std::string message);
+      Packet(unsigned fromto, unsigned what, std::string message);
       ~Packet();
 
+
+      // FIXME : unsigned to char. Set to unsigned for testing purposes
       size_t size_get();
-      char fromto_get();
-      char what_get();
+      unsigned fromto_get();
+      unsigned what_get();
       std::string& message_get();
-      std::string serialize();
+      const std::string serialize() const;
   };
 
   class Session
@@ -46,6 +48,7 @@ namespace network
       streambuf& buff_get();
       unsigned length_get();
       void recieve();
+      void send(const Packet packet);
   };
 
   class Server

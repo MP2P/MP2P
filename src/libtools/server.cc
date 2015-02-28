@@ -10,7 +10,6 @@ namespace network
     : socket_{std::forward<ip::tcp::socket>(socket)},
       handler_{std::move(handler)}
   {
-    recieve();
   }
 
   streambuf& Session::buff_get()
@@ -36,6 +35,22 @@ namespace network
               handler_(*this);
               recieve(); // Keep the socket alive
               //socket_.close(); // Close the socket
+            }
+          }
+    );
+  }
+
+  void Session::send(const Packet packet)
+  {
+    auto buff = boost::asio::buffer(packet.serialize());
+    boost::asio::async_write(socket_,
+                             buff,
+          [this](boost::system::error_code ec, std::size_t /* length */)
+          {
+            if (!ec)
+            {
+              std::cout << "Packet sent" << std::endl;
+              socket_.close(); // Close the socket
             }
           }
     );
@@ -78,6 +93,7 @@ namespace network
             std::cout << "Connection accepted. (Thread "
                       << std::this_thread::get_id() << ")" << std::endl;
             auto session = std::make_shared<Session>(std::move(socket_), handler_);
+            session->recieve();
             sessions_.emplace_back(session);
 
             // At the end of each request & treatment, we call listen again.
