@@ -33,23 +33,39 @@ namespace network
   void handle_zeus();
   auto get_handle_fun();
 
+  class Session
+  {
+    private:
+      ip::tcp::socket socket_;
+      streambuf buff_;
+      unsigned length_;
+      std::function<void(Session&)> handler_;
+
+    public:
+      Session(ip::tcp::socket&& socket, std::function<void(Session&)> handler);
+      ip::tcp::socket& socket_get();
+      streambuf& buff_get();
+      unsigned length_get();
+      void recieve();
+  };
+
   class Server
   {
     private:
       ip::tcp::acceptor acceptor_;
       ip::tcp::socket socket_;
-      std::function<void()> handler_;
+      std::function<void(Session&)> handler_;
       boost::asio::streambuf buff_; // Buffer containing the result string
+      std::vector<std::shared_ptr<Session>> sessions_;
 
     public:
       Server(io_service& io_service,
              const unsigned port,
-             std::function<void()> handler);
+             std::function<void(Session&)> handler);
       ~Server();
 
       boost::asio::streambuf& buff_get();
-      ip::tcp::socket& socket_get();
-      void listen(); // Listen to accept connections
+      void do_listen(); // Listen to accept connections
   };
 
   class Master
@@ -62,7 +78,7 @@ namespace network
       io_service io_service_; // Does not need instantiation
       Server server_;
 
-      void handle();
+      void handle(Session& session);
 
     public:
       Master(std::unique_ptr<libconfig::Config>&& config);

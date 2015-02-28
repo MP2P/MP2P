@@ -8,9 +8,8 @@ namespace network
   Master::Master(std::unique_ptr<libconfig::Config>&& config)
     : config_{std::move(config)},
       port_{utils::get_port(config_)},
-      server_{io_service_, port_, std::bind(&Master::handle, this)}
+      server_{io_service_, port_, std::bind(&Master::handle, this, std::placeholders::_1)}
   {
-    port_ = utils::get_port(config_);
     concurent_threads_ = utils::get_concurent_threads(config_);
     std::cout << "Concurency level = " << concurent_threads_
               << std::endl << "Bind port = " << port_ << std::endl;
@@ -22,37 +21,20 @@ namespace network
       stop();
   }
 
-  void Master::handle()
+  // Handle the session after filling the buffer
+  void Master::handle(Session& session)
   {
-    std::cout << "Master handle called" << std::endl;
-    auto& buff = server_.buff_get();
-    auto& socket = server_.socket_get();
+    std::cout << "Master handle called. (Thread " << std::this_thread::get_id()
+              << ")" << std::endl;
+    auto& buff = session.buff_get();
+    auto length = session.length_get();
     // Read until we see a newline
-    boost::asio::async_read_until(socket,
-                                  buff,
-                                  '\n',
-        [this, &buff](boost::system::error_code ec, std::size_t length)
-        {
-          std::string line;
-          if (!ec)
-          {
-            boost::asio::streambuf::const_buffers_type bufs = buff.data();
-            line = std::string(boost::asio::buffers_begin(bufs),
-                             boost::asio::buffers_begin(bufs) + length);
-            std::cout << line << std::endl;
-            buff.consume(length);
-          }
-          // If the message is wait : then don't close the socket
-          if (line == std::string("wait\r\n"))
-          {
-            handle();
-          }
-          else // Close the socket and listen for more
-          {
-            server_.socket_get().close();
-            server_.listen();
-          }
-        });
+    std::string line;
+    boost::asio::streambuf::const_buffers_type bufs = buff.data();
+    line = std::string(boost::asio::buffers_begin(bufs),
+                     boost::asio::buffers_begin(bufs) + length);
+    std::cout << line;
+    buff.consume(length);
   }
 
   /// Creates threads & make them bind the same port defined in the config.
