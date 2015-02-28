@@ -71,11 +71,14 @@ namespace network
 
   void Server::do_listen()
   {
-    std::cout << "Listening..." << std::endl;
-    acceptor_.async_accept(socket_,
-        [this](boost::system::error_code ec)
-        {
-          if (!ec)
+    std::ostringstream msg;
+    msg << "Listening";
+    std::mutex tmp;
+    std::make_unique<libconfig::Config>();
+    utils::print(std::cout, tmp, msg.str());
+    acceptor_.async_accept(socket_, [this](boost::system::error_code ec)
+      {
+        if (!ec)
           {
             std::cout << "Connection accepted. (Thread "
                       << std::this_thread::get_id() << ")" << std::endl;

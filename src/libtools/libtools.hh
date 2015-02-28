@@ -5,6 +5,7 @@
 # include <libconfig.h++>
 # include <thread>
 # include <boost/asio.hpp>
+# include <mutex>
 
 # include <libtools.hh>
 
@@ -77,6 +78,7 @@ namespace network
       unsigned concurent_threads_;
       io_service io_service_; // Does not need instantiation
       Server server_;
+      std::mutex w_mutex_; // Just for testing purposes.
 
       void handle(Session& session);
 
@@ -99,6 +101,8 @@ namespace files
 namespace utils
 {
   void print_debug(const std::string& info);
+
+  void print(std::ostream& out, std::mutex& wmutex, const std::string& msg);
 
   /// Creates a Config instance with the given path, if file does not exists,
   /// or parse failed it returns NULL

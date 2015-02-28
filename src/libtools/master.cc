@@ -11,8 +11,12 @@ namespace network
       server_{io_service_, port_, std::bind(&Master::handle, this, std::placeholders::_1)}
   {
     concurent_threads_ = utils::get_concurent_threads(config_);
-    std::cout << "Concurency level = " << concurent_threads_
-              << std::endl << "Bind port = " << port_ << std::endl;
+    std::ostringstream msg;
+    msg << "Concurency level = " << concurent_threads_;
+    utils::print(std::cout, w_mutex_, msg.str());
+    msg.str("");
+    msg << "Bind port = " << port_;
+    utils::print(std::cout, w_mutex_, msg.str());
   }
 
   Master::~Master()
@@ -24,10 +28,13 @@ namespace network
   // Handle the session after filling the buffer
   void Master::handle(Session& session)
   {
+    // FIXME : Use some kind of stringstream
+    // utils::print(std::cout, w_mutex_, "Master handle called");
     std::cout << "Master handle called. (Thread " << std::this_thread::get_id()
               << ")" << std::endl;
     auto& buff = session.buff_get();
     auto length = session.length_get();
+    //
     // Read until we see a newline
     std::string line;
     boost::asio::streambuf::const_buffers_type bufs = buff.data();
@@ -47,7 +54,9 @@ namespace network
             {
               try
               {
-                std::cout << "Thread " << i + 1 << " launched!" << std::endl;
+                std::ostringstream msg;
+                msg << "Thread " << i + 1 << " launched!";
+                utils::print(std::cout, w_mutex_, msg.str());
                 io_service_.run();
               }
               catch (std::exception& e)
@@ -65,8 +74,7 @@ namespace network
     // TODO
 
     /// Join all threads
-    std::for_each(threads_.begin(), threads_.end(),
-                  [](std::thread& t) { t.join(); });
+    std::for_each(threads_.begin(), threads_.end(), [](std::thread& t){ t.join(); });
 
     // Delete all threads
     while (!threads_.empty())
