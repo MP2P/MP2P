@@ -32,8 +32,7 @@ namespace network
   KeepAlive Master::handle(Session& session)
   {
     std::ostringstream msg;
-    msg << "Master handle called. (Thread " << std::this_thread::get_id()
-              << ")";
+    msg << "Master handle called. (Thread " << std::this_thread::get_id() << ")";
     utils::print(std::cout, w_mutex_, msg.str());
     msg.str("");
 
@@ -76,7 +75,7 @@ namespace network
           {
             // Using a mutex to avoid printing asynchronously.
             std::ostringstream msg;
-            msg << "Thread " << i + 1 << " launched (id=" << std::this_thread::get_id() << ") !";
+            msg << "Thread " << i + 1 << " launched (id=" << std::this_thread::get_id() << ")!";
             utils::print(std::cout, w_mutex_, msg.str());
             io_service_.run();
           }
@@ -89,9 +88,7 @@ namespace network
   void Master::stop()
   {
     std::cout << "The server is going to stop..." << std::endl;
-
-    /// Send a stop signal for all threads
-    // TODO
+    server_.stop();
 
     /// Join all threads
     std::for_each(threads_.begin(), threads_.end(),
@@ -108,25 +105,22 @@ namespace network
       threads_.pop_front();
   }
   
-  void master_sigstop(int s)
-  {
-    std::cout << "Master received signal " << s << "..." << std::endl;
-  }
-
   void Master::catch_stop()
   {
     struct sigaction sigIntHandler;
 
-    sigIntHandler.sa_handler = &master_sigstop;
+    sigIntHandler.sa_handler = [](int s)
+    {
+      std::cout << std::endl << "Master received signal " << s << "..." << std::endl;
+    };
     sigemptyset(&sigIntHandler.sa_mask);
     sigIntHandler.sa_flags = 0;
-
     sigaction(SIGINT, &sigIntHandler, NULL);
 
     pause();
 
     stop();
 
-    std::cout << "Master stopped. Bye bye!" << std::endl;
+    std::cout << "Master: Bye bye!" << std::endl;
   }
 }

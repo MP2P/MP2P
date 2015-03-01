@@ -87,6 +87,12 @@ namespace network
     // FIXME : There should be something to do here.
   }
 
+  void Server::stop()
+  {
+    if (acceptor_.is_open())
+      acceptor_.cancel();
+  }
+
   void Server::listen()
   {
     std::ostringstream msg;

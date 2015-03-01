@@ -1,6 +1,7 @@
 #ifndef MP2P_LIBTOOLS
 # define MP2P_LIBTOOLS
 # include <memory>
+# include <atomic>
 # include <forward_list>
 # include <libconfig.h++>
 # include <thread>
@@ -76,6 +77,7 @@ namespace network
 
       boost::asio::streambuf& buff_get();
       void listen(); // Listen to accept connections
+      void stop();
   };
 
   class Master
