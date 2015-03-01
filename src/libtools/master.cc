@@ -28,7 +28,7 @@ namespace network
   }
 
   // Handle the session after filling the buffer
-  void Master::handle(Session& session)
+  KeepAlive Master::handle(Session& session)
   {
     // FIXME : Use some kind of stringstream
     // utils::print(std::cout, w_mutex_, "Master handle called");
@@ -42,8 +42,22 @@ namespace network
     boost::asio::streambuf::const_buffers_type bufs = buff.data();
     line = std::string(boost::asio::buffers_begin(bufs),
                      boost::asio::buffers_begin(bufs) + length);
-    std::cout << line;
+    //std::cout << line;
     buff.consume(length);
+
+    auto packet = Packet::deserialize(line);
+    std::cout << packet;
+
+    // For testing purposes, just send "SEND" through the client to test sending
+    if (packet.message_get() == "SEND")
+    {
+      std::string message("TESTING SENDING");
+      Packet p{1, 2, message};
+      session.send(p);
+      return KeepAlive::Live;
+    }
+
+    return KeepAlive::Live;
   }
 
   /// Creates threads & make them bind the same port defined in the config.
