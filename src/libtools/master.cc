@@ -40,15 +40,14 @@ namespace network
     boost::asio::streambuf::const_buffers_type bufs = buff.data();
     line = std::string(boost::asio::buffers_begin(bufs),
                      boost::asio::buffers_begin(bufs) + length);
-    std::cout << line;
+    //std::cout << line;
     buff.consume(length);
 
-    // For testing purposes, just send "exit" through telnet to stop the keep-alive
-    if (line == "exit\r\n")
-      return KeepAlive::Live;
+    auto packet = Packet::deserialize(line);
+    std::cout << packet;
 
-    // For testing purposes, just send "SEND" through telnet to test sending
-    if (line == "SEND\r\n")
+    // For testing purposes, just send "SEND" through the client to test sending
+    if (packet.message_get() == "SEND")
     {
       std::string message("TESTING SENDING");
       Packet p{1, 2, message};

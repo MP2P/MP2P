@@ -37,7 +37,10 @@ namespace network
       unsigned what_get();
       std::string& message_get();
       const std::string serialize() const;
+      static const Packet deserialize(const std::string& input);
   };
+
+  std::ostream &operator<<(std::ostream& output, const Packet& packet);
 
   class Session
   {

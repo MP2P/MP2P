@@ -22,11 +22,8 @@ namespace network
     {
       size_ = sizeof(fromto) + sizeof(what) + message.size();
       std::ostringstream o;
-      o << "Packet("
-        << size_ << ", " << int(fromto_)
-        << ", " << int(what_) << ", " << message_
-        << ")";
-      utils::print_debug(o.str());
+      o << *this;
+      //utils::print_debug(o.str());
     }
   Packet::~Packet()
     {}
@@ -58,8 +55,35 @@ namespace network
            << fromto_ << "|"
            << what_ << "|"
            << message_
-           << "\r\n";
+           << "\n";
     return packet.str();
+  }
+
+  const Packet Packet::deserialize(const std::string& input)
+  {
+    size_t size = 0;
+    unsigned fromto = 0;
+    unsigned what = 0;
+    std::string message;
+
+    std::istringstream packet(input);
+    std::string item;
+    std::getline(packet, item, '|');
+    size = std::stoi(item);
+    std::getline(packet, item, '|');
+    fromto = std::stoi(item);
+    std::getline(packet, item, '|');
+    what = std::stoi(item);
+    std::getline(packet, message, '\n');
+    if (size != (sizeof(fromto) + sizeof(what) + message.size()))
+      throw std::runtime_error("Error while deserializing Packet");
+    return Packet{fromto, what, message};
+  }
+
+  std::ostream &operator<<(std::ostream& output, const Packet& packet)
+  {
+    output << packet.serialize();
+    return output;
   }
 
 }
