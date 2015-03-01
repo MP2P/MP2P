@@ -54,12 +54,13 @@ namespace network
     msg << packet;
     utils::print(std::cout, w_mutex_, msg.str());
 
-    if (packet.size_get() <= 2 * sizeof(unsigned))
+    if (packet.size_get() < 3)
       return KeepAlive::Die;
 
     // For testing purposes, just send "SEND" through the client to test sending
     if (packet.message_get() == "SEND")
     {
+      std::cout << "Received SEND message!" << std::endl;
       std::string message("TESTING SENDING");
       Packet p{1, 2, message};
       session.send(p);

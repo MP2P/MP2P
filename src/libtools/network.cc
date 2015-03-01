@@ -20,7 +20,7 @@ namespace network
       what_(what),
       message_(message)
     {
-      size_ = sizeof(fromto) + sizeof(what) + message.size();
+      size_ = (2 + message.length()) * sizeof(uint8_t);
     }
   Packet::~Packet()
     {}
