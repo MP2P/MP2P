@@ -13,8 +13,8 @@ using boost::asio::ip::tcp;
 namespace network
 {
 
-  Packet::Packet(unsigned fromto,
-                 unsigned what,
+  Packet::Packet(uint8_t fromto,
+                 uint8_t what,
                  std::string message)
     : fromto_(fromto),
       what_(what),
@@ -25,17 +25,17 @@ namespace network
   Packet::~Packet()
     {}
 
-  size_t Packet::size_get()
+  uint32_t Packet::size_get()
   {
     return size_;
   }
 
-  unsigned Packet::fromto_get()
+  uint8_t Packet::fromto_get()
   {
     return fromto_;
   }
 
-  unsigned Packet::what_get()
+  uint8_t Packet::what_get()
   {
     return what_;
   }
@@ -51,8 +51,8 @@ namespace network
   {
     std::ostringstream packet;
     packet << size_ << "|"
-           << fromto_ << "|"
-           << what_ << "|"
+           << int(fromto_) << "|"
+           << int(what_) << "|"
            << message_
            << "\n";
     return packet.str();
@@ -61,22 +61,35 @@ namespace network
   // Get a packet from a string
   const Packet Packet::deserialize(const std::string& input)
   {
-    size_t size = 0;
-    unsigned fromto = 0;
-    unsigned what = 0;
+    uint32_t size = 0;
+    uint8_t fromto = 0;
+    uint8_t what = 0;
     std::string message;
 
     std::istringstream packet(input);
     std::string item;
-    std::getline(packet, item, '|');
-    size = std::stoi(item);
-    std::getline(packet, item, '|');
-    fromto = std::stoi(item);
-    std::getline(packet, item, '|');
-    what = std::stoi(item);
-    std::getline(packet, message, '\n');
-    if (size != (sizeof(fromto) + sizeof(what) + message.size()))
-      throw std::runtime_error("Error while deserializing Packet");
+
+    try {
+      std::getline(packet, item, '|');
+      size = std::stoi(item);
+      std::getline(packet, item, '|');
+      fromto = std::stoi(item);
+      std::getline(packet, item, '|');
+      what = std::stoi(item);
+      std::getline(packet, message, '\n');
+    }
+    catch (const std::exception& e)
+    {
+      std::cout << "Invalid packet (" << e.what() << ")" << std::endl;
+      return Packet{0, 0, ""};
+    }
+    uint32_t real_size = (2 + message.length()) * sizeof(uint8_t);
+    if (size != real_size)
+    {
+      std::cout << "Received an invalid packet of size " << real_size
+                << " (expecting " << size << ")" << std::endl;
+      return Packet{0, 0, ""};
+    }
     return Packet{fromto, what, message};
   }
 
@@ -85,5 +98,4 @@ namespace network
     output << packet.serialize();
     return output;
   }
-
 }

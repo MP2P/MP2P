@@ -32,23 +32,30 @@ namespace network
   KeepAlive Master::handle(Session& session)
   {
     std::ostringstream msg;
-    msg << "Master handle called. (Thread " << std::this_thread::get_id() << ")";
+    msg << "Master handle (tid=" << std::this_thread::get_id() << ")";
     utils::print(std::cout, w_mutex_, msg.str());
     msg.str("");
 
     auto& buff = session.buff_get();
     auto length = session.length_get();
 
+    if (length <= 2)
+      return KeepAlive::Die;
+
     // Convert the buffer to a string
     std::string line;
     boost::asio::streambuf::const_buffers_type bufs = buff.data();
     line = std::string(boost::asio::buffers_begin(bufs),
-                     boost::asio::buffers_begin(bufs) + length);
+                     boost::asio::buffers_begin(bufs) + length - 2);
     buff.consume(length); // Empty the buffer
 
     auto packet = Packet::deserialize(line); // Get a Packet from the string
+
     msg << packet;
     utils::print(std::cout, w_mutex_, msg.str());
+
+    if (packet.size_get() <= 2 * sizeof(unsigned))
+      return KeepAlive::Die;
 
     // For testing purposes, just send "SEND" through the client to test sending
     if (packet.message_get() == "SEND")

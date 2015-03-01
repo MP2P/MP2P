@@ -25,6 +25,7 @@ namespace network
   // Read on the open socket
   void Session::receive()
   {
+    std::cout << "Opened session (tid=" << std::this_thread::get_id() << ")" << std::endl;
     boost::asio::async_read_until(socket_,
                                   buff_,
                                   '\n',
@@ -35,7 +36,10 @@ namespace network
               length_ = length;
               auto keep_alive = handler_(*this);
               if (keep_alive == KeepAlive::Die)
+              {
+                std::cout << "Closed session" << std::endl;
                 socket_.close(); // Close the socket
+              }
               else
                 receive(); // Keep the socket alive
             }
@@ -84,7 +88,7 @@ namespace network
 
   Server::~Server()
   {
-    // FIXME : There should be something to do here.
+    stop();
   }
 
   void Server::stop()

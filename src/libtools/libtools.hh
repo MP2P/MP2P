@@ -22,20 +22,20 @@ namespace network
   class Packet
   {
     private:
-      size_t size_;
-      unsigned fromto_;
-      unsigned what_;
+      uint32_t size_;
+      uint8_t fromto_;
+      uint8_t what_;
       std::string message_;
 
     public:
-      Packet(unsigned fromto, unsigned what, std::string message);
+      Packet(uint8_t fromto, uint8_t what, std::string message);
       ~Packet();
 
 
       // FIXME : unsigned to char. Set to unsigned for testing purposes
-      size_t size_get();
-      unsigned fromto_get();
-      unsigned what_get();
+      uint32_t size_get();
+      uint8_t fromto_get();
+      uint8_t what_get();
       std::string& message_get();
       const std::string serialize() const;
       static const Packet deserialize(const std::string& input);
@@ -131,7 +131,6 @@ namespace network
       // Causes the server to stop it's running threads if any.
       void stop();
   };
-
 }
 
 namespace files

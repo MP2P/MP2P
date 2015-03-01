@@ -10,6 +10,7 @@ Functional tests
 Synchronisations (Master-Master and Storage-Storage)
 Simultaneous transfers
 Redundancy
+Timeouts
 
 *Binaries:
 Network library (static?)
