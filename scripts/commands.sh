@@ -64,3 +64,4 @@ else
     sshpass -p $PWD ssh mp2p@$IP2 -p $PORT2 -T 'sh -s' < $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/command_list
   fi
 fi
+echo DONE
