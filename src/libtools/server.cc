@@ -22,6 +22,7 @@ namespace network
     return length_;
   }
 
+  // Read on the open socket
   void Session::receive()
   {
     boost::asio::async_read_until(socket_,
@@ -42,6 +43,7 @@ namespace network
     );
   }
 
+  // Send a packet on the open socket
   void Session::send(const Packet packet)
   {
     auto buff = boost::asio::buffer(packet.serialize());
@@ -51,7 +53,7 @@ namespace network
           {
             if (!ec)
             {
-              std::cout << "Packet sent" << std::endl;
+              utils::print(std::cout, w_mutex_, "Packet sent");
               auto keep_alive = handler_(*this);
               if (keep_alive == KeepAlive::Die)
                 socket_.close(); // Close the socket
@@ -76,12 +78,14 @@ namespace network
     acceptor_.set_option(ip::tcp::acceptor::reuse_address(true));
     acceptor_.bind(endpoint);
     acceptor_.listen();
-    listen();
+    listen(); // Listen for new connections
   }
 
 
   Server::~Server()
-  {}
+  {
+    // FIXME : There should be something to do here.
+  }
 
   void Server::listen()
   {
@@ -90,12 +94,17 @@ namespace network
     std::mutex tmp;
     std::make_unique<libconfig::Config>();
     utils::print(std::cout, tmp, msg.str());
-    acceptor_.async_accept(socket_, [this](boost::system::error_code ec)
+    acceptor_.async_accept(socket_,
+      [this](boost::system::error_code ec)
       {
         if (!ec)
           {
-            std::cout << "Connection accepted. (Thread "
-                      << std::this_thread::get_id() << ")" << std::endl;
+            std::mutex tmp;
+            std::ostringstream msg;
+            msg.str("");
+            msg << "Connection accepted. (Thread "
+                      << std::this_thread::get_id() << ")";
+            utils::print(std::cout, tmp, msg.str());
             auto session = std::make_shared<Session>(std::move(socket_), handler_);
             session->receive();
             sessions_.push_back(session);
