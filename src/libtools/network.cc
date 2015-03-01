@@ -21,9 +21,6 @@ namespace network
       message_(message)
     {
       size_ = sizeof(fromto) + sizeof(what) + message.size();
-      std::ostringstream o;
-      o << *this;
-      //utils::print_debug(o.str());
     }
   Packet::~Packet()
     {}
@@ -48,6 +45,8 @@ namespace network
     return message_;
   }
 
+  // Create a std::string from the Packet
+  // FIXME : Remove useless chars
   const std::string Packet::serialize() const
   {
     std::ostringstream packet;
@@ -59,6 +58,7 @@ namespace network
     return packet.str();
   }
 
+  // Get a packet from a string
   const Packet Packet::deserialize(const std::string& input)
   {
     size_t size = 0;

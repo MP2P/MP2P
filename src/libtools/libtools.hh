@@ -49,6 +49,7 @@ namespace network
       streambuf buff_;
       unsigned length_;
       std::function<KeepAlive(Session&)> handler_;
+      std::mutex w_mutex_; // Just for testing purposes.
 
     public:
       Session(ip::tcp::socket&& socket, std::function<KeepAlive(Session&)> handler);
