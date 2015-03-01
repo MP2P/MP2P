@@ -13,7 +13,17 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 
 # ********[02] COMPILER OPTIONS ******** #
-set(CMAKE_CXX_COMPILER "clang++")
+#set(CMAKE_CXX_COMPILER "clang++")
+#set(CMAKE_CXX_COMPILER if hash clang++ 2>/dev/null; then "clang++" else "g++")
+#execute_process(COMMAND (if hash clang++ 2>/dev/null; then echo clang++; else echo g++; fi) OUTPUT_VARIABLE CMAKE_CXX_COMPILER)
+
+execute_process(COMMAND which clang++ RESULT_VARIABLE cavailable OUTPUT_QUIET ERROR_QUIET)
+#message("cavailable: ${cavailable}")
+if(NOT ${cavailable})
+  set(CMAKE_CXX_COMPILER "clang++")
+#else(NOT ${cavailable})
+#  set(CMAKE_CXX_COMPILER "g++")
+endif(NOT ${cavailable})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -Wall -Wextra -Werror -pedantic -O3")
 
