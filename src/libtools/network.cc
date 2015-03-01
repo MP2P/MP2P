@@ -57,7 +57,8 @@ namespace network
     packet << size_ << "|"
            << fromto_ << "|"
            << what_ << "|"
-           << message_;
+           << message_
+           << "\r\n";
     return packet.str();
   }
 

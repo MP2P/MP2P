@@ -7,8 +7,6 @@
 # include <boost/asio.hpp>
 # include <mutex>
 
-# include <libtools.hh>
-
 using namespace boost::asio;
 
 namespace network
@@ -99,6 +97,33 @@ namespace network
       // Causes the server to stop it's running threads if any.
       void stop();
   };
+
+  class Client
+  {
+    private:
+      std::unique_ptr<libconfig::Config> config_; // FIXME: Useless?
+      //std::forward_list<std::thread> threads_;
+      unsigned port_;
+      std::string host_;
+      //unsigned concurent_threads_;
+      io_service io_service_; // Does not need instantiation
+      ip::tcp::socket socket_;
+      std::mutex w_mutex_; // Just for testing purposes.
+
+      KeepAlive handle(Session& session);
+      void send(Session& session);
+
+    public:
+      Client(std::unique_ptr<libconfig::Config>&& config);
+      ~Client();
+
+      // Creates threads & make them bind the same port defined in config.
+      void run();
+
+      // Causes the server to stop it's running threads if any.
+      void stop();
+  };
+
 }
 
 namespace files

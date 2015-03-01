@@ -43,8 +43,8 @@ namespace network
     std::cout << line;
     buff.consume(length);
 
-    // For testing purposes, just send "WAIT" through telnet to test keep-alive
-    if (line == "WAIT\r\n")
+    // For testing purposes, just send "exit" through telnet to stop the keep-alive
+    if (line == "exit\r\n")
       return KeepAlive::Live;
 
     // For testing purposes, just send "SEND" through telnet to test sending
@@ -56,7 +56,7 @@ namespace network
       return KeepAlive::Live;
     }
 
-    return KeepAlive::Die;
+    return KeepAlive::Live;
   }
 
   /// Creates threads & make them bind the same port defined in the config.

@@ -52,7 +52,9 @@ namespace network
             if (!ec)
             {
               std::cout << "Packet sent" << std::endl;
-              socket_.close(); // Close the socket
+              auto keep_alive = handler_(*this);
+              if (keep_alive == KeepAlive::Die)
+                socket_.close(); // Close the socket
             }
           }
     );
@@ -96,7 +98,7 @@ namespace network
                       << std::this_thread::get_id() << ")" << std::endl;
             auto session = std::make_shared<Session>(std::move(socket_), handler_);
             session->recieve();
-            sessions_.emplace_back(session);
+            sessions_.push_back(session);
 
             // At the end of each request & treatment, we call listen again.
             listen();
