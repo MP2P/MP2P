@@ -55,7 +55,7 @@ namespace network
       ip::tcp::socket& socket_get();
       streambuf& buff_get();
       unsigned length_get();
-      void recieve();
+      void receive();
       void send(const Packet packet);
   };
 
@@ -90,6 +90,8 @@ namespace network
 
       KeepAlive handle(Session& session);
 
+      // Causes the server to stop it's running threads if any.
+      void stop();
     public:
       Master(std::unique_ptr<libconfig::Config>&& config);
       ~Master();
@@ -97,8 +99,8 @@ namespace network
       // Creates threads & make them bind the same port defined in config.
       void run();
 
-      // Causes the server to stop it's running threads if any.
-      void stop();
+      // Catch a CTRL+C / CTRL+D signal, call Master::stop(); and exit.
+      void catch_stop();
   };
 
   class Client

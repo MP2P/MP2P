@@ -19,5 +19,5 @@ int main()
   network::Master master(std::move(config));
 
   master.run();
-  master.stop();
+  master.catch_stop();
 }

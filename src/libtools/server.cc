@@ -22,7 +22,7 @@ namespace network
     return length_;
   }
 
-  void Session::recieve()
+  void Session::receive()
   {
     boost::asio::async_read_until(socket_,
                                   buff_,
@@ -36,7 +36,7 @@ namespace network
               if (keep_alive == KeepAlive::Die)
                 socket_.close(); // Close the socket
               else
-                recieve(); // Keep the socket alive
+                receive(); // Keep the socket alive
             }
           }
     );
@@ -97,7 +97,7 @@ namespace network
             std::cout << "Connection accepted. (Thread "
                       << std::this_thread::get_id() << ")" << std::endl;
             auto session = std::make_shared<Session>(std::move(socket_), handler_);
-            session->recieve();
+            session->receive();
             sessions_.push_back(session);
 
             // At the end of each request & treatment, we call listen again.

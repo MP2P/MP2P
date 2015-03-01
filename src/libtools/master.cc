@@ -66,49 +66,60 @@ namespace network
     /// Creating (concurent_threads) threads
     for (unsigned i = 0; i < concurent_threads_; ++i)
     {
-      unsigned j = i;
-      if (i == 0)
-        threads_.emplace_front(std::thread(
-              [i, this]()
-              {
-                std::cout << "Thread " << i + 1 << " launched!" << std::endl;
-              }));
-      else
-      {
-        auto it = threads_.begin();
-        std::advance(it, i - 1);
-
-        threads_.insert_after(it, std::thread(
-            [&i, j, this]()
-            {
-              try
-              {
-                std::ostringstream msg;
-                msg << "Thread " << i + 1 << " launched!";
-                utils::print(std::cout, w_mutex_, msg.str());
-                io_service_.run();
-              }
-              catch (std::exception& e)
-              {
-                std::cerr << "Fail: " << e.what() << std::endl;
-              }
-            })
-        );
-      }
+      threads_.emplace_front(
+        std::thread(
+          [i, this]()
+          {
+            // Using a mutex to avoid printing asynchronously.
+            std::ostringstream msg;
+            msg << "Thread " << i + 1 << " launched (id=" << std::this_thread::get_id() << ") !";
+            utils::print(std::cout, w_mutex_, msg.str());
+            io_service_.run();
+          }
+        )
+      );
     }
   }
 
   /// Causes the server to stop it's running threads if any.
   void Master::stop()
   {
+    std::cout << "The server is going to stop..." << std::endl;
+
     /// Send a stop signal for all threads
     // TODO
 
     /// Join all threads
-    std::for_each(threads_.begin(), threads_.end(), [](std::thread& t){ t.join(); });
-
+    std::for_each(threads_.begin(), threads_.end(), [](std::thread& t){
+        std::cout << "Stopping thread " << t.get_id() << "..." << std::flush;
+        t.join();
+        std::cout << " Done!" << std::endl;
+      }
+    );
     // Delete all threads
     while (!threads_.empty())
       threads_.pop_front();
+  }
+  
+  void master_sigstop(int s)
+  {
+    std::cout << "Master received signal " << s << "..." << std::endl;
+  }
+
+  void Master::catch_stop()
+  {
+    struct sigaction sigIntHandler;
+
+    sigIntHandler.sa_handler = &master_sigstop;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+
+    sigaction(SIGINT, &sigIntHandler, NULL);
+
+    pause();
+
+    stop();
+
+    std::cout << "Master stopped. Bye bye!" << std::endl;
   }
 }
