@@ -38,4 +38,7 @@ class Master
     void catch_stop();
 };
 
+void Handle_CM(Packet& packet);
+void Handle_SM(Packet& packet);
+
 #endif /* MP2P_SERVER */

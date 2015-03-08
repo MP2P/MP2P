@@ -19,6 +19,18 @@ namespace network
     Die
   };
 
+  enum FromTo
+  {
+    C_to_M = 0,
+    M_to_C = 1,
+    C_to_S = 2,
+    S_to_C = 3,
+    M_to_S = 4,
+    S_to_M = 5,
+    M_to_M = 6,
+    S_to_S = 7
+  };
+
   class Packet
   {
     private:
@@ -82,32 +94,33 @@ namespace network
       void listen(); // Listen to accept connections
       void stop();
   };
-
-  class Client
+  class Error
   {
+      public:
+      Error();
+      ~Error();
+
+      enum ErrorType
+      {
+        succes = 0,
+        failure = 1
+      };
+
+      ErrorType error_type_get();
+      std::ostringstream stream_get();
+
+      Error& operator=(const Error& e);
+      Error& operator=(ErrorType e);
+
+      // Put the parameter in stream_
+      template <typename T> Error& operator<<(const T& t);
+
+      Error& operator<<(std::ostream& (*f)(std::ostream&));
     private:
-      std::unique_ptr<libconfig::Config> config_; // FIXME: Useless?
-      //std::forward_list<std::thread> threads_;
-      unsigned port_;
-      std::string host_;
-      //unsigned concurent_threads_;
-      io_service io_service_; // Does not need instantiation
-      ip::tcp::socket socket_;
-      std::mutex w_mutex_; // Just for testing purposes.
-
-      KeepAlive handle(Session& session);
-      void send(Session& session);
-
-    public:
-      Client(std::unique_ptr<libconfig::Config>&& config);
-      ~Client();
-
-      // Creates threads & make them bind the same port defined in config.
-      void run();
-
-      // Causes the server to stop it's running threads if any.
-      void stop();
+      ErrorType status_;
+      std::ostringstream stream_;
   };
+  std::ostream& operator<<(std::ostream& o, const Error& e);
 }
 
 namespace files

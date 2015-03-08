@@ -1,5 +1,6 @@
 #include <iostream>
 #include <libtools.hh>
+#include "client.hh"
 
 int main()
 {
@@ -16,7 +17,7 @@ int main()
 
   try
   {
-    network::Client client(std::move(config));
+    Client client(std::move(config));
 
     client.run();
     client.stop();

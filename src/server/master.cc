@@ -8,8 +8,8 @@ Master::Master(std::unique_ptr<libconfig::Config>&& config)
     std::bind(&Master::handle, this, std::placeholders::_1)}
 {
   concurent_threads_ = utils::get_concurent_threads(config_);
-  std::cout << "Concurency level = " << concurent_threads_;
-  std::cout << "Bind port = " << port_;
+  std::cout << "Concurency level = " << concurent_threads_ << std::endl;
+  std::cout << "Bind port = " << port_ << std::endl;
 }
 
 Master::~Master()
@@ -29,7 +29,7 @@ void Master::run()
         [i, this]()
         {
           // Using a mutex to avoid printing asynchronously.
-          std::cout << "Thread " << i + 1 << " launched (id=" << std::this_thread::get_id() << ")!";
+          std::cout << "Thread " << i + 1 << " launched (id=" << std::this_thread::get_id() << ")!" << std::endl;
           io_service_.run();
         }
       )
@@ -82,7 +82,7 @@ void Master::catch_stop()
 // Handle the session after filling the buffer
 KeepAlive Master::handle(Session& session)
 {
-  std::cout << "Master handle (tid=" << std::this_thread::get_id() << ")";
+  std::cout << "Master handle (tid=" << std::this_thread::get_id() << ")" << std::endl;
 
   // Create and get the Packet object from the session (buff_ & length_)
   Packet packet = session.get_packet();
@@ -91,10 +91,19 @@ KeepAlive Master::handle(Session& session)
   if (packet.size_get() < 3)
     return KeepAlive::Die;
 
-  // DEBUG purposes
   std::cout << packet;
 
-  // For testing purposes, just send "SEND" through the client to test sending
+  switch (packet.fromto_get())
+  {
+    case FromTo::C_to_M:
+      Handle_CM(packet); // If the Packet is from a client
+    case FromTo::S_to_M:
+      Handle_SM(packet);
+    default:
+      return KeepAlive::Die;
+  }
+/*
+
   if (packet.message_get() == "SEND")
   {
     std::cout << "Received SEND message!" << std::endl;
@@ -103,7 +112,7 @@ KeepAlive Master::handle(Session& session)
     session.send(p);
     return KeepAlive::Live;
   }
-
+*/
   // FIXME : Close me maybe
   return KeepAlive::Live; // Always keep the connection alive
 }
