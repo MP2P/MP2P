@@ -57,6 +57,9 @@ namespace network
       ip::tcp::socket& socket_get();
       streambuf& buff_get();
       unsigned length_get();
+      std::string get_line();
+      Packet get_packet();
+
       void receive();
       void send(const Packet packet);
   };
@@ -78,32 +81,6 @@ namespace network
       boost::asio::streambuf& buff_get();
       void listen(); // Listen to accept connections
       void stop();
-  };
-
-  class Master
-  {
-    private:
-      std::unique_ptr<libconfig::Config> config_; // FIXME: Useless?
-      std::forward_list<std::thread> threads_;
-      unsigned port_;
-      unsigned concurent_threads_;
-      io_service io_service_; // Does not need instantiation
-      Server server_;
-      std::mutex w_mutex_; // Just for testing purposes.
-
-      KeepAlive handle(Session& session);
-
-      // Causes the server to stop it's running threads if any.
-      void stop();
-    public:
-      Master(std::unique_ptr<libconfig::Config>&& config);
-      ~Master();
-
-      // Creates threads & make them bind the same port defined in config.
-      void run();
-
-      // Catch a CTRL+C / CTRL+D signal, call Master::stop(); and exit.
-      void catch_stop();
   };
 
   class Client

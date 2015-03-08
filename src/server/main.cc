@@ -2,6 +2,7 @@
 #include <memory>
 
 #include <libtools.hh>
+#include "master.hh"
 
 int main()
 {
@@ -14,7 +15,7 @@ int main()
   if (!config)
     return 1;
 
-  network::Master master(std::move(config));
+  Master master(std::move(config));
 
   master.run();
   master.catch_stop();
