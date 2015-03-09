@@ -36,14 +36,14 @@ Client::~Client()
   // FIXME : Close sockets and everything if needed
 }
 
-KeepAlive Client::handle(Session& session)
+std::unique_ptr<Error> Client::handle(Session& session)
 {
   (void)session;
 
   std::cout << "Client handling";
 
   send(session); // Ask for a new command
-  return KeepAlive::Live;
+  return std::make_unique<Error>(Error::ErrorType::failure);
 }
 
 void Client::run()

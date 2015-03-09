@@ -7,7 +7,7 @@ namespace network
 {
   Server::Server(io_service& io_service,
                  const unsigned port,
-                 std::function<KeepAlive(Session&)> handler)
+                 std::function<std::unique_ptr<Error>(Session&)> handler)
     : acceptor_{io_service},
       socket_{io_service},
       handler_{std::move(handler)}
@@ -19,11 +19,17 @@ namespace network
 
     acceptor_.open(endpoint.protocol());
     acceptor_.set_option(ip::tcp::acceptor::reuse_address(true));
-    acceptor_.bind(endpoint);
-    acceptor_.listen();
-    listen(); // Listen for new connections
+    try
+    {
+      acceptor_.bind(endpoint);
+      acceptor_.listen();
+      listen(); // Listen for new connections
+    }
+    catch (const std::exception& e)
+    {
+      std::cerr << e.what() << std::endl;
+    }
   }
-
 
   Server::~Server()
   {

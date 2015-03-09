@@ -2,12 +2,12 @@
 #include "master.hh"
 
 Master::Master(std::unique_ptr<libconfig::Config>&& config)
-  : config_{std::move(config)},
-  port_{utils::get_port(config_)},
+  : //config_{std::move(config)},
+  port_{utils::get_port(config)},
   server_{io_service_, port_,
     std::bind(&Master::handle, this, std::placeholders::_1)}
 {
-  concurent_threads_ = utils::get_concurent_threads(config_);
+  concurent_threads_ = utils::get_concurent_threads(config);
   std::cout << "Concurency level = " << concurent_threads_ << std::endl;
   std::cout << "Bind port = " << port_ << std::endl;
 }
@@ -80,7 +80,7 @@ void Master::catch_stop()
 
 
 // Handle the session after filling the buffer
-KeepAlive Master::handle(Session& session)
+std::unique_ptr<Error> Master::handle(Session& session)
 {
   std::cout << "Master handle (tid=" << std::this_thread::get_id() << ")" << std::endl;
 
@@ -89,18 +89,20 @@ KeepAlive Master::handle(Session& session)
 
 
   if (packet.size_get() < 3)
-    return KeepAlive::Die;
+    return std::make_unique<Error>(Error::ErrorType::failure);
 
   std::cout << packet;
 
   switch (packet.fromto_get())
   {
     case FromTo::C_to_M:
-      Handle_CM(packet); // If the Packet is from a client
+      return Handle_CM(packet, session); // If the Packet is from a client
     case FromTo::S_to_M:
-      Handle_SM(packet);
+      return Handle_SM(packet, session); // If the Packet is from a storage
+    case FromTo::M_to_M:
+      return Handle_MM(packet, session); // If the Packet is from a master
     default:
-      return KeepAlive::Die;
+      return std::make_unique<Error>(Error::ErrorType::failure); // Else failure
   }
 /*
 
@@ -114,5 +116,5 @@ KeepAlive Master::handle(Session& session)
   }
 */
   // FIXME : Close me maybe
-  return KeepAlive::Live; // Always keep the connection alive
+  return std::make_unique<Error>(Error::ErrorType::failure);
 }

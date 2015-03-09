@@ -6,7 +6,7 @@
 namespace network
 {
 
-  Session::Session(ip::tcp::socket&& socket, std::function<KeepAlive(Session&)> handler)
+  Session::Session(ip::tcp::socket&& socket, std::function<std::unique_ptr<Error>(Session&)> handler)
     : socket_{std::forward<ip::tcp::socket>(socket)},
       handler_{std::move(handler)}
   {
@@ -51,8 +51,8 @@ namespace network
             if (!ec)
             {
               length_ = length;
-              auto keep_alive = handler_(*this);
-              if (keep_alive == KeepAlive::Die)
+              auto error = handler_(*this);
+              if (error->status_get() != Error::ErrorType::success)
               {
                 std::cout << "Closed session" << std::endl;
                 socket_.close(); // Close the socket
@@ -76,8 +76,8 @@ namespace network
         if (!ec)
         {
           utils::print(std::cout, w_mutex_, "Packet sent");
-          auto keep_alive = handler_(*this);
-          if (keep_alive == KeepAlive::Die)
+          auto error = handler_(*this);
+          if (error->status_get() != Error::ErrorType::success)
             socket_.close(); // Close the socket
         }
       }

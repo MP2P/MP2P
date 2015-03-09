@@ -13,7 +13,7 @@ using namespace network;
 class Master
 {
   private:
-    std::unique_ptr<libconfig::Config> config_; // FIXME: Useless?
+    //std::unique_ptr<libconfig::Config> config_; FIXME: Useless?
 
 
     std::forward_list<std::thread> threads_;
@@ -23,7 +23,7 @@ class Master
     io_service io_service_; // Does not need instantiation
     network::Server server_;
 
-    KeepAlive handle(Session& session);
+    std::unique_ptr<Error> handle(Session& session);
 
     // Causes the server to stop it's running threads if any.
     void stop();
@@ -38,7 +38,8 @@ class Master
     void catch_stop();
 };
 
-void Handle_CM(Packet& packet);
-void Handle_SM(Packet& packet);
+std::unique_ptr<Error> Handle_CM(Packet& packet, Session& session);
+std::unique_ptr<Error> Handle_SM(Packet& packet, Session& session);
+std::unique_ptr<Error> Handle_MM(Packet& packet, Session& session);
 
 #endif /* MP2P_SERVER */

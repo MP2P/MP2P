@@ -31,6 +31,35 @@ namespace network
     S_to_S = 7
   };
 
+  class Error
+  {
+    public:
+
+      enum ErrorType
+      {
+        success = 0,
+        failure = 1
+      };
+
+      Error(const ErrorType et);
+      ~Error();
+
+      ErrorType status_get();
+      const std::ostringstream& stream_get() const;
+
+      Error& operator=(Error& e);
+      Error& operator=(const ErrorType e);
+
+      // Put the parameter in stream_
+      template <typename T> Error& operator<<(const T& t);
+
+      Error& operator<<(std::ostream& (*f)(std::ostream&));
+    private:
+      ErrorType status_;
+      std::ostringstream stream_;
+      
+  };
+
   class Packet
   {
     private:
@@ -61,11 +90,11 @@ namespace network
       ip::tcp::socket socket_;
       streambuf buff_;
       unsigned length_;
-      std::function<KeepAlive(Session&)> handler_;
+      std::function<std::unique_ptr<Error>(Session&)> handler_;
       std::mutex w_mutex_; // Just for testing purposes.
 
     public:
-      Session(ip::tcp::socket&& socket, std::function<KeepAlive(Session&)> handler);
+      Session(ip::tcp::socket&& socket, std::function<std::unique_ptr<Error>(Session&)> handler);
       ip::tcp::socket& socket_get();
       streambuf& buff_get();
       unsigned length_get();
@@ -81,45 +110,20 @@ namespace network
     private:
       ip::tcp::acceptor acceptor_;
       ip::tcp::socket socket_;
-      std::function<KeepAlive(Session&)> handler_;
+      std::function<std::unique_ptr<Error>(Session&)> handler_;
       std::vector<std::shared_ptr<Session>> sessions_;
 
     public:
       Server(io_service& io_service,
              const unsigned port,
-             std::function<KeepAlive(Session&)> handler);
+             std::function<std::unique_ptr<Error>(Session&)> handler);
       ~Server();
 
       boost::asio::streambuf& buff_get();
       void listen(); // Listen to accept connections
       void stop();
   };
-  class Error
-  {
-      public:
-      Error();
-      ~Error();
 
-      enum ErrorType
-      {
-        succes = 0,
-        failure = 1
-      };
-
-      ErrorType error_type_get();
-      std::ostringstream stream_get();
-
-      Error& operator=(const Error& e);
-      Error& operator=(ErrorType e);
-
-      // Put the parameter in stream_
-      template <typename T> Error& operator<<(const T& t);
-
-      Error& operator<<(std::ostream& (*f)(std::ostream&));
-    private:
-      ErrorType status_;
-      std::ostringstream stream_;
-  };
   std::ostream& operator<<(std::ostream& o, const Error& e);
 }
 

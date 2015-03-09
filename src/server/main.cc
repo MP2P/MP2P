@@ -8,7 +8,7 @@ int main()
 {
   if (!utils::is_system_ok())
     return 1;
-
+ 
   std::unique_ptr<libconfig::Config> config =
     utils::get_config("../config/server.conf");
 

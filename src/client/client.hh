@@ -17,7 +17,7 @@ class Client
     io_service io_service_; // Does not need instantiation
     ip::tcp::socket socket_;
 
-    KeepAlive handle(Session& session);
+    std::unique_ptr<Error> handle(Session& session);
     void send(Session& session);
 
   public:
