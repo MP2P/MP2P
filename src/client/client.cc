@@ -12,9 +12,9 @@ Client::Client(std::unique_ptr<libconfig::Config>&& config)
   host_{"localhost"}, // FIXME : Add hostname to the config file
   socket_{io_service_}
 {
-  std::cout << "Endpoint host = " << host_;
+  std::cout << "Endpoint host = " << host_ << std::endl;
 
-  std::cout << "Endpoint port = " << port_;
+  std::cout << "Endpoint port = " << port_ << std::endl;
 
   // Query needs the port as a string. Ugly fix.
   std::ostringstream port;
