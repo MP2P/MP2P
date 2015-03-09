@@ -54,7 +54,7 @@ namespace network
            << int(fromto_) << "|"
            << int(what_) << "|"
            << message_
-           << "\n";
+           << "\r\n";
     return packet.str();
   }
 
