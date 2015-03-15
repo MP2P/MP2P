@@ -6,7 +6,12 @@ cmake_minimum_required(VERSION 2.8)
 project(MP2P)
 
 # ********[01] CMAKE OPTIONS ********* #
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+# Finding libconfig++
+find_path(LIBCONFIG++_INCLUDE_DIR libconfig.h++)
+find_library(LIBCONFIG++_LIBRARY config++)
+if (LIBCONFIG++_INCLUDE_DIR AND LIBCONFIG++_LIBRARY)
+   set(LIBCONFIG++_FOUND TRUE)
+endif (LIBCONFIG++_INCLUDE_DIR AND LIBCONFIG++_LIBRARY)
 
 set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -40,7 +45,7 @@ include_directories(${Boost_INCLUDE_DIR})
 
 # ********[04][d01] ADDING LIBCONFIG LIBRARY ******** #
 #set(LibConfig++_DIR /usr/include)
-find_package(LibConfig++ REQUIRED)
+#find_package(LibConfig++ REQUIRED)
 include_directories(${LIBCONFIG++_INCLUDE_DIR})
 
 
