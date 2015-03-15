@@ -3,14 +3,14 @@
 //#include <algorithm>
 //#include <utility>
 
-//#include <libtools.hh>
+#include <files.hh>
 #include "client.hh"
 
-Client::Client(std::unique_ptr<libconfig::Config>&& config)
-  : config_{std::move(config)},
-  port_{utils::get_port(config_)},
-  host_{"localhost"}, // FIXME : Add hostname to the config file
-  socket_{io_service_}
+Client::Client(std::unique_ptr < libconfig::Config > && config)
+    : config_{std::move(config)},
+      port_{utils::get_port(config_)},
+      host_{"localhost"}, // FIXME : Add hostname to the config files
+      socket_{io_service_}
 {
   std::cout << "Endpoint host = " << host_ << std::endl;
 
@@ -36,9 +36,9 @@ Client::~Client()
   // FIXME : Close sockets and everything if needed
 }
 
-std::unique_ptr<Error> Client::handle(Session& session)
+std::unique_ptr <Error> Client::handle(Session & session)
 {
-  (void)session;
+  (void) session;
 
   std::cout << "Client handling";
 
@@ -56,7 +56,7 @@ void Client::run()
   io_service_.run();
 }
 
-void Client::send(Session& session)
+void Client::send(Session & session)
 {
   std::string command;
   std::getline(std::cin, command);

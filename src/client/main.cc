@@ -7,8 +7,8 @@ int main()
   if (!utils::is_system_ok())
     return 1;
 
-  std::unique_ptr<libconfig::Config> config =
-    utils::get_config("../config/server.conf");
+  std::unique_ptr <libconfig::Config> config =
+      utils::get_config("../config/server.conf");
 
   if (!config)
     return 1;
@@ -20,7 +20,7 @@ int main()
     client.run();
     client.stop();
   }
-  catch (std::exception& e)
+  catch (std::exception &e)
   {
     std::cerr << "Client failed : " << e.what() << std::endl;
   }

@@ -1,11 +1,12 @@
 #include <iostream>
 #include "master.hh"
 
-Master::Master(std::unique_ptr<libconfig::Config>&& config)
-  : //config_{std::move(config)},
-  port_{utils::get_port(config)},
-  server_{io_service_, port_,
-    std::bind(&Master::handle, this, std::placeholders::_1)}
+Master::Master(std::unique_ptr<libconfig::Config> &&config)
+    : //config_{std::move(config)},
+    port_{utils::get_port(config)},
+    timeout_{utils::get_timeout(config)},
+    server_{io_service_, port_,
+        std::bind(&Master::handle, this, std::placeholders::_1)}
 {
   concurent_threads_ = utils::get_concurent_threads(config);
   std::cout << "Concurency level = " << concurent_threads_ << std::endl;
@@ -19,22 +20,28 @@ Master::~Master()
 }
 
 // Creates threads & make them bind the same port defined in the config.
-void Master::run()
+bool Master::run()
 {
+  if (!server_.is_running())
+  {
+    stop();
+    return false;
+  }
   // Creating (concurent_threads) threads
   for (unsigned i = 0; i < concurent_threads_; ++i)
   {
     threads_.emplace_front(
-      std::thread(
-        [i, this]()
-        {
-          // Using a mutex to avoid printing asynchronously.
-          std::cout << "Thread " << i + 1 << " launched (id=" << std::this_thread::get_id() << ")!" << std::endl;
-          io_service_.run();
-        }
-      )
+        std::thread(
+            [i, this]()
+            {
+              // Using a mutex to avoid printing asynchronously.
+              std::cout << "Thread " << i + 1 << " launched (id=" << std::this_thread::get_id() << ")!" << std::endl;
+              io_service_.run();
+            }
+        )
     );
   }
+  return true;
 }
 
 // Causes the server to stop it's running threads if any.
@@ -45,13 +52,13 @@ void Master::stop()
 
   /// Join all threads
   std::for_each(threads_.begin(), threads_.end(),
-      [](std::thread& t)
+      [](std::thread &t)
       {
-      std::cout << "Stopping thread " << t.get_id() << "..." << std::flush;
-      t.join();
-      std::cout << " Done!" << std::endl;
+        std::cout << "Stopping thread " << t.get_id() << "..." << std::flush;
+        t.join();
+        std::cout << " Done!" << std::endl;
       }
-      );
+  );
 
   // Delete all threads
   while (!threads_.empty())
@@ -80,7 +87,7 @@ void Master::catch_stop()
 
 
 // Handle the session after filling the buffer
-std::unique_ptr<Error> Master::handle(Session& session)
+std::unique_ptr<Error> Master::handle(Session & session)
 {
   std::cout << "Master handle (tid=" << std::this_thread::get_id() << ")" << std::endl;
 
