@@ -1,7 +1,7 @@
-#include "network.hh"
+#include <network.hh>
+#include <utils.hh>
 
 #include <iostream>
-
 
 namespace network
 {
@@ -51,11 +51,11 @@ namespace network
 
   void Server::listen()
   {
-    //std::ostringstream msg;
+    std::ostringstream msg;
     std::cout << "Listening" << std::endl;
-    //std::mutex tmp;
+    std::mutex tmp;
     //std::make_unique<libconfig::Config>();
-    //utils::print(std::cout, tmp, msg.str());
+    utils::print(std::cout, tmp, msg.str());
     acceptor_.async_accept(socket_,
         [this](boost::system::error_code ec)
         {
