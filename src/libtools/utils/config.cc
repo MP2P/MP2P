@@ -1,10 +1,12 @@
-#include "utils.hh"
+#include <utils.hh>
 
-#include <iostream>
 #include <thread>
 
 namespace utils
 {
+  Conf::Conf()
+  {}
+
   bool Conf::update_conf(const std::string &path)
   {
     libconfig::Config cfg;
@@ -26,14 +28,20 @@ namespace utils
     }
 
 
-    // Getting bind_port value - Default = 3727
-    cfg.lookupValue("server.master.bind_port", port_);
+    // Getting host value - Default = "localhost"
+    cfg.lookupValue("server.host", host_);
+    if (host_ == "")
+      host_ = "localhost";
+
+
+    // Getting port value - Default = 3727
+    cfg.lookupValue("server.port", port_);
     if (port_ == 0)
       port_ = 3727; // 3727=mp2p
 
 
     // Getting concurency level - Default = 1
-    cfg.lookupValue("server.master.concurency", concurrent_threads_);
+    cfg.lookupValue("server.concurency", concurrent_threads_);
     if (!concurrent_threads_)
       concurrent_threads_ = std::thread::hardware_concurrency();
     if (!concurrent_threads_)
@@ -50,22 +58,26 @@ namespace utils
     return true;
   }
 
-  /// getting the port number to be binded
+  /// getting the host to bind
+  std::string Conf::get_host()
+  {
+    return host_;
+  }
+  /// getting the port number to bind
   unsigned Conf::get_port()
   {
     return port_;
   }
 
-  /// getting the concurency level
-  unsigned Conf::get_concurent_threads()
+  /// getting the concurrency level
+  unsigned Conf::get_concurrency()
   {
     return concurrent_threads_;
   }
 
-  /// getting the port number to be binded
+  /// getting the timeout for server connexions
   time_duration Conf::get_timeout()
   {
     return timeout_;
   }
-
 }

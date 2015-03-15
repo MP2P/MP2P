@@ -1,21 +1,20 @@
-#include <iostream>
-#include <libtools.hh>
+#include <utils.hh>
 #include "client.hh"
+
+#include <iostream>
 
 int main()
 {
   if (!utils::is_system_ok())
     return 1;
 
-  std::unique_ptr <libconfig::Config> config =
-      utils::get_config("../config/server.conf");
-
-  if (!config)
+  utils::Conf& cfg = utils::Conf::get_instance();
+  if (!cfg.update_conf("../config/server.conf"))
     return 1;
 
   try
   {
-    Client client(std::move(config));
+    Client client{};
 
     client.run();
     client.stop();

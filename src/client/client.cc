@@ -1,34 +1,28 @@
-#include <iostream>
-//#include <memory>
-//#include <algorithm>
-//#include <utility>
-
-#include <files.hh>
+#include <utils.hh>
 #include "client.hh"
 
-Client::Client(std::unique_ptr < libconfig::Config > && config)
-    : config_{std::move(config)},
-      port_{utils::get_port(config_)},
-      host_{"localhost"}, // FIXME : Add hostname to the config files
-      socket_{io_service_}
-{
-  std::cout << "Endpoint host = " << host_ << std::endl;
+#include <ostream>
 
-  std::cout << "Endpoint port = " << port_ << std::endl;
+Client::Client()
+     : socket_{io_service_}
+{
+  std::cout << "Endpoint host = " << utils::Conf::get_instance().get_host() << std::endl;
+  std::cout << "Endpoint port = " << utils::Conf::get_instance().get_port() << std::endl;
 
   // Query needs the port as a string. Ugly fix.
   std::ostringstream port;
-  port << port_;
+  port << utils::Conf::get_instance().get_port();
 
   ip::tcp::resolver resolver{io_service_}; // Needed to resolve the host
-  ip::tcp::resolver::query query{host_, port.str()};
+  ip::tcp::resolver::query query{utils::Conf::get_instance().get_host(), port.str()};
 
   // Resolve the host and define the endpoint
-  ip::tcp::resolver::iterator endpoint = resolver.resolve(query);
+  ip::tcp::resolver::iterator iter = resolver.resolve(query);
+  ip::tcp::endpoint endpoint = *iter;
 
   // FIXME : Check for errors
   boost::system::error_code ec;
-  socket_.connect(*endpoint, ec); // Connect to the endpoint
+  socket_.connect(endpoint, ec); // Connect to the endpoint
 }
 
 Client::~Client()

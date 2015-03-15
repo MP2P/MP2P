@@ -151,7 +151,6 @@ namespace network
 
   public:
     Server(io_service &io_service,
-        const unsigned port,
         std::function<std::unique_ptr<Error>(Session &)> handler);
 
     ~Server();

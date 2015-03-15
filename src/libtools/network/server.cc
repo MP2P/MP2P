@@ -6,7 +6,6 @@
 namespace network
 {
   Server::Server(io_service &io_service,
-      const unsigned port,
       std::function<std::unique_ptr<Error>(Session &)> handler)
       : acceptor_{io_service},
         socket_{io_service},
@@ -15,6 +14,7 @@ namespace network
     // Use of ipv6 by default, with IPV6_V6ONLY disabled, it will listen to
     // both ipv4 & ipv6.
     // ipv4 addresses will be mapped to ipv6 like this: `::ffff:192.168.0.'
+    unsigned port = utils::Conf::get_instance().get_port();
     ip::tcp::endpoint endpoint(ip::tcp::v6(), port);
 
     acceptor_.open(endpoint.protocol());

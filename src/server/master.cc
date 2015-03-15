@@ -1,16 +1,15 @@
 #include <iostream>
+
+#include <utils.hh>
 #include "master.hh"
 
-Master::Master(std::unique_ptr<libconfig::Config> &&config)
-    : //config_{std::move(config)},
-    port_{utils::get_port(config)},
-    timeout_{utils::get_timeout(config)},
-    server_{io_service_, port_,
-        std::bind(&Master::handle, this, std::placeholders::_1)}
+Master::Master()
+    : server_{io_service_, std::bind(&Master::handle, this, std::placeholders::_1)}
 {
-  concurent_threads_ = utils::get_concurent_threads(config);
-  std::cout << "Concurency level = " << concurent_threads_ << std::endl;
-  std::cout << "Bind port = " << port_ << std::endl;
+  unsigned concurrency = utils::Conf::get_instance().get_concurrency();
+  unsigned port = utils::Conf::get_instance().get_port();
+  std::cout << "Concurency level = " << concurrency << std::endl;
+  std::cout << "Bind port = " << port << std::endl;
 }
 
 Master::~Master()
@@ -28,14 +27,16 @@ bool Master::run()
     return false;
   }
   // Creating (concurent_threads) threads
-  for (unsigned i = 0; i < concurent_threads_; ++i)
+  unsigned concurrency = utils::Conf::get_instance().get_concurrency();
+  for (unsigned i = 0; i < concurrency; ++i)
   {
     threads_.emplace_front(
         std::thread(
             [i, this]()
             {
               // Using a mutex to avoid printing asynchronously.
-              std::cout << "Thread " << i + 1 << " launched (id=" << std::this_thread::get_id() << ")!" << std::endl;
+              std::cout << "Thread " << i + 1 << " launched "
+                  "(id=" << std::this_thread::get_id() << ")!" << std::endl;
               io_service_.run();
             }
         )

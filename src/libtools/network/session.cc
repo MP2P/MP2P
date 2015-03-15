@@ -1,4 +1,4 @@
-#include "network.hh"
+#include <network.hh>
 
 #include <iostream>
 

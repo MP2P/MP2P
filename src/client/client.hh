@@ -1,29 +1,21 @@
-#ifndef MP2P_CLIENT
-# define MP2P_CLIENT
+#pragma once
 
-# include <libconfig.h++>
-# include <libtools.hh>
+#include <libconfig.h++>
+#include <network.hh>
 
-using namespace "network";
+using namespace network;
 
 class Client
 {
 private:
-  //std::unique_ptr<libconfig::Config> config_; // FIXME: Useless?
-
-  unsigned port_;
-  std::string host_;
-
-  io_service io_service_; // Does not need instantiation
+  io_service io_service_; // Does not requires instantiation
   ip::tcp::socket socket_;
 
   std::unique_ptr <Error> handle(Session &session);
-
   void send(Session &session);
 
 public:
-  Client(std::unique_ptr <libconfig::Config> &&config);
-
+  Client();
   ~Client();
 
   // Creates threads & make them bind the same port defined in config.
@@ -32,5 +24,3 @@ public:
   // Causes the server to stop it's running threads if any.
   void stop();
 };
-
-#endif /* MP2P_CLIENT */

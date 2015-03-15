@@ -1,28 +1,21 @@
-#ifndef MP2P_SERVER
-# define MP2P_SERVER
+#pragma once
 
-# include <forward_list>
-# include <libconfig.h++>
-# include <thread>
-# include <boost/asio.hpp>
-# include <libtools.hh>
+#include <forward_list>
+#include <thread>
+#include <boost/asio.hpp>
 
-using namespace boost::asio;
+#include <network.hh>
+
 using namespace network;
+using namespace boost::asio;
+using namespace boost::posix_time;
 
 class Master
 {
 private:
-  //std::unique_ptr<libconfig::Config> config_; FIXME: Useless?
-
-
-  std::forward_list<std::thread> threads_;
-  unsigned port_;
-  unsigned concurent_threads_;
-  time_duration timeout_;
-
   io_service io_service_; // Does not need instantiation
   network::Server server_;
+  std::forward_list<std::thread> threads_;
 
   std::unique_ptr<Error> handle(Session &session);
 
@@ -30,8 +23,7 @@ private:
   void stop();
 
 public:
-  Master(std::unique_ptr<libconfig::Config> &&config);
-
+  Master();
   ~Master();
 
   // Creates threads & make them bind the same port defined in config.
@@ -44,5 +36,3 @@ public:
 std::unique_ptr<Error> Handle_CM(Packet & packet, Session & session);
 std::unique_ptr<Error> Handle_SM(Packet & packet, Session & session);
 std::unique_ptr<Error> Handle_MM(Packet & packet, Session & session);
-
-#endif /* MP2P_SERVER */

@@ -38,11 +38,10 @@ namespace utils
   {
   private:
     Conf();
-
     Conf(Conf const &) = delete;
-
     void operator=(Conf const &) = delete;
 
+    std::string host_;
     unsigned port_;
     unsigned concurrent_threads_;
     time_duration timeout_;
@@ -55,10 +54,9 @@ namespace utils
 
     bool update_conf(const std::string &config_path);
 
+    std::string get_host();
     unsigned get_port();
-
-    unsigned get_concurent_threads();
-
+    unsigned get_concurrency();
     time_duration get_timeout();
   };
 
