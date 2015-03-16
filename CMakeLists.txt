@@ -15,6 +15,15 @@ endif (LIBCONFIG++_INCLUDE_DIR AND LIBCONFIG++_LIBRARY)
 
 MESSAGE( STATUS "LIBCONFIG++_FOUND:         " ${LIBCONFIG++_FOUND} )
 
+find_path(OPENSSL_INCLUDE_DIR openssl/sha.h)
+find_library(OPENSSL_LIBRARY openssl)
+if (OPENSSL_INCLUDE_DIR AND OPENSSL_LIBRARY)
+   set(OPENSSL_FOUND TRUE)
+endif (OPENSSL_INCLUDE_DIR AND OPENSSL_LIBRARY)
+
+MESSAGE( STATUS "OPENSSL_FOUND:         " ${LIBCONFIG++_FOUND} )
+
+
 set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
@@ -32,7 +41,7 @@ if(NOT ${cavailable})
 #  set(CMAKE_CXX_COMPILER "g++")
 endif(NOT ${cavailable})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -Wall -Wextra -Werror -pedantic -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -Wall -Wextra -Werror -pedantic -O3 -Wno-error=deprecated-declarations")
 
 if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
@@ -49,6 +58,9 @@ include_directories(${Boost_INCLUDE_DIR})
 #set(LibConfig++_DIR /usr/include)
 #find_package(LibConfig++ REQUIRED)
 include_directories(${LIBCONFIG++_INCLUDE_DIR})
+
+# ********[04][d02] ADDING OPENSSL LIBRARY ********** #
+include_directories(${OPENSSL_INCLUDE_DIR})
 
 
 # ********[05][d01-02-03-04] SOURCE FILES ******** #
