@@ -1,5 +1,6 @@
 before_install:
   - sudo apt-get install libconfig8
+  - cmake --version
 
 install:
   - mkdir build
