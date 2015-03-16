@@ -1,4 +1,5 @@
-cd MP2P
+mkdir ../home/mp2p/MP2P
+cd ../home/mp2p/MP2P
 git pull --rebase
 mkdir build
 cd build
