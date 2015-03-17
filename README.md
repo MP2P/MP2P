@@ -1,4 +1,6 @@
-# MP2P
+# MP2P 
+
+[![Build Status](https://travis-ci.org/Dubrzr/MP2P.svg?branch=master)](https://travis-ci.org/Dubrzr/MP2P)
 
 Open source Cloud system & Protocol
 

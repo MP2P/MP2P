@@ -1,6 +1,6 @@
 # Notation [XX][dWW-YY-..] -> ElementId=XX / Depends from WW & YY
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 
 # ********[00] PROJECT VARIABLES ******** #
 project(MP2P)
@@ -15,7 +15,7 @@ else (LIBCONFIG++_INCLUDE_DIR AND LIBCONFIG++_LIBRARY)
    set(LIBCONFIG++_FOUND FALSE)
 endif (LIBCONFIG++_INCLUDE_DIR AND LIBCONFIG++_LIBRARY)
 
-MESSAGE( STATUS "LIBCONFIG++_FOUND:         " ${LIBCONFIG++_FOUND} )
+MESSAGE( STATUS "LIBCONFIG++_FOUND:      " ${LIBCONFIG++_FOUND} )
 
 find_path(OPENSSL_INCLUDE_DIR openssl/sha.h)
 find_library(OPENSSL_LIBRARY openssl)
@@ -23,7 +23,7 @@ if (OPENSSL_INCLUDE_DIR AND OPENSSL_LIBRARY)
    set(OPENSSL_FOUND TRUE)
 endif (OPENSSL_INCLUDE_DIR AND OPENSSL_LIBRARY)
 
-MESSAGE( STATUS "OPENSSL_FOUND:         " ${LIBCONFIG++_FOUND} )
+MESSAGE( STATUS "OPENSSL_FOUND:          " ${LIBCONFIG++_FOUND} )
 
 
 set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
@@ -35,15 +35,17 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 #set(CMAKE_CXX_COMPILER if hash clang++ 2>/dev/null; then "clang++" else "g++")
 #execute_process(COMMAND (if hash clang++ 2>/dev/null; then echo clang++; else echo g++; fi) OUTPUT_VARIABLE CMAKE_CXX_COMPILER)
 
-execute_process(COMMAND which clang++ RESULT_VARIABLE cavailable OUTPUT_QUIET ERROR_QUIET)
+execute_process(COMMAND which clang++ RESULT_VARIABLE clangnotavailable OUTPUT_QUIET ERROR_QUIET)
 #message("cavailable: ${cavailable}")
-if(NOT ${cavailable})
+if(${clangnotavailable} EQUAL 0)
   set(CMAKE_CXX_COMPILER "clang++")
 #else(NOT ${cavailable})
 #  set(CMAKE_CXX_COMPILER "g++")
-endif(NOT ${cavailable})
+endif(${clangnotavailable} EQUAL 0)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -Wall -Wextra -Werror -pedantic -O3 -Wno-error=deprecated-declarations")
+message(STATUS "CMAKE_CXX_COMPILER:     " ${CMAKE_CXX_COMPILER})
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -pedantic -Wall -Wextra -Werror -O3 -Wno-error=deprecated-declarations")
 
 if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
