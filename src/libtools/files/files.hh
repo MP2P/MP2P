@@ -19,11 +19,13 @@ namespace files
       /// Calculate the hash and the size.
       FilePart(const std::string& filename);
 
+      /// Accessors
+      size_t size_get();
+      const std::string& hash_get();
+
     private:
       size_t size_;
       std::string hash_;
-
-      bool is_hash_correct();
   };
 
   class File
@@ -34,24 +36,32 @@ namespace files
            const std::vector<FilePart>& parts,
            const size_t size);
 
-      /// Constructor for a file that is not split yet.
-      File(const std::string& filename,
-           const size_t size);
+        /// Constructor for a file that is not split yet.
+        File(const std::string& filename,
+             const size_t size);
 
-    private:
-      std::string filename_;
-      std::vector<FilePart> parts_;
-      size_t size_;
-  };
+        /// Accessors
+        const std::string& filename_get();
+        std::vector<FilePart>& parts_get();
+        size_t size_get();
 
-  /// Hash a buffer of chars and return the SHA1 hash as a string
-  std::string hash_buffer(const unsigned char* buff, size_t size);
+      private:
+        std::string filename_;
+        std::vector<FilePart> parts_;
+        size_t size_;
+    };
 
-  /// Get the size of the file
-  size_t filesize_get(const std::string& filename);
-  /// Get the size of an opened file
-  size_t filesize_get(std::ifstream& open_file);
+    /// Hash a buffer of chars and return the SHA1 hash as a string
+    std::string hash_buffer(const unsigned char* buff, size_t size);
 
-  /// Read a file into a buffer. The buffer allocated enough memory for that.
+    /// Get the size of the file
+    size_t filesize_get(const std::string& filename);
+    /// Get the size of an opened file
+    size_t filesize_get(std::ifstream& open_file);
+
+    /// Read a file into a buffer. The buffer allocated enough memory for that.
   std::string file_to_buffer(std::ifstream& file);
+
 }
+
+#include <files.hxx>

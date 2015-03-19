@@ -26,13 +26,6 @@ namespace files
     hash_ = hash_buffer((const unsigned char *)buffer.c_str(), size_);
   }
 
-  bool FilePart::is_hash_correct()
-  {
-    // FIXME : hash the file
-    // FIXME : compare it to the actual hash
-    return true;
-  }
-
   File::File(const std::string& filename,
              const std::vector<FilePart>& parts,
              const size_t size)
@@ -44,10 +37,10 @@ namespace files
 
   File::File(const std::string& filename,
              const size_t size)
+    : filename_(filename),
+    size_(size)
   {
-    (void)filename;
-    (void)size;
-    (void)size_;
+    (void)parts_;
     // FIXME : Split the file, fill the vector with parts
   }
 
