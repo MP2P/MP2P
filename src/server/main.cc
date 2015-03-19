@@ -5,11 +5,7 @@
 
 int main()
 {
-  if (!utils::is_system_ok())
-    return 1;
-
-  utils::Conf& cfg = utils::Conf::get_instance();
-  if (!cfg.update_conf("../config/server.conf"))
+  if (!utils::init())
     return 1;
 
   try

@@ -12,11 +12,11 @@ const bool debug = true;
 
 namespace utils
 {
-  /*-----------.
-  | checker.cc |
-  `-----------*/
+  /*--------.
+  | init.cc |
+  `--------*/
   bool is_system_ok();
-
+  bool init();
 
   /*---------.
   | color.cc |

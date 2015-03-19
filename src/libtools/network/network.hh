@@ -3,6 +3,7 @@
 #include <memory>
 #include <atomic>
 #include <forward_list>
+#include <unordered_map>
 #include <iostream>
 #include <thread>
 #include <mutex>
@@ -10,6 +11,8 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <glob.h>
+#include <stdatomic.h>
 
 using namespace boost::asio;
 //using namespace boost::asio::ip::tcp;
@@ -19,7 +22,7 @@ namespace network
 
   enum class KeepAlive
   {
-    ive,
+    Live,
     Die
   };
 
@@ -42,6 +45,7 @@ namespace network
   class Error
   {
   public:
+    static std::unordered_map<uint16_t, std::string> errors;
 
     enum ErrorType
     {
@@ -52,6 +56,8 @@ namespace network
     Error(const ErrorType et);
 
     ~Error();
+
+    static bool update_conf(const std::string &path);
 
     ErrorType status_get();
 
@@ -80,7 +86,7 @@ namespace network
   class Packet
   {
   private:
-    uint32_t size_;
+    unsigned long size_;
     uint8_t fromto_;
     uint8_t what_;
     std::string message_;
@@ -90,7 +96,7 @@ namespace network
 
     ~Packet();
 
-    uint32_t size_get();
+    unsigned long size_get();
 
     uint8_t fromto_get();
 
@@ -114,7 +120,7 @@ namespace network
   private:
     ip::tcp::socket socket_;
     streambuf buff_;
-    unsigned length_;
+    size_t length_;
     std::function<std::unique_ptr<Error>(Session &)> handler_;
     std::mutex w_mutex_; // Just for testing purposes.
 
@@ -125,7 +131,7 @@ namespace network
 
     streambuf &buff_get();
 
-    unsigned length_get();
+    size_t length_get();
 
     std::string get_line();
 

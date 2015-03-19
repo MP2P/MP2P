@@ -17,7 +17,7 @@ namespace network
   {
   }
 
-  uint32_t Packet::size_get()
+  unsigned long Packet::size_get()
   {
     return size_;
   }

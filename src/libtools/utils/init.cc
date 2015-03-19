@@ -1,4 +1,5 @@
 #include <utils.hh>
+#include <network.hh>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -16,6 +17,21 @@ namespace utils
       std::cerr << "Fatal error: IPV6_V6ONLY must be false." << std::endl;
       return false;
     }
+    return true;
+  }
+  bool init()
+  {
+    std::cout << "Initialization..." << std::endl;
+    if (!is_system_ok())
+      return false;
+
+    utils::Conf& cfg = utils::Conf::get_instance();
+    if (!cfg.update_conf("../config/server.conf"))
+      return false;
+
+    if (!network::Error::update_conf("../ressources/errors"))
+      return false;
+
     return true;
   }
 }

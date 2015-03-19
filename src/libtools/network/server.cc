@@ -27,7 +27,6 @@ namespace network
     }
     catch (const std::exception &e)
     {
-      std::cout << "test" << std::endl;
       std::cerr << e.what() << std::endl;
       acceptor_.cancel();
     }

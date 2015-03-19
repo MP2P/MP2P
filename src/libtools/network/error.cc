@@ -1,7 +1,12 @@
 #include <network.hh>
 
+#include <libconfig.h++>
+
 namespace network
 {
+
+  std::unordered_map<uint16_t, std::string> Error::errors;
+
   Error::Error(const ErrorType et)
       : status_{et}
   {
@@ -9,6 +14,43 @@ namespace network
 
   Error::~Error()
   {
+  }
+
+  bool Error::update_conf(const std::string &path)
+  {
+    libconfig::Config cfg;
+
+    try
+    {
+      cfg.readFile(path.c_str());
+    }
+    catch (const libconfig::FileIOException &fioex)
+    {
+      std::cerr << "i/o error while reading error file." << std::endl;
+      return false;
+    }
+    catch (const libconfig::ParseException &pex)
+    {
+      std::cerr << "parse error at " << pex.getFile() << ":" << pex.getLine()
+          << " - " << pex.getError() << std::endl;
+      return false;
+    }
+
+    std::cout << "Getting all errors... " << std::flush;
+
+    std::string msg{};
+    for (uint16_t i = 0; i < UINT16_MAX; ++i)
+    {
+      msg = std::string("");
+      cfg.lookupValue("errors.codes.id-" + std::to_string(i) + ".message", msg);
+      if (msg == "")
+        continue;
+      errors.emplace(i, msg);
+    }
+
+    std::cout << "Done!" << std::endl;
+
+    return true;
   }
 
   Error::ErrorType Error::status_get()

@@ -1,7 +1,5 @@
 #include <network.hh>
 
-#include <iostream>
-
 namespace network
 {
 
@@ -16,7 +14,7 @@ namespace network
     return buff_;
   }
 
-  unsigned Session::length_get()
+  size_t Session::length_get()
   {
     return length_;
   }
@@ -50,11 +48,13 @@ namespace network
           if (!ec)
           {
             length_ = length;
-            auto error = handler_(*this);
+            // Calling master.handle(session)
+            std::unique_ptr<Error> error = handler_(*this);
             if (error->status_get() != Error::ErrorType::success)
             {
-              std::cout << "Closed session" << std::endl;
               socket_.close(); // Close the socket
+              //Send an error packet.
+              std::cout << "Closed session" << std::endl;
             }
             else
               receive(); // Keep the socket alive
@@ -76,7 +76,7 @@ namespace network
           {
             //utils::print(std::cout, w_mutex_, "Packet sent");
             std::cout << "Packet sent!" << std::endl;
-            auto error = handler_(*this);
+            std::unique_ptr<Error> error = handler_(*this);
             if (error->status_get() != Error::ErrorType::success)
               socket_.close(); // Close the socket
           }
