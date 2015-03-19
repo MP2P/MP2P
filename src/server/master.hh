@@ -10,6 +10,8 @@ using namespace network;
 using namespace boost::asio;
 using namespace boost::posix_time;
 
+using error_code = uint16_t;
+
 class Master
 {
 private:
@@ -17,7 +19,7 @@ private:
   network::Server server_;
   std::forward_list<std::thread> threads_;
 
-  std::unique_ptr<Error> handle(Session &session);
+  error_code handle(Session &session);
 
   // Causes the server to stop it's running threads if any.
   void stop();
@@ -33,6 +35,8 @@ public:
   void catch_stop();
 };
 
-std::unique_ptr<Error> Handle_CM(Packet & packet, Session & session);
-std::unique_ptr<Error> Handle_SM(Packet & packet, Session & session);
-std::unique_ptr<Error> Handle_MM(Packet & packet, Session & session);
+error_code CM_callback_may_i_upload_a_file(Packet & packet, Session & session);
+error_code CM_callback_may_i_download_this_file(Packet & packet, Session & session);
+error_code CM_callback_can_you_delete_this_file(Packet & packet, Session & session);
+error_code SM_callback_part_deletion_succeded(Packet & packet, Session & session);
+error_code SM_callback_part_received(Packet & packet, Session & session);

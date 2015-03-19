@@ -88,7 +88,8 @@ void Master::catch_stop()
 
 
 // Handle the session after filling the buffer
-std::unique_ptr<Error> Master::handle(Session & session)
+// Errors are defined in the ressources/errors file.
+error_code Master::handle(Session & session)
 {
   std::cout << "Master handle (tid=" << std::this_thread::get_id() << ")" << std::endl;
 
@@ -96,21 +97,43 @@ std::unique_ptr<Error> Master::handle(Session & session)
   Packet packet = session.get_packet();
 
 
-  if (packet.size_get() < 3)
-    return std::make_unique<Error>(Error::ErrorType::failure);
+  if (packet.get_size() < 3)
+    return 1;
 
   std::cout << packet;
 
-  switch (packet.fromto_get())
+  switch (packet.get_fromto())
   {
     case FromTo::C_to_M:
-      return Handle_CM(packet, session); // If the Packet is from a client
+      switch (packet.get_what())
+      {
+        case 0:
+          return 10001; // Error
+        case 1:
+          return CM_callback_may_i_upload_a_file(packet, session);
+        case 2:
+          return CM_callback_may_i_download_this_file(packet, session);
+        case 3:
+          return CM_callback_can_you_delete_this_file(packet, session);
+        default:
+          return 10001;
+      }
     case FromTo::S_to_M:
-      return Handle_SM(packet, session); // If the Packet is from a storage
+      switch (packet.get_what())
+      {
+        case 0:
+          return 10101;
+        case 1:
+          return SM_callback_part_deletion_succeded(packet, session);
+        case 2:
+          return SM_callback_part_received(packet, session);
+        default:
+          return 10101;
+      }
     case FromTo::M_to_M:
-      return Handle_MM(packet, session); // If the Packet is from a master
+      return 10601;
     default:
-      return std::make_unique<Error>(Error::ErrorType::failure); // Else failure
+      return 1;
   }
 /*
 

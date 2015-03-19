@@ -17,22 +17,22 @@ namespace network
   {
   }
 
-  unsigned long Packet::size_get()
+  unsigned long Packet::get_size()
   {
     return size_;
   }
 
-  uint8_t Packet::fromto_get()
+  uint8_t Packet::get_fromto()
   {
     return fromto_;
   }
 
-  uint8_t Packet::what_get()
+  uint8_t Packet::get_what()
   {
     return what_;
   }
 
-  std::string &Packet::message_get()
+  std::string &Packet::get_message()
   {
     return message_;
   }

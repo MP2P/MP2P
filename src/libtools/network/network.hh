@@ -15,7 +15,6 @@
 #include <stdatomic.h>
 
 using namespace boost::asio;
-//using namespace boost::asio::ip::tcp;
 
 namespace network
 {
@@ -96,13 +95,13 @@ namespace network
 
     ~Packet();
 
-    unsigned long size_get();
+    unsigned long get_size();
 
-    uint8_t fromto_get();
+    uint8_t get_fromto();
 
-    uint8_t what_get();
+    uint8_t get_what();
 
-    std::string &message_get();
+    std::string &get_message();
 
     const std::string serialize() const;
 

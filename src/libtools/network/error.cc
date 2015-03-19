@@ -49,7 +49,6 @@ namespace network
     }
 
     std::cout << "Done!" << std::endl;
-
     return true;
   }
 

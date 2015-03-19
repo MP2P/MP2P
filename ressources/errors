@@ -12,12 +12,28 @@ errors:
     id-0:
     {
       category: "id-0",
-      message: "success"
+      message: "Success"
     },
     id-1:
     {
       category: "id-0",
       message: "failure"
-    }
+    },
+    id-10000: { message: "Client to Master success." },
+    id-10001: { message: "Client to Master error." },
+    id-10100: { message: "Master to Client success." },
+    id-10101: { message: "Client to Master error." },
+    id-10200: { message: "Client to Storage success." },
+    id-10201: { message: "Client to Master error." },
+    id-10300: { message: "Storage to Client success." },
+    id-10301: { message: "Client to Master error." },
+    id-10400: { message: "Master to Storage success." },
+    id-10401: { message: "Client to Master error." },
+    id-10500: { message: "Storage to Master success." },
+    id-10501: { message: "Client to Master error." },
+    id-10600: { message: "Master to Master success." },
+    id-10601: { message: "Client to Master error." },
+    id-10700: { message: "Storage to Storage success." }
+    id-10701: { message: "Client to Master error." },
   }
 }
