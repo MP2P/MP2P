@@ -15,6 +15,7 @@
 #include <stdatomic.h>
 
 using namespace boost::asio;
+using error_code = uint16_t;
 
 namespace network
 {
@@ -120,11 +121,11 @@ namespace network
     ip::tcp::socket socket_;
     streambuf buff_;
     size_t length_;
-    std::function<std::unique_ptr<Error>(Session &)> handler_;
+    std::function<error_code(Session &)> handler_;
     std::mutex w_mutex_; // Just for testing purposes.
 
   public:
-    Session(ip::tcp::socket &&socket, std::function<std::unique_ptr<Error>(Session &)> handler);
+    Session(ip::tcp::socket &&socket, std::function<error_code(Session &)> handler);
 
     ip::tcp::socket &socket_get();
 
@@ -150,13 +151,13 @@ namespace network
   private:
     ip::tcp::acceptor acceptor_;
     ip::tcp::socket socket_;
-    std::function<std::unique_ptr<Error>(Session &)> handler_;
+    std::function<error_code(Session &)> handler_;
     std::vector<std::shared_ptr<Session>> sessions_;
 
 
   public:
     Server(io_service &io_service,
-        std::function<std::unique_ptr<Error>(Session &)> handler);
+        std::function<error_code(Session &)> handler);
 
     ~Server();
 

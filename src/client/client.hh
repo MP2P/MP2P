@@ -5,13 +5,15 @@
 
 using namespace network;
 
+using error_code = uint16_t;
+
 class Client
 {
 private:
   io_service io_service_; // Does not requires instantiation
   ip::tcp::socket socket_;
 
-  std::unique_ptr <Error> handle(Session &session);
+  error_code handle(Session &session);
   void send(Session &session);
 
 public:

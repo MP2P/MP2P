@@ -104,7 +104,7 @@ error_code Master::handle(Session & session)
 
   switch (packet.get_fromto())
   {
-    case FromTo::C_to_M:
+    case FromTo::C_to_M: // Code=0
       switch (packet.get_what())
       {
         case 0:
@@ -118,34 +118,21 @@ error_code Master::handle(Session & session)
         default:
           return 10001;
       }
-    case FromTo::S_to_M:
+    case FromTo::S_to_M: // Code=5
       switch (packet.get_what())
       {
         case 0:
-          return 10101;
+          return 10501; // Error
         case 1:
           return SM_callback_part_deletion_succeded(packet, session);
         case 2:
           return SM_callback_part_received(packet, session);
         default:
-          return 10101;
+          return 10501;
       }
-    case FromTo::M_to_M:
-      return 10601;
+    case FromTo::M_to_M: // Code=6
+      return 10601; // Error
     default:
-      return 1;
+      return 1; // Error
   }
-/*
-
-  if (packet.message_get() == "SEND")
-  {
-    std::cout << "Received SEND message!" << std::endl;
-    std::string message("TESTING SENDING");
-    Packet p{1, 2, message};
-    session.send(p);
-    return KeepAlive::Live;
-  }
-*/
-  // FIXME : Close me maybe
-  return std::make_unique<Error>(Error::ErrorType::failure);
 }

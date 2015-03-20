@@ -6,7 +6,7 @@
 namespace network
 {
   Server::Server(io_service &io_service,
-      std::function<std::unique_ptr<Error>(Session &)> handler)
+      std::function<error_code(Session &)> handler)
       : acceptor_{io_service},
         socket_{io_service},
         handler_{std::move(handler)}

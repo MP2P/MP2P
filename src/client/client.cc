@@ -30,14 +30,15 @@ Client::~Client()
   // FIXME : Close sockets and everything if needed
 }
 
-std::unique_ptr <Error> Client::handle(Session & session)
+error_code Client::handle(Session & session)
 {
   (void) session;
 
   std::cout << "Client handling";
 
   send(session); // Ask for a new command
-  return std::make_unique<Error>(Error::ErrorType::failure);
+  return 1;
+  //return std::make_unique<Error>(Error::ErrorType::failure);
 }
 
 void Client::run()
