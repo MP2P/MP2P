@@ -21,10 +21,9 @@ namespace network
   {
     std::ifstream file("file.txt");
     message_ = files::file_to_buffer(file);
+    message_[message_.size() - 1] = '\0';
     size_ = (2 + part.size_get()) * sizeof(uint8_t);
   }
-
-
 
   Packet::~Packet()
   {

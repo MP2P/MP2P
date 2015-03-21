@@ -95,6 +95,12 @@ std::unique_ptr<Error> Master::handle(Session & session)
   // Create and get the Packet object from the session (buff_ & length_)
   Packet packet = session.get_packet();
 
+  std::string& buffer = packet.message_get();
+
+  {
+    std::ofstream f1("recieved.txt");
+    f1.write(buffer.c_str(), packet.size_get());
+  }
 
   if (packet.size_get() < 3)
     return std::make_unique<Error>(Error::ErrorType::failure);
