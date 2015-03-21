@@ -15,14 +15,23 @@ namespace files
   {
   }
 
+  FilePart::FilePart(std::ifstream& file)
+    : size_(filesize_get(file))
+  {
+    hash_compute(file);
+  }
+
   FilePart::FilePart(const std::string& filename)
   {
     std::ifstream file(filename, std::ios::binary);
-
     size_ = filesize_get(file);
 
-    std::string buffer = file_to_buffer(file);
+    hash_compute(file);
+  }
 
+  void FilePart::hash_compute(std::ifstream& file)
+  {
+    std::string buffer = file_to_buffer(file);
     hash_ = hash_buffer((const unsigned char *)buffer.c_str(), size_);
   }
 
@@ -48,7 +57,9 @@ namespace files
   std::string hash_buffer(const unsigned char* buff, size_t size)
   {
     unsigned char hash[20];
-    SHA1(buff, size, hash);
+    (void)buff;
+    (void)size;
+    //SHA1(buff, size, hash);
     std::stringstream result;
     for (int i = 0; i < 20; ++i)
       result << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];

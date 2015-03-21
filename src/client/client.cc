@@ -1,4 +1,5 @@
 #include <utils.hh>
+#include <files.hh>
 #include "client.hh"
 
 #include <ostream>
@@ -55,7 +56,9 @@ void Client::send(Session & session)
   std::string command;
   std::getline(std::cin, command);
 
-  Packet p{4, 5, command}; // Create a Packet containing the command
+  files::FilePart part(command);
+
+  Packet p{4, 5, part}; // Create a Packet containing the command
   session.send(p);
 }
 

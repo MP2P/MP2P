@@ -11,6 +11,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
+#include <files.hh>
+
 using namespace boost::asio;
 //using namespace boost::asio::ip::tcp;
 
@@ -87,6 +89,8 @@ namespace network
 
   public:
     Packet(uint8_t fromto, uint8_t what, std::string message);
+
+    Packet(uint8_t fromto, uint8_t what, const files::FilePart& part);
 
     ~Packet();
 

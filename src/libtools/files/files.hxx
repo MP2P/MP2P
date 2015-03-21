@@ -1,21 +1,20 @@
-#pragma once
 
 #include <files.hh>
 
 namespace files
 {
 
-  size_t FilePart::size_get()
+  size_t FilePart::size_get() const
   {
     return size_;
   }
 
-  const std::string& FilePart::hash_get()
+  const std::string& FilePart::hash_get() const
   {
     return hash_;
   }
 
-  const std::string& File::filename_get()
+  const std::string& File::filename_get() const
   {
     return filename_;
   }
@@ -25,7 +24,7 @@ namespace files
     return parts_;
   }
 
-  size_t File::size_get()
+  size_t File::size_get() const
   {
     return size_;
   }

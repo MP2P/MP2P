@@ -13,6 +13,19 @@ namespace network
     size_ = (2 + message.length()) * sizeof(uint8_t);
   }
 
+  Packet::Packet(uint8_t fromto,
+      uint8_t what,
+      const files::FilePart& part)
+      : fromto_(fromto),
+        what_(what)
+  {
+    std::ifstream file("file.txt");
+    message_ = files::file_to_buffer(file);
+    size_ = (2 + part.size_get()) * sizeof(uint8_t);
+  }
+
+
+
   Packet::~Packet()
   {
   }
