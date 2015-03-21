@@ -15,14 +15,13 @@ namespace network
 
   Packet::Packet(uint8_t fromto,
       uint8_t what,
-      const files::FilePart& part)
+      std::ifstream& file,
+      size_t size)
       : fromto_(fromto),
         what_(what)
   {
-    std::ifstream file("file.txt");
-    message_ = files::file_to_buffer(file);
-    message_[message_.size() - 1] = '\0';
-    size_ = (2 + part.size_get()) * sizeof(uint8_t);
+    message_ = files::read_to_buffer(file, size);
+    size_ = (2 + size) * sizeof(uint8_t);
   }
 
   Packet::~Packet()
@@ -58,7 +57,7 @@ namespace network
         << int(fromto_) << "|"
         << int(what_) << "|"
         << message_
-        << "\r\n";
+        << "\n";
     return packet.str();
   }
 
@@ -81,7 +80,8 @@ namespace network
       fromto = (uint8_t) std::stoi(item);
       std::getline(packet, item, '|');
       what = (uint8_t) std::stoi(item);
-      std::getline(packet, message, '\n');
+      packet >> message;
+      std::cout << "GOT MESSAGE " << message << std::endl;
     }
     catch (const std::exception &e)
     {

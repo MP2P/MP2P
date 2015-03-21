@@ -10,6 +10,12 @@ namespace files
     return size_;
   }
 
+  inline size_t FilePart::id_get() const
+  {
+    return id_;
+  }
+
+
   inline const std::string& FilePart::hash_get() const
   {
     return hash_;

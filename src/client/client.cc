@@ -55,11 +55,22 @@ void Client::send(Session & session)
 {
   std::string command;
   std::getline(std::cin, command);
+  if (command[command.size() - 1] == '\n')
+    command[command.size() - 1] = '\0';
 
-  files::FilePart part(command);
+  // Create a file with the file name
+  files::File file(command);
 
-  Packet p{4, 5, part}; // Create a Packet containing the command
-  session.send(p);
+  auto& parts = file.parts_get();
+  std::ifstream filestream(command);
+  for (auto& part : parts)
+  {
+    filestream.seekg(part.size_get() * part.id_get());
+    std::cout << part.size_get() << std::endl;
+    Packet p{4, 5, filestream, part.size_get()};
+    std::cout << p.message_get() << std::endl;
+    session.send(p);
+  }
 }
 
 void Client::stop()
