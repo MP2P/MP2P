@@ -12,7 +12,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <glob.h>
-#include <stdatomic.h>
+//#include <stdatomic.h>
 
 using namespace boost::asio;
 using error_code = uint16_t;
