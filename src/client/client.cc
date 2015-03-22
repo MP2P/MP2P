@@ -37,8 +37,7 @@ std::unique_ptr <Error> Client::handle(Session & session)
 
   std::cout << "Client handling";
 
-  send(session); // Ask for a new command
-  return std::make_unique<Error>(Error::ErrorType::failure);
+  return std::make_unique<Error>(Error::ErrorType::success);
 }
 
 void Client::run()
@@ -67,7 +66,7 @@ void Client::send(Session & session)
   {
     filestream.seekg(part.size_get() * part.id_get());
     std::cout << part.size_get() << std::endl;
-    Packet p{4, 5, filestream, part.size_get()};
+    Packet p{0, 1, filestream, part.size_get()};
     std::cout << p.message_get() << std::endl;
     session.send(p);
   }

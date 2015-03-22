@@ -51,12 +51,12 @@ namespace network
           {
             length_ = length;
             auto error = handler_(*this);
- //           if (error->status_get() != Error::ErrorType::success)
-  //          {
-   //           std::cout << "Closed session" << std::endl;
-//              socket_.close(); // Close the socket
-    //        }
-     //       else
+            if (error->status_get() != Error::ErrorType::success)
+            {
+              std::cout << "Closed session" << std::endl;
+              socket_.close(); // Close the socket
+            }
+            else
               receive(); // Keep the socket alive
           }
         }
