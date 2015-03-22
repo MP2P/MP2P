@@ -44,20 +44,38 @@ namespace network
     std::cout << "Opened session (tid=" << std::this_thread::get_id() << ")" << std::endl;
     boost::asio::async_read_until(socket_,
         buff_,
-        '\n',
+        '|',
         [this](boost::system::error_code ec, std::size_t length)
         {
           if (!ec)
           {
-            length_ = length;
-            auto error = handler_(*this);
-            if (error->status_get() != Error::ErrorType::success)
-            {
-              std::cout << "Closed session" << std::endl;
-              socket_.close(); // Close the socket
-            }
-            else
-              receive(); // Keep the socket alive
+            int msg_size = 0;
+            boost::asio::streambuf::const_buffers_type bufs = buff_.data();
+            std::string str(boost::asio::buffers_begin(bufs),
+                  boost::asio::buffers_begin(bufs) + length);
+            str.pop_back();
+            msg_size = std::atoi(str.c_str());
+            boost::asio::async_read(socket_,
+                buff_,
+                boost::asio::transfer_exactly(msg_size),
+                [this](boost::system::error_code ec, std::size_t length)
+                {
+                  if (!ec)
+                  {
+                    length_ = length;
+                    auto error = handler_(*this);
+                    if (error->status_get() != Error::ErrorType::success)
+                    {
+                      std::cout << "Closed session" << std::endl;
+                      socket_.close(); // Close the socket
+                    }
+                    else
+                      receive(); // Keep the socket alive
+                  }
+                  else
+                    std::cout << ec.message() << std::endl;
+                }
+            );
           }
         }
     );
