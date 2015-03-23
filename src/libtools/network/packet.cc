@@ -10,7 +10,7 @@ namespace network
         what_(what),
         message_(message)
   {
-    size_ = (2 + message.length()) * sizeof(uint8_t);
+    size_ = message.length() * sizeof(uint8_t);
   }
 
   Packet::Packet(uint8_t fromto,
@@ -21,7 +21,7 @@ namespace network
         what_(what)
   {
     message_ = files::read_to_buffer(file, size);
-    size_ = (2 + size) * sizeof(uint8_t);
+    size_ = size * sizeof(uint8_t);
   }
 
   Packet::~Packet()
@@ -80,15 +80,15 @@ namespace network
       fromto = (uint8_t) std::stoi(item);
       std::getline(packet, item, '|');
       what = (uint8_t) std::stoi(item);
-      packet >> message;
-      std::cout << "GOT MESSAGE " << message << std::endl;
+      message.resize(size, '\0');
+      packet.read(&*message.begin(), size);
     }
     catch (const std::exception &e)
     {
       std::cout << "Invalid packet (" << e.what() << ")" << std::endl;
       return Packet{0, 0, ""};
     }
-    unsigned long real_size = (2 + message.length()) * sizeof(uint8_t);
+    unsigned long real_size = (message.length()) * sizeof(uint8_t);
     if (size != real_size)
     {
       std::cout << "Received an invalid packet of size " << real_size

@@ -27,7 +27,7 @@ namespace network
 
     boost::asio::streambuf::const_buffers_type bufs = buff_.data();
     line = std::string(boost::asio::buffers_begin(bufs),
-        boost::asio::buffers_begin(bufs) + length_ - 2);
+        boost::asio::buffers_begin(bufs) + length_);
     buff_.consume(length_);
 
     return line;
@@ -58,11 +58,11 @@ namespace network
             boost::asio::async_read(socket_,
                 buff_,
                 boost::asio::transfer_exactly(msg_size),
-                [this](boost::system::error_code ec, std::size_t length)
+                [this, msg_size](boost::system::error_code ec, std::size_t length)
                 {
                   if (!ec)
                   {
-                    length_ = length;
+                    length_ = length + msg_size;
                     auto error = handler_(*this);
                     if (error->status_get() != Error::ErrorType::success)
                     {
