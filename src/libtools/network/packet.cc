@@ -10,7 +10,7 @@ namespace network
         what_(what),
         message_(message)
   {
-    size_ = message.length() * sizeof(uint8_t);
+    size_ = message.length();
   }
 
   Packet::Packet(uint8_t fromto,
@@ -21,13 +21,14 @@ namespace network
         what_(what)
   {
     message_ = files::read_to_buffer(file, size);
-    size_ = size * sizeof(uint8_t);
+    size_ = size;
   }
 
   Packet::~Packet()
   {
   }
 
+  // FIXME : create a hxx and inline them
   uint32_t Packet::size_get()
   {
     return size_;
@@ -63,8 +64,7 @@ namespace network
   // Get a packet from a string
   const Packet Packet::deserialize(const std::string &input)
   {
-    std::cout << "Input of packet is : " << input << std::endl;
-    uint32_t size = 6;
+    uint32_t size = 0;
     uint8_t fromto = 0;
     uint8_t what = 0;
     std::string message;
@@ -75,13 +75,10 @@ namespace network
     try
     {
       std::getline(packet, item, '|');
-      std::cout << "Stoi of : " << item << std::endl;
       size = (uint32_t) std::stoi(item);
       std::getline(packet, item, '|');
-      std::cout << "Stoi of : " << item << std::endl;
       fromto = (uint8_t) std::stoi(item);
       std::getline(packet, item, '|');
-      std::cout << "Stoi of : " << item << std::endl;
       what = (uint8_t) std::stoi(item);
       message.resize(size, '\0');
       packet.read(&*message.begin(), size);
@@ -91,14 +88,14 @@ namespace network
       std::cout << "Invalid packet (" << e.what() << ")" << std::endl;
       return Packet{0, 0, ""};
     }
-/*    unsigned long real_size = (message.length()) * sizeof(uint8_t);
+    unsigned long real_size = (message.length()) * sizeof(uint8_t);
     if (size != real_size)
     {
       std::cout << "Received an invalid packet of size " << real_size
           << " (expecting " << size << ")" << std::endl;
       return Packet{0, 0, ""};
     }
-    */
+
     return Packet{fromto, what, message};
   }
 

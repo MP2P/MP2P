@@ -59,8 +59,9 @@ namespace files
   {
     std::ifstream file(filename);
     size_ = filesize_get(file);
-    auto part_size = size_ / 4;
-    for (unsigned i = 0; i < 4; ++i)
+    auto parts = parts_for_size(size_);
+    auto part_size = size_ / parts;
+    for (unsigned i = 0; i < parts; ++i)
     {
       file.seekg(part_size * i);
       parts_.emplace_back(file, part_size, i);
@@ -73,6 +74,7 @@ namespace files
     unsigned char hash[20];
     (void)buff;
     (void)size;
+    // FIXME : Activate hashing
     //SHA1(buff, size, hash);
     std::stringstream result;
     for (int i = 0; i < 20; ++i)
@@ -110,10 +112,14 @@ namespace files
   std::string read_to_buffer(std::ifstream& file, size_t size)
   {
     std::string buffer(size, '\0');
-    std::cout << "size to read to buff:" << size  << std::endl;
     file.read(&*buffer.begin(), size);
-    std::cout << "size to read to buff:" << size  << std::endl;
-    std::cout << "I read this from file: |" << buffer << "|" << std::endl;
     return buffer;
+  }
+
+  size_t parts_for_size(size_t size)
+  {
+    // FIXME : Compute the parts relative to the size.
+    (void)size;
+    return 4;
   }
 }

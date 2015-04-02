@@ -26,16 +26,13 @@ Client::Client()
   socket_.connect(endpoint, ec); // Connect to the endpoint
 }
 
-Client::~Client()
-{
-  // FIXME : Close sockets and everything if needed
-}
-
 std::unique_ptr <Error> Client::handle(Session & session)
 {
   (void) session;
 
-  std::cout << "Client handling";
+  std::cout << "Client handling" << std::endl;
+
+  session.receive();
 
   return std::make_unique<Error>(Error::ErrorType::success);
 }
@@ -48,13 +45,14 @@ void Client::run()
 
   send(*session); // Ask for a command
   io_service_.run();
-  session->receive();
 }
 
 void Client::send(Session & session)
 {
-  std::string command = "file.txt";
-  //std::getline(std::cin, command);
+  std::string command;
+  std::cout << "Enter the name of the file you want to send" << std::endl;
+  std::getline(std::cin, command);
+
   if (command[command.size() - 1] == '\n')
     command[command.size() - 1] = '\0';
 
@@ -67,7 +65,6 @@ void Client::send(Session & session)
   {
     filestream.seekg(part.size_get() * part.id_get());
     Packet p{0, 1, filestream, part.size_get()};
-    std::cout << p << std::endl;
     session.send(p);
   }
 }

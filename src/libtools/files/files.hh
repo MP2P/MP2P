@@ -74,6 +74,9 @@ namespace files
 
   /// Read size amount of bytes from file into a buffer
   std::string read_to_buffer(std::ifstream& file, size_t size);
+
+  /// Estimate an optimal number of parts depending of the size of the file
+  size_t parts_for_size(size_t size);
 }
 
 #include <files.hxx>

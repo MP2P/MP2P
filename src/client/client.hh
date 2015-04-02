@@ -16,7 +16,6 @@ private:
 
 public:
   Client();
-  ~Client();
 
   // Creates threads & make them bind the same port defined in config.
   void run();

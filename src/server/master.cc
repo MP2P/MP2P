@@ -34,14 +34,12 @@ bool Master::run()
         std::thread(
             [i, this]()
             {
-              // Using a mutex to avoid printing asynchronously.
               std::cout << "Thread " << i + 1 << " launched "
                   "(id=" << std::this_thread::get_id() << ")!" << std::endl;
               io_service_.run();
             }
         )
     );
-    break;
   }
   return true;
 }
@@ -99,15 +97,12 @@ std::unique_ptr<Error> Master::handle(Session & session)
   std::string& buffer = packet.message_get();
 
   {
-    std::ofstream f1("recieved.txt");
-    std::cout << "I am writing to recieved.txt: " << buffer << std::endl;
+    std::ofstream f1("recieved.txt", std::ios::app);
     f1.write(buffer.c_str(), packet.size_get());
   }
 
-//  if (packet.size_get() < 1)
-//    return std::make_unique<Error>(Error::ErrorType::failure);
-
-  std::cout << packet;
+  if (packet.size_get() < 1)
+    return std::make_unique<Error>(Error::ErrorType::failure);
 
   switch (packet.fromto_get())
   {
@@ -120,6 +115,5 @@ std::unique_ptr<Error> Master::handle(Session & session)
     default:
       return std::make_unique<Error>(Error::ErrorType::failure); // Else failure
   }
-  // FIXME : Close me maybe
   return std::make_unique<Error>(Error::ErrorType::failure);
 }

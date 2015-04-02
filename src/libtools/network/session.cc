@@ -17,11 +17,12 @@ namespace network
     return buff_;
   }
 
-  unsigned Session::length_get()
+  size_t Session::length_get()
   {
     return length_;
   }
 
+  // FIXME : Get a generic function to do this
   std::string Session::get_line()
   {
     boost::asio::streambuf::const_buffers_type bufs = buff_.data();
@@ -40,42 +41,40 @@ namespace network
   {
     std::cout << "Session recieving...(tid=" << std::this_thread::get_id()
               << ")" << std::endl;
-    std::cout << "Buffer size is : " << buff_.size() << std::endl;
-    buff_.prepare(1024);
-    boost::asio::async_read(socket_,
+    boost::asio::async_read_until(socket_,
         buff_,
-        boost::asio::transfer_exactly(2),
-        [this](boost::system::error_code ec, std::size_t length)
+        '|', // FIXME : transfer the size first
+        [this](boost::system::error_code ec, std::size_t size_length)
         {
           if (!ec)
           {
-    std::cout << "Buffer size is : " << buff_.size() << std::endl;
-    std::cout << "len is : " << length << std::endl;
-            int msg_size = 0;
             boost::asio::streambuf::const_buffers_type bufs = buff_.data();
             std::string str(boost::asio::buffers_begin(bufs),
-                            boost::asio::buffers_begin(bufs) + length);
-            std::cout << "SIZE BUFFER IS : " << str << std::endl;
-            //buff_.consume(2);
+                            boost::asio::buffers_begin(bufs) + size_length);
             str.pop_back();
-            std::cout << "STR IS:" << str << std::endl;
-            msg_size = std::stoi(str);
-            std::cout << "msg_size IS:" << msg_size << std::endl;
+
+            auto msg_size = std::stoll(str);
+
+            std::cout << "Receiving a message of size: "
+                      << msg_size << std::endl;
+
+            // Read the whole message + the headers left
             boost::asio::async_read(socket_,
                 buff_,
-                boost::asio::transfer_exactly(msg_size + 6),
-                [this, msg_size](boost::system::error_code ec, std::size_t /*length*/)
+                // FIXME : remove hardcoded size
+                boost::asio::transfer_exactly(msg_size + 4),
+                [this, msg_size, size_length](boost::system::error_code ec, std::size_t length)
                 {
                   if (!ec)
                   {
-                    length_ = msg_size + 6;
-                    boost::asio::streambuf::const_buffers_type bufs = buff_.data();
-                    std::string str(boost::asio::buffers_begin(bufs),
-                    boost::asio::buffers_begin(bufs) + length_);
-                    std::cout << "BUFFER IS : " << str << std::endl;
+                    length_ = length + size_length;
+
                     auto error = handler_(*this);
+
+                    // Reset buffer and length to be ready for reading again
                     buff_.consume(length_);
                     length_ = 0;
+
                     if (error->status_get() != Error::ErrorType::success)
                     {
                       std::cout << "Closed session" << std::endl;
@@ -99,21 +98,8 @@ namespace network
     auto str = packet.serialize();
     std::cout << "Gonna send this : " << str << std::endl;
     socket_.send(boost::asio::buffer(str));
-/*    boost::asio::async_write(
-        socket_,
-        buff_,
-        [this](boost::system::error_code ec, std::size_t / * length * /)
-        {
-          if (!ec)
-          {
-            //utils::print(std::cout, w_mutex_, "Packet sent");
-            std::cout << "Packet sent!" << std::endl;
-            auto error = handler_(*this);
-            if (error->status_get() != Error::ErrorType::success)
-              socket_.close(); // Close the socket
-          }
-        }
-    );
-*/
+    auto error = handler_(*this);
+    if (error->status_get() != Error::ErrorType::success)
+      socket_.close(); // Close the socket
   }
 }

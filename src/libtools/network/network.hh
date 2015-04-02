@@ -118,7 +118,7 @@ namespace network
   private:
     ip::tcp::socket socket_;
     streambuf buff_;
-    unsigned length_;
+    size_t length_;
     std::function<std::unique_ptr<Error>(Session &)> handler_;
     std::mutex w_mutex_; // Just for testing purposes.
 
@@ -129,7 +129,7 @@ namespace network
 
     streambuf &buff_get();
 
-    unsigned length_get();
+    size_t length_get();
 
     std::string get_line();
 
@@ -158,8 +158,6 @@ namespace network
         std::function<std::unique_ptr<Error>(Session &)> handler);
 
     ~Server();
-
-    boost::asio::streambuf &buff_get();
 
     void listen(); // Listen to accept connections
     void stop();
