@@ -48,12 +48,13 @@ void Client::run()
 
   send(*session); // Ask for a command
   io_service_.run();
+  session->receive();
 }
 
 void Client::send(Session & session)
 {
-  std::string command;
-  std::getline(std::cin, command);
+  std::string command = "file.txt";
+  //std::getline(std::cin, command);
   if (command[command.size() - 1] == '\n')
     command[command.size() - 1] = '\0';
 
@@ -65,9 +66,8 @@ void Client::send(Session & session)
   for (auto& part : parts)
   {
     filestream.seekg(part.size_get() * part.id_get());
-    std::cout << part.size_get() << std::endl;
     Packet p{0, 1, filestream, part.size_get()};
-    std::cout << p.message_get() << std::endl;
+    std::cout << p << std::endl;
     session.send(p);
   }
 }

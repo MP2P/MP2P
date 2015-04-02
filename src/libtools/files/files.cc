@@ -109,9 +109,11 @@ namespace files
 
   std::string read_to_buffer(std::ifstream& file, size_t size)
   {
-    std::string buffer;
-    buffer.resize(size + 1, '\0');
+    std::string buffer(size, '\0');
+    std::cout << "size to read to buff:" << size  << std::endl;
     file.read(&*buffer.begin(), size);
+    std::cout << "size to read to buff:" << size  << std::endl;
+    std::cout << "I read this from file: |" << buffer << "|" << std::endl;
     return buffer;
   }
 }

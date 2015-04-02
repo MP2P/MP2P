@@ -41,6 +41,7 @@ bool Master::run()
             }
         )
     );
+    break;
   }
   return true;
 }
@@ -99,11 +100,12 @@ std::unique_ptr<Error> Master::handle(Session & session)
 
   {
     std::ofstream f1("recieved.txt");
+    std::cout << "I am writing to recieved.txt: " << buffer << std::endl;
     f1.write(buffer.c_str(), packet.size_get());
   }
 
-  if (packet.size_get() < 1)
-    return std::make_unique<Error>(Error::ErrorType::failure);
+//  if (packet.size_get() < 1)
+//    return std::make_unique<Error>(Error::ErrorType::failure);
 
   std::cout << packet;
 
