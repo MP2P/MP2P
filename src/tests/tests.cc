@@ -25,16 +25,27 @@ int main(int argc, char *argv[])
   {
     case 0:
       for (unsigned i = 0; i < nb_threads; i++)
-      {
         threads.emplace_front(std::thread(naive_caller, nb_messages, i));
-        //std::thread(naive, nb_messages);
-      }
       std::for_each(threads.begin(), threads.end(), [](std::thread &t)
           {
           t.join();
           });
       break;
     case 1:
+      for (unsigned i = 0; i < nb_threads; i++)
+        threads.emplace_front(std::thread(classic_caller, nb_messages, i));
+      std::for_each(threads.begin(), threads.end(), [](std::thread &t)
+          {
+          t.join();
+          });
+      break;
+    default:
+      //for (unsigned i = 0; i < nb_threads; i++)
+        //threads.emplace_front(std::thread(lock_free_caller, nb_messages, i));
+      //std::for_each(threads.begin(), threads.end(), [](std::thread &t)
+          //{
+          //t.join();
+          //});
       break;
   }
   return 0;
