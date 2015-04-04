@@ -1,7 +1,41 @@
-#include <iostream>
+#include "main.hh"
 
-int main()
+int main(int argc, char *argv[])
 {
-  std::cout << "Here is the tests!" << std::endl;
+  if (argc < 3)
+  {
+    std::cout << "Usage:\n"
+      << "\ttests <log_type> <nb_threads> <nb_messages>\n"
+      << "\nlog_type:\n"
+      << "\t0: Naive mutex implementation (the current implementation).\n"
+      << "\t1: An Herb Sutter's logger, using a mutex.\n"
+      << "\t2: An Herb Sutter's logger, using a lock-free data structure.\n"
+      << "\nnb_threads:\n"
+      << "\tThe number of threads to start.\n"
+      << "\nnb_messages:\n"
+      << "\tThe number of messages per thread to print.\n"
+      << "\nYou should \"time\" it!" << std::endl;
+    return 0;
+  }
+  unsigned log_type = atoi(argv[1]);
+  unsigned nb_threads = atoi(argv[2]);
+  unsigned nb_messages = atoi(argv[3]);
+  std::forward_list<std::thread> threads;
+  switch (log_type)
+  {
+    case 0:
+      for (unsigned i = 0; i < nb_threads; i++)
+      {
+        threads.emplace_front(std::thread(naive_caller, nb_messages, i));
+        //std::thread(naive, nb_messages);
+      }
+      std::for_each(threads.begin(), threads.end(), [](std::thread &t)
+          {
+          t.join();
+          });
+      break;
+    case 1:
+      break;
+  }
   return 0;
 }
