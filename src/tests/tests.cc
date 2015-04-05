@@ -40,13 +40,14 @@ int main(int argc, char *argv[])
           });
       break;
     default:
-      //for (unsigned i = 0; i < nb_threads; i++)
-        //threads.emplace_front(std::thread(lock_free_caller, nb_messages, i));
-      //std::for_each(threads.begin(), threads.end(), [](std::thread &t)
-          //{
-          //t.join();
-          //});
+      for (unsigned i = 0; i < nb_threads; i++)
+        threads.emplace_front(std::thread(lock_free_caller, nb_messages, i));
+      std::for_each(threads.begin(), threads.end(), [](std::thread &t)
+          {
+          t.join();
+          });
       break;
   }
+  //std::this_thread::sleep_for(std::chrono::milliseconds(10000));
   return 0;
 }

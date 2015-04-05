@@ -9,3 +9,4 @@
 int main(int argc, char *argv[]);
 void naive_caller(unsigned nb_messages, unsigned thread_nb);
 void classic_caller(unsigned nb_messages, unsigned thread_nb);
+void lock_free_caller(unsigned nb_messages, unsigned thread_nb);
