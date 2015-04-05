@@ -34,8 +34,8 @@ namespace network
     {
       //std::cerr << "parse error at " << pex.getFile() << ":" << pex.getLine()
           //<< " - " << pex.getError() << std::endl;
-      utils::Logger::cerr() << "parse error at " << pex.getFile() << ":" << pex.getLine()
-          << " - " << pex.getError() << std::endl;
+      utils::Logger::cerr() << "parse error at " << pex.getFile() << ":" + std::to_string(pex.getLine())
+          << " - " << pex.getError();
       return false;
     }
 

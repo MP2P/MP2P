@@ -110,11 +110,11 @@ namespace utils
         //Print(s);
         //return this;
       //}
-      std::ostream &operator<<(std::string s)
+      Logger &operator<<(const std::string s)
       {
         Print(s);
         //FIXME: This is a major problem: We should not allow the user to write directly in the stream!
-        return stream_;
+        return *this;
       }
 
     private:

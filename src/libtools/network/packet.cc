@@ -82,8 +82,8 @@ namespace network
     {
       //std::cout << "Received an invalid packet of size " << real_size
           //<< " (expecting " << size << ")" << std::endl;
-      utils::Logger::cout() << "Received an invalid packet of size " << real_size
-          << " (expecting " << size << ").";
+      utils::Logger::cout() << "Received an invalid packet of size " << std::to_string(real_size)
+          << " (expecting " << std::to_string(size) << ").";
       return Packet{0, 0, ""};
     }
     return Packet{fromto, what, message};
