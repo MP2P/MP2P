@@ -26,17 +26,21 @@ namespace network
     }
     catch (const libconfig::FileIOException &fioex)
     {
-      std::cerr << "i/o error while reading error file." << std::endl;
+      //std::cerr << "i/o error while reading error file." << std::endl;
+      utils::Logger::cerr() << "i/o error while reading error file.";
       return false;
     }
     catch (const libconfig::ParseException &pex)
     {
-      std::cerr << "parse error at " << pex.getFile() << ":" << pex.getLine()
+      //std::cerr << "parse error at " << pex.getFile() << ":" << pex.getLine()
+          //<< " - " << pex.getError() << std::endl;
+      utils::Logger::cerr() << "parse error at " << pex.getFile() << ":" << pex.getLine()
           << " - " << pex.getError() << std::endl;
       return false;
     }
 
-    std::cout << "Getting all errors... " << std::flush;
+    //std::cout << "Getting all errors... " << std::flush;
+    utils::Logger::cout() << "Getting all errors... ";
 
     std::string msg{};
     for (uint16_t i = 0; i < UINT16_MAX; ++i)
@@ -48,7 +52,8 @@ namespace network
       errors.emplace(i, msg);
     }
 
-    std::cout << "Done!" << std::endl;
+    //std::cout << "Done!" << std::endl;
+    utils::Logger::cout() << "Done!";
     return true;
   }
 

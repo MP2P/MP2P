@@ -12,6 +12,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <glob.h>
+#include <utils.hh>
 //#include <stdatomic.h>
 
 using namespace boost::asio;
@@ -19,7 +20,6 @@ using error_code = uint16_t;
 
 namespace network
 {
-
   enum class KeepAlive
   {
     Live,
@@ -122,7 +122,7 @@ namespace network
     streambuf buff_;
     size_t length_;
     std::function<error_code(Session &)> handler_;
-    std::mutex w_mutex_; // Just for testing purposes.
+    //std::mutex w_mutex_; // Just for testing purposes.
 
   public:
     Session(ip::tcp::socket &&socket, std::function<error_code(Session &)> handler);
@@ -153,7 +153,6 @@ namespace network
     ip::tcp::socket socket_;
     std::function<error_code(Session &)> handler_;
     std::vector<std::shared_ptr<Session>> sessions_;
-
 
   public:
     Server(io_service &io_service,

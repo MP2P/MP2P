@@ -39,7 +39,8 @@ namespace network
   // Read on the open socket
   void Session::receive()
   {
-    std::cout << "Opened session (tid=" << std::this_thread::get_id() << ")" << std::endl;
+    //std::cout << "Opened session (tid=" << std::this_thread::get_id() << ")" << std::endl;
+    utils::Logger::cout() << "Opened session (tid=" << std::this_thread::get_id() << ").";
     boost::asio::async_read_until(socket_,
         buff_,
         '\n',
@@ -54,7 +55,8 @@ namespace network
             //{
               socket_.close(); // Close the socket
               //Send an error packet.
-              std::cout << "Closed session" << std::endl;
+              //std::cout << "Closed session" << std::endl;
+              utils::Logger::cout() << "Closed session.";
             //}
             //else
             //  receive(); // Keep the socket alive
@@ -74,8 +76,8 @@ namespace network
         {
           if (!ec)
           {
-            //utils::print(std::cout, w_mutex_, "Packet sent");
-            std::cout << "Packet sent!" << std::endl;
+            //std::cout << "Packet sent!" << std::endl;
+            utils::Logger::cout() << "Packet sent!";
             /*error_code error = */handler_(*this);
             //if (error->status_get() != Error::ErrorType::success)
               socket_.close(); // Close the socket

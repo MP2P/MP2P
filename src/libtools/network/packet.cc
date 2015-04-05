@@ -73,14 +73,17 @@ namespace network
     }
     catch (const std::exception &e)
     {
-      std::cout << "Invalid packet (" << e.what() << ")" << std::endl;
+      //std::cout << "Invalid packet (" << e.what() << ")" << std::endl;
+      utils::Logger::cout() << "Invalid packet (" << e.what() << ").";
       return Packet{0, 0, ""};
     }
     unsigned long real_size = (2 + message.length()) * sizeof(uint8_t);
     if (size != real_size)
     {
-      std::cout << "Received an invalid packet of size " << real_size
-          << " (expecting " << size << ")" << std::endl;
+      //std::cout << "Received an invalid packet of size " << real_size
+          //<< " (expecting " << size << ")" << std::endl;
+      utils::Logger::cout() << "Received an invalid packet of size " << real_size
+          << " (expecting " << size << ").";
       return Packet{0, 0, ""};
     }
     return Packet{fromto, what, message};

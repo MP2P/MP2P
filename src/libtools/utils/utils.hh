@@ -4,11 +4,13 @@
 #include <string>
 #include <mutex>
 #include <libconfig.h++>
+#include <thread>
+#include "concurentqueue.hh"
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 using namespace boost::posix_time;
 
-const bool debug = true;
+//#define DEBUG true
 
 namespace utils
 {
@@ -66,5 +68,58 @@ namespace utils
   `----------*/
   void print_debug(const std::string &info);
 
-  void print(std::ostream &out, std::mutex &wmutex, const std::string &msg);
+  class Active
+  {
+    public:
+      typedef std::function<void()> Message;
+
+      Active();
+      ~Active();
+
+      void Send(Message m);
+
+    private:
+      Active(const Active&);        // no copying
+      void operator=(const Active&);// no copying
+
+      void Run();
+
+      bool done_;
+      moodycamel::ConcurrentQueue<Message> mq_;
+      std::unique_ptr<std::thread> thd_;
+  };
+
+  class Logger
+  {
+    public:
+      Logger(std::ostream &stream = std::cout);
+
+      static Logger &cout()
+      {
+        static Logger instance;
+        return instance;
+      }
+      static Logger &cerr()
+      {
+        static Logger instance(std::cerr);
+        return instance;
+      }
+      void Print(std::string message);
+      //Logger &operator<<(std::string s)
+      //{
+        //Print(s);
+        //return this;
+      //}
+      std::ostream &operator<<(std::string s)
+      {
+        Print(s);
+        //FIXME: This is a major problem: We should not allow the user to write directly in the stream!
+        return stream_;
+      }
+
+    private:
+      std::ostream &stream_;
+      Active a_;
+  };
+  //void print(std::ostream &out, std::mutex &wmutex, const std::string &msg);
 }

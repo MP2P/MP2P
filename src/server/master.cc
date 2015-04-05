@@ -8,8 +8,10 @@ Master::Master()
 {
   unsigned concurrency = utils::Conf::get_instance().get_concurrency();
   unsigned port = utils::Conf::get_instance().get_port();
-  std::cout << "Concurency level = " << concurrency << std::endl;
-  std::cout << "Bind port = " << port << std::endl;
+  //std::cout << "Concurency level = " << concurrency << std::endl;
+  utils::Logger::cout() << "Concurency level = " << concurrency;
+  //std::cout << "Bind port = " << port << std::endl;
+  utils::Logger::cout() << "Bind port = " << port;
 }
 
 Master::~Master()
@@ -35,8 +37,10 @@ bool Master::run()
             [i, this]()
             {
               // Using a mutex to avoid printing asynchronously.
-              std::cout << "Thread " << i + 1 << " launched "
-                  "(id=" << std::this_thread::get_id() << ")!" << std::endl;
+              //std::cout << "Thread " << i + 1 << " launched "
+                  //"(id=" << std::this_thread::get_id() << ")!" << std::endl;
+              utils::Logger::cout() << "Thread " << i + 1 << " launched "
+                  "(id=" << std::this_thread::get_id() << ")!";
               io_service_.run();
             }
         )
@@ -48,16 +52,19 @@ bool Master::run()
 // Causes the server to stop it's running threads if any.
 void Master::stop()
 {
-  std::cout << "The server is going to stop..." << std::endl;
+  //std::cout << "The server is going to stop..." << std::endl;
+  utils::Logger::cout() << "The server is going to stop...";
   server_.stop();
 
   /// Join all threads
   std::for_each(threads_.begin(), threads_.end(),
       [](std::thread &t)
       {
-        std::cout << "Stopping thread " << t.get_id() << "..." << std::flush;
+        //std::cout << "Stopping thread " << t.get_id() << "..." << std::flush;
+        utils::Logger::cout() << "Stopping thread " << t.get_id() << "...";
         t.join();
-        std::cout << " Done!" << std::endl;
+        //std::cout << " Done!" << std::endl;
+        utils::Logger::cout() << "Done stopping thread " << t.get_id() << "!";
       }
   );
 
@@ -73,7 +80,8 @@ void Master::catch_stop()
 
   sigIntHandler.sa_handler = [](int s)
   {
-    std::cout << std::endl << "Master received signal " << s << "..." << std::endl;
+    //std::cout << std::endl << "Master received signal " << s << "..." << std::endl;
+    utils::Logger::cout() << "\nMaster received signal " << s << "...";
   };
   sigemptyset(&sigIntHandler.sa_mask);
   sigIntHandler.sa_flags = 0;
@@ -83,7 +91,8 @@ void Master::catch_stop()
 
   stop();
 
-  std::cout << "Master: Bye bye!" << std::endl;
+  //std::cout << "Master: Bye bye!" << std::endl;
+  utils::Logger::cout() << "Master: Bye bye!";
 }
 
 
@@ -91,7 +100,8 @@ void Master::catch_stop()
 // Errors are defined in the ressources/errors file.
 error_code Master::handle(Session & session)
 {
-  std::cout << "Master handle (tid=" << std::this_thread::get_id() << ")" << std::endl;
+  //std::cout << "Master handle (tid=" << std::this_thread::get_id() << ")" << std::endl;
+  utils::Logger::cout() << "Master handle (tid=" << std::this_thread::get_id() << ").";
 
   // Create and get the Packet object from the session (buff_ & length_)
   Packet packet = session.get_packet();
@@ -100,7 +110,9 @@ error_code Master::handle(Session & session)
   if (packet.get_size() < 3)
     return 1;
 
+  //FIXME
   std::cout << packet;
+  //utils::Logger::cout() << packet;
 
   switch (packet.get_fromto())
   {

@@ -19,9 +19,11 @@ namespace utils
     }
     return true;
   }
+
   bool init()
   {
-    std::cout << "Initialization..." << std::endl;
+    //std::cout << "Initialization..." << std::endl;
+    utils::Logger::cout() << "Initialization...";
     if (!is_system_ok())
       return false;
 

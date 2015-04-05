@@ -51,16 +51,21 @@ namespace network
   void Server::listen()
   {
     std::ostringstream msg;
-    std::cout << "Listening" << std::endl;
-    std::mutex tmp;
+    //std::cout << "Listening" << std::endl;
     //std::make_unique<libconfig::Config>();
-    utils::print(std::cout, tmp, msg.str());
+
+    //FIXME
+    //std::mutex tmp;
+    //utils::print(std::cout, tmp, msg.str());
+    utils::Logger::cerr() << "Listening...";
+
     acceptor_.async_accept(socket_,
         [this](boost::system::error_code ec)
         {
           if (!ec)
           {
-            std::cout << "Connection accepted. (Thread " << std::this_thread::get_id() << ")" << std::endl;
+            //std::cout << "Connection accepted. (Thread " << std::this_thread::get_id() << ")" << std::endl;
+            utils::Logger::cout() << "Connection accepted. (Thread " << std::this_thread::get_id() << ").";
             auto session = std::make_shared<Session>(std::move(socket_), handler_);
             session->receive();
             sessions_.push_back(session);
