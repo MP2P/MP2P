@@ -41,19 +41,22 @@ namespace network
   {
     std::cout << "Session recieving...(tid=" << std::this_thread::get_id()
               << ")" << std::endl;
-    boost::asio::async_read_until(socket_,
+    boost::asio::async_read(socket_,
         buff_,
-        '|', // FIXME : transfer the size first
+        boost::asio::transfer_exactly(sizeof(uint32_t)),
         [this](boost::system::error_code ec, std::size_t size_length)
         {
           if (!ec)
           {
             boost::asio::streambuf::const_buffers_type bufs = buff_.data();
+
             std::string str(boost::asio::buffers_begin(bufs),
                             boost::asio::buffers_begin(bufs) + size_length);
-            str.pop_back();
 
-            auto msg_size = std::stoll(str);
+            const uint32_t* sizep =
+              reinterpret_cast<const uint32_t*>(str.c_str());
+
+            uint32_t msg_size = *sizep;
 
             std::cout << "Receiving a message of size: "
                       << msg_size << std::endl;
@@ -62,8 +65,9 @@ namespace network
             boost::asio::async_read(socket_,
                 buff_,
                 // FIXME : remove hardcoded size
-                boost::asio::transfer_exactly(msg_size + 4),
-                [this, msg_size, size_length](boost::system::error_code ec, std::size_t length)
+                boost::asio::transfer_exactly(msg_size + 2 * sizeof (uint8_t)),
+                [this, msg_size, size_length](boost::system::error_code ec,
+                                              std::size_t length)
                 {
                   if (!ec)
                   {
@@ -84,10 +88,18 @@ namespace network
                       receive(); // Keep the socket alive
                   }
                   else
+                  {
                     std::cout << "Error: " << ec.message() << std::endl;
+                  }
                 }
             );
           }
+          else
+          {
+            std::cout << "Error while getting size: " << ec.message()
+                      << std::endl;
+
+            }
         }
     );
   }
@@ -96,10 +108,10 @@ namespace network
   void Session::send(const Packet packet)
   {
     auto str = packet.serialize();
-    std::cout << "Gonna send this : " << str << std::endl;
-    socket_.send(boost::asio::buffer(str));
-    auto error = handler_(*this);
+    boost::asio::write(socket_, boost::asio::buffer(str));
+    /*auto error = handler_(*this);
     if (error->status_get() != Error::ErrorType::success)
       socket_.close(); // Close the socket
+      */
   }
 }

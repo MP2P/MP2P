@@ -24,6 +24,8 @@ Client::Client()
   // FIXME : Check for errors
   boost::system::error_code ec;
   socket_.connect(endpoint, ec); // Connect to the endpoint
+  if (ec)
+    throw std::logic_error("Unable to connect to server");
 }
 
 std::unique_ptr <Error> Client::handle(Session & session)
@@ -32,7 +34,10 @@ std::unique_ptr <Error> Client::handle(Session & session)
 
   std::cout << "Client handling" << std::endl;
 
-  session.receive();
+  // FIXME : Actually, we should listen after every send.
+  // For now, we listen after all the sends, since it's communicating with only
+  // one master
+//  session.receive();
 
   return std::make_unique<Error>(Error::ErrorType::success);
 }
@@ -67,6 +72,7 @@ void Client::send(Session & session)
     Packet p{0, 1, filestream, part.size_get()};
     session.send(p);
   }
+  session.receive();
 }
 
 void Client::stop()

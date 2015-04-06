@@ -94,7 +94,7 @@ std::unique_ptr<Error> Master::handle(Session & session)
   // Create and get the Packet object from the session (buff_ & length_)
   Packet packet = session.get_packet();
 
-  std::string& buffer = packet.message_get();
+  const std::string& buffer = packet.message_get();
 
   {
     std::ofstream f1("recieved.txt", std::ios::app);
