@@ -43,22 +43,23 @@ namespace utils
     : stream_{stream}
   {}
 
-  void Logger::Print(std::string message)
-  {
-    a_.Send( [=]
-      {
-        time_t now = time(0);
-        struct tm tstruct;
-        char buf[80];
-        tstruct = *localtime(&now);
-        //strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
-        strftime(buf, sizeof(buf), "%X", &tstruct);
-        g(stream_);
-        stream_ << "<" << buf << "> ";
-        w(stream_);
-        stream_ << message << std::endl;
-      } );
-  }
+  //void Logger::Print(std::string message)
+  //template <typename T> void Logger::Print(T t)
+  //{
+    //a_.Send( [=]
+      //{
+        //time_t now = time(0);
+        //struct tm tstruct;
+        //char buf[80];
+        //tstruct = *localtime(&now);
+        ////strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+        //strftime(buf, sizeof(buf), "%X", &tstruct);
+        //g(stream_);
+        //stream_ << "<" << buf << "> ";
+        //w(stream_);
+        //stream_ << t << std::endl;
+      //} );
+  //}
 
 //void print(std::ostream &out, std::mutex &wmutex, const std::string &msg)
 //{

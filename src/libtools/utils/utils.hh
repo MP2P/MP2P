@@ -104,16 +104,30 @@ namespace utils
         static Logger instance(std::cerr);
         return instance;
       }
-      void Print(std::string message);
+      template <typename T> void Print(T t)
+      {
+        a_.Send( [=]
+          {
+            time_t now = time(0);
+            struct tm tstruct;
+            char buf[80];
+            tstruct = *localtime(&now);
+            //strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+            strftime(buf, sizeof(buf), "%X", &tstruct);
+            g(stream_);
+            stream_ << "<" << buf << "> ";
+            w(stream_);
+            stream_ << t << std::endl;
+          } );
+      }
       //Logger &operator<<(std::string s)
       //{
-        //Print(s);
-        //return this;
+      //Print(s);
+      //return this;
       //}
-      Logger &operator<<(const std::string s)
+      template <typename T> Logger &operator<<(T t)
       {
-        Print(s);
-        //FIXME: This is a major problem: We should not allow the user to write directly in the stream!
+        Print(t);
         return *this;
       }
 

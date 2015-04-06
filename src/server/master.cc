@@ -39,7 +39,7 @@ bool Master::run()
               // Using a mutex to avoid printing asynchronously.
               //std::cout << "Thread " << i + 1 << " launched "
                   //"(id=" << std::this_thread::get_id() << ")!" << std::endl;
-              utils::Logger::cout() << "Thread " << i + 1 << " launched "
+              utils::Logger::cout() << "Thread " + std::to_string(i + 1) + " launched "
                   "(id=" << std::this_thread::get_id() << ")!";
               io_service_.run();
             }
@@ -110,9 +110,8 @@ error_code Master::handle(Session & session)
   if (packet.get_size() < 3)
     return 1;
 
-  //FIXME
-  std::cout << packet;
-  //utils::Logger::cout() << packet;
+  //std::cout << packet;
+  utils::Logger::cout() << packet;
 
   switch (packet.get_fromto())
   {
