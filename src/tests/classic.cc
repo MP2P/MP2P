@@ -1,17 +1,17 @@
 #include "main.hh"
 
-class Active
+class Active2
 {
   public:
     typedef std::function<void()> Message;
 
-    Active()
+    Active2()
       : done_{false}
     {
       thd_ = std::unique_ptr<std::thread>(new std::thread( [=]{this->Run();} ));
     }
 
-    ~Active()
+    ~Active2()
     {
       Send([&]{ done_ = true; });;
       thd_->join();
@@ -26,8 +26,8 @@ class Active
     }
 
   private:
-    Active(const Active&);        // no copying
-    void operator=(const Active&);// no copying
+    Active2(const Active2&);        // no copying
+    void operator=(const Active2&);// no copying
 
     bool done_;
     std::queue<Message> mq_;
@@ -39,9 +39,13 @@ class Active
       while(!done_)
       {
         if (mq_.empty())
+        {
+          //std::cout << "Sleeping..." << std::endl;
           std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
         else
         {
+          //std::cout << "Poping..." << std::endl;
           Message msg = mq_.front();
           msg();
           mq_.pop();
@@ -50,10 +54,10 @@ class Active
     }
 };
 
-class Logger
+class Logger2
 {
   public:
-    Logger(std::ostream &stream = std::cout)
+    Logger2(std::ostream &stream = std::cout)
       : stream_{stream}
     {}
 
@@ -76,10 +80,10 @@ class Logger
 
   private:
     std::ostream &stream_;
-    Active a;
+    Active2 a;
 };
 
-Logger l;
+Logger2 l;
 
 void classic_caller(unsigned nb_messages, unsigned thread_nb)
 {
