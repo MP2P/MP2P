@@ -29,22 +29,22 @@ namespace network
   }
 
   // FIXME : create a hxx and inline them
-  uint32_t Packet::size_get()
+  uint32_t Packet::size_get() const
   {
     return size_;
   }
 
-  uint8_t Packet::fromto_get()
+  uint8_t Packet::fromto_get() const
   {
     return fromto_;
   }
 
-  uint8_t Packet::what_get()
+  uint8_t Packet::what_get() const
   {
     return what_;
   }
 
-  std::string &Packet::message_get()
+  const std::string &Packet::message_get() const
   {
     return message_;
   }
@@ -53,12 +53,20 @@ namespace network
   // FIXME : Remove useless chars
   const std::string Packet::serialize() const
   {
-    std::ostringstream packet;
-    packet << size_ << "|"
-        << int(fromto_) << "|"
-        << int(what_) << "|"
-        << message_;
-    return packet.str();
+    std::string s(6 + message_.size(), '\0');
+
+    char* ptr = &*s.begin();
+    uint32_t* sizep = reinterpret_cast<uint32_t*>(ptr);
+    *sizep = size_;
+    uint8_t* fromtop = reinterpret_cast<uint8_t*>(ptr + sizeof (size_));
+    *fromtop = fromto_;
+    uint8_t* whatp = reinterpret_cast<uint8_t*>(ptr + sizeof (size_) + sizeof(fromto_));
+    *whatp = what_;
+
+    ptr += 6;
+    memcpy(ptr, message_.c_str(), message_.size());
+
+    return s;
   }
 
   // Get a packet from a string
@@ -69,22 +77,17 @@ namespace network
     uint8_t what = 0;
     std::string message;
 
-    std::istringstream packet(input);
-    std::string item;
+    const char* ptr = &*input.begin();
 
-    try
-    {
-      std::getline(packet, item, '|');
-      size = (uint32_t) std::stoi(item);
-      std::getline(packet, item, '|');
-      fromto = (uint8_t) std::stoi(item);
-      std::getline(packet, item, '|');
-      what = (uint8_t) std::stoi(item);
-      message.resize(size, '\0');
-      packet.read(&*message.begin(), size);
-    }
-    catch (const std::exception &e)
-    {
+    size = *reinterpret_cast<const uint32_t*>(ptr);
+    fromto = *reinterpret_cast<const uint8_t*>(ptr + 4);
+    what = *reinterpret_cast<const uint8_t*>(ptr + 5);
+    message.resize(size, '\0');
+    memcpy(&*message.begin(), ptr + 6, size);
+
+    /* FIXME :: Error checks.
+
+    if {
       std::cout << "Invalid packet (" << e.what() << ")" << std::endl;
       return Packet{0, 0, ""};
     }
@@ -96,12 +99,17 @@ namespace network
       return Packet{0, 0, ""};
     }
 
+    */
+
     return Packet{fromto, what, message};
   }
 
   std::ostream &operator<<(std::ostream &output, const Packet &packet)
   {
-    output << packet.serialize();
+    output << packet.size_get() << "|"
+           << (int)packet.fromto_get() << "|"
+           << (int)packet.what_get() << "|"
+           << packet.message_get();
     return output;
   }
 }

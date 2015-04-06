@@ -94,13 +94,13 @@ namespace network
 
     ~Packet();
 
-    uint32_t size_get();
+    uint32_t size_get() const;
 
-    uint8_t fromto_get();
+    uint8_t fromto_get() const;
 
-    uint8_t what_get();
+    uint8_t what_get() const;
 
-    std::string &message_get();
+    const std::string &message_get() const;
 
     const std::string serialize() const;
 
