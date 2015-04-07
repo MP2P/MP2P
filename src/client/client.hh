@@ -9,10 +9,9 @@ class Client
 {
 private:
   io_service io_service_; // Does not requires instantiation
-  ip::tcp::socket socket_;
+  Session master_session_;
 
   std::unique_ptr <Error> handle(Session &session);
-  void send(Session &session);
 
 public:
   Client();
@@ -22,4 +21,7 @@ public:
 
   // Causes the server to stop it's running threads if any.
   void stop();
+
+  // Send a file to the master
+  void send_file(files::File& file);
 };

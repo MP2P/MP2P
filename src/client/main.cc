@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-int main()
+int main(int argc, const char *argv[])
 {
   if (!utils::is_system_ok())
     return 1;
@@ -14,9 +14,18 @@ int main()
 
   try
   {
+    if (argc <= 1)
+      throw std::logic_error("USAGE: ./client filename");
+
     Client client{};
 
     client.run();
+
+
+    files::File file(argv[1]);
+
+    client.send_file(file);
+
     client.stop();
   }
   catch (std::exception &e)

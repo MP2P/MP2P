@@ -12,6 +12,11 @@ namespace network
     std::cout << "Opened session (tid=" << std::this_thread::get_id() << ")" << std::endl;
   }
 
+  ip::tcp::socket& Session::socket_get()
+  {
+    return socket_;
+  }
+
   streambuf &Session::buff_get()
   {
     return buff_;
