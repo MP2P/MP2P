@@ -3,6 +3,7 @@
 #include <openssl/sha.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdexcept>
 #include <unistd.h>
 
 #include <files.hh>
@@ -58,6 +59,9 @@ namespace files
     : filename_(filename)
   {
     std::ifstream file(filename);
+    if (!file)
+      throw std::logic_error("File " + filename + "not found");
+
     size_ = filesize_get(file);
     auto parts = parts_for_size(size_);
     auto part_size = size_ / parts;
