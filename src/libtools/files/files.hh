@@ -12,12 +12,14 @@ namespace files
   {
     public:
       /// Construct a part using a size and a hash
-      FilePart(const size_t size,
+      FilePart(const std::string& filename,
+               const size_t size,
                const size_t id,
                const std::string& hash);
 
       /// Construct a part using an opened stream
-      FilePart(std::ifstream& file,
+      FilePart(const std::string& filename,
+               std::ifstream& file,
                const size_t id,
                const size_t size);
 
@@ -34,6 +36,7 @@ namespace files
       size_t size_;
       size_t id_;
       std::string hash_;
+      std::string filename_;
 
       /// Calculate a hash from a stream
       void hash_compute(std::ifstream& file);

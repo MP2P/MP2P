@@ -1,8 +1,10 @@
+#include <sys/mman.h>
 #include <iomanip>
 #include <sstream>
 #include <openssl/sha.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <stdexcept>
 #include <unistd.h>
 
@@ -12,27 +14,32 @@
 namespace files
 {
 
-  FilePart::FilePart(const size_t size,
+  FilePart::FilePart(const std::string& filename,
+                     const size_t size,
                      const size_t id,
                      const std::string& hash)
     : size_(size),
       id_(id),
-      hash_(hash)
+      hash_(hash),
+      filename_(filename)
   {
   }
 
-  FilePart::FilePart(std::ifstream& file,
+  FilePart::FilePart(const std::string& filename,
+                     std::ifstream& file,
                      const size_t size,
                      const size_t id)
     : size_(size),
-      id_(id)
+      id_(id),
+      filename_(filename)
   {
     hash_compute(file);
   }
 
   FilePart::FilePart(const std::string& filename,
                      const size_t id)
-    : id_(id)
+    : id_(id),
+      filename_(filename)
   {
     std::ifstream file(filename, std::ios::binary);
     size_ = filesize_get(file);
@@ -42,8 +49,11 @@ namespace files
 
   void FilePart::hash_compute(std::ifstream& file)
   {
-    std::string buffer = file_to_buffer(file);
-    hash_ = hash_buffer((const unsigned char *)buffer.c_str(), size_);
+    (void)file;
+//    std::string buffer = file_to_buffer(file);
+    int fd = open(filename_.c_str(), O_RDONLY);
+    const unsigned char *mapped = reinterpret_cast<const unsigned char*>(mmap(NULL, size_, PROT_READ, MAP_SHARED, fd, size_ * id_));
+    hash_ = hash_buffer(mapped, size_);
   }
 
   File::File(const std::string& filename,
@@ -59,8 +69,9 @@ namespace files
     : filename_(filename)
   {
     std::ifstream file(filename);
+    // FIXME : Create exception to prevent catching them all
     if (!file)
-      throw std::logic_error("File " + filename + "not found");
+      throw std::logic_error("File " + filename + " not found");
 
     size_ = filesize_get(file);
     auto parts = parts_for_size(size_);
@@ -68,7 +79,7 @@ namespace files
     for (unsigned i = 0; i < parts; ++i)
     {
       file.seekg(part_size * i);
-      parts_.emplace_back(file, part_size, i);
+      parts_.emplace_back(filename, file, part_size, i);
     }
   }
 
