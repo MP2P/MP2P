@@ -31,7 +31,7 @@ namespace files
     (void)buff;
     (void)size;
     // FIXME : Activate hashing
-    //SHA1(buff, size, hash);
+    SHA1(buff, size, hash);
     std::stringstream result;
     for (int i = 0; i < 20; ++i)
       result << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];

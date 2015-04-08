@@ -49,6 +49,8 @@ void Client::run()
 
 void Client::send_file(files::File& file)
 {
+  std::cout << "Sending file with SHA1 hash : " << file.hash_get() << std::endl;
+
   auto size = file.size_get();
   auto parts = files::parts_for_size(size);
   auto part_size = size / parts;
