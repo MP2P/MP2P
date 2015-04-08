@@ -20,7 +20,7 @@ endforeach(subdir)
 
 set_target_properties(libtools PROPERTIES OUTPUT_NAME tools)
 set_target_properties(libtools PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-target_link_libraries(libtools ${Boost_LIBRARIES} ${LIBCONFIG++_LIBRARY})
+target_link_libraries(libtools ${Boost_LIBRARIES} ${LIBCRYPTO_LIBRARY} ${LIBCONFIG++_LIBRARY} ${OPENSSL_LIBRARY})
 #set_target_properties(libtools PROPERTIES LINKER_LANGUAGE CXX)
 #target_include_directories(libtools PUBLIC include)
 #target_include_directories(libtools PUBLIC .)
