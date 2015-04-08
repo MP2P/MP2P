@@ -49,12 +49,13 @@ void Client::run()
 
 void Client::send_file(files::File& file)
 {
-  auto& parts = file.parts_get();
-  std::ifstream filestream(file.filename_get());
-  for (auto& part : parts)
+  auto size = file.size_get();
+  auto parts = files::parts_for_size(size);
+  auto part_size = size / parts;
+  for (size_t i = 0; i < parts; ++i)
   {
-    filestream.seekg(part.size_get() * part.id_get());
-    Packet p{0, 1, filestream, part.size_get()};
+    const char* tmp = file.data() + i * part_size;
+    Packet p{0, 1, tmp, part_size};
     master_session_.send(p);
   }
   master_session_.receive();
