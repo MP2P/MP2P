@@ -15,13 +15,13 @@ namespace network
 
   Packet::Packet(uint8_t fromto,
       uint8_t what,
-      std::ifstream& file,
+      const char* message,
       size_t size)
-      : fromto_(fromto),
-        what_(what)
+      : size_(size),
+        fromto_(fromto),
+        what_(what),
+        message_{message, size}
   {
-    message_ = files::read_to_buffer(file, size);
-    size_ = size;
   }
 
   Packet::~Packet()

@@ -5,35 +5,24 @@
 namespace files
 {
 
-  inline size_t FilePart::size_get() const
-  {
-    return size_;
-  }
-
-  inline size_t FilePart::id_get() const
-  {
-    return id_;
-  }
-
-
-  inline const std::string& FilePart::hash_get() const
-  {
-    return hash_;
-  }
-
   inline const std::string& File::filename_get() const
   {
     return filename_;
   }
 
-  inline std::vector<FilePart>& File::parts_get()
-  {
-    return parts_;
-  }
-
   inline size_t File::size_get() const
   {
-    return size_;
+    return file_.size();
+  }
+
+  inline const std::string& File::hash_get() const
+  {
+    return hash_;
+  }
+
+  inline const char* File::data() const
+  {
+    return file_.data();
   }
 
 }

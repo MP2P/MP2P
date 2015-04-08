@@ -90,7 +90,8 @@ namespace network
   public:
     Packet(uint8_t fromto, uint8_t what, std::string message);
 
-    Packet(uint8_t fromto, uint8_t what, std::ifstream& file, size_t size);
+    Packet(uint8_t fromto, uint8_t what,
+           const char* message, size_t size);
 
     ~Packet();
 
