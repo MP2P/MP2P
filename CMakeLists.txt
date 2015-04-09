@@ -15,7 +15,7 @@ else (LIBCONFIG++_INCLUDE_DIR AND LIBCONFIG++_LIBRARY)
    set(LIBCONFIG++_FOUND FALSE)
 endif (LIBCONFIG++_INCLUDE_DIR AND LIBCONFIG++_LIBRARY)
 
-MESSAGE( STATUS "LIBCONFIG++_FOUND:      " ${LIBCONFIG++_FOUND} )
+#MESSAGE( STATUS "LIBCONFIG++_FOUND:      " ${LIBCONFIG++_FOUND} )
 
 find_path(OPENSSL_INCLUDE_DIR openssl/sha.h)
 find_library(OPENSSL_LIBRARY openssl)
@@ -23,7 +23,7 @@ if (OPENSSL_INCLUDE_DIR AND OPENSSL_LIBRARY)
    set(OPENSSL_FOUND TRUE)
 endif (OPENSSL_INCLUDE_DIR AND OPENSSL_LIBRARY)
 
-MESSAGE( STATUS "OPENSSL_FOUND:          " ${LIBCONFIG++_FOUND} )
+#MESSAGE( STATUS "OPENSSL_FOUND:          " ${LIBCONFIG++_FOUND} )
 
 
 set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
@@ -43,9 +43,10 @@ if(${clangnotavailable} EQUAL 0)
 #  set(CMAKE_CXX_COMPILER "g++")
 endif(${clangnotavailable} EQUAL 0)
 
-message(STATUS "CMAKE_CXX_COMPILER:     " ${CMAKE_CXX_COMPILER})
+#message(STATUS "CMAKE_CXX_COMPILER:     " ${CMAKE_CXX_COMPILER})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -pedantic -Wall -Wextra -Werror -O3 -Wno-error=deprecated-declarations")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -pedantic -Wall -Wextra -Werror -O3 -Wno-error=deprecated-declarations")
+set(SHARED_FLAGS "-std=c++1y -pedantic -Wall -Wextra -Werror -Wno-error=deprecated-declarations")
 
 if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
