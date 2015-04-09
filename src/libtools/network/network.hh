@@ -93,6 +93,10 @@ namespace network
     Packet(uint8_t fromto, uint8_t what,
            const char* message, size_t size);
 
+    Packet(uint8_t fromto, uint8_t what,
+           const char* message, std::string hash,
+           size_t partid, size_t size);
+
     ~Packet();
 
     uint32_t size_get() const;

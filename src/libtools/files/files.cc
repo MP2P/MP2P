@@ -19,14 +19,13 @@ namespace files
   {
     auto size = filesize_get(filename);
     file_ = boost::iostreams::mapped_file_source{filename_, size};
-    const unsigned char* to_hash =
-      reinterpret_cast<const unsigned char*>(file_.data());
-    hash_ = hash_buffer(to_hash, size_get());
+    hash_ = hash_buffer(file_.data(), size_get());
   }
 
   // SHA-1 hash a buffer of bytes
-  std::string hash_buffer(const unsigned char* buff, size_t size)
+  std::string hash_buffer(const char* sbuff, size_t size)
   {
+    const unsigned char* buff = reinterpret_cast<const unsigned char*>(sbuff);
     unsigned char hash[20];
     (void)buff;
     (void)size;

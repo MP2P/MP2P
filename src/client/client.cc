@@ -57,7 +57,9 @@ void Client::send_file(files::File& file)
   for (size_t i = 0; i < parts; ++i)
   {
     const char* tmp = file.data() + i * part_size;
-    Packet p{0, 1, tmp, part_size};
+    std::string hash = files::hash_buffer(tmp, part_size);
+    Packet p{0, 1, tmp, hash, i, part_size};
+    std::cout << p << std::endl;
     master_session_.send(p);
   }
   master_session_.receive();

@@ -96,9 +96,24 @@ std::unique_ptr<Error> Master::handle(Session & session)
 
   const std::string& buffer = packet.message_get();
 
+  std::istringstream input(buffer);
+  std::string item;
+
+  std::getline(input, item, '|');
+  std::string part(item);
+  char hash_c[41] = { 0 };
+  input.read(hash_c, 40);
+  std::string hash(hash_c);
+  std::getline(input, item, '|');
+  std::string msg(item);
+
   {
-    std::ofstream f1("recieved.txt", std::ios::app);
-    f1.write(buffer.c_str(), packet.size_get());
+    std::string hash_msg = files::hash_buffer(msg.c_str(), msg.size());
+    std::cout << part << " : " << std::endl
+              << hash << std::endl
+              << hash_msg << std::endl << std::endl;
+    std::ofstream f1(part);
+    f1.write(&*msg.begin(), msg.size());
   }
 
   if (packet.size_get() < 1)

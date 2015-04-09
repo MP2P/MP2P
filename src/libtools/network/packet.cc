@@ -24,6 +24,22 @@ namespace network
   {
   }
 
+  Packet::Packet(uint8_t fromto,
+      uint8_t what,
+      const char* message,
+      std::string hash,
+      size_t partid,
+      size_t size)
+      : fromto_(fromto),
+        what_(what)
+  {
+    // FIXME : use sizeof int for the partid
+    std::stringstream s;
+    s << partid << "|" << hash << std::string(message, size);
+    message_ = s.str();
+    size_ = message_.size();
+  }
+
   Packet::~Packet()
   {
   }
@@ -50,7 +66,7 @@ namespace network
   }
 
   // Create a std::string from the Packet
-  // FIXME : Remove useless chars
+  // FIXME : Remove useless chars and hardcoded values
   const std::string Packet::serialize() const
   {
     std::string s(6 + message_.size(), '\0');

@@ -31,7 +31,7 @@ namespace files
   };
 
   // Hash a buffer of chars and return the SHA1 hash as a string
-  std::string hash_buffer(const unsigned char* buff, size_t size);
+  std::string hash_buffer(const char* buff, size_t size);
 
   // Get the size of the file
   size_t filesize_get(const std::string& filename);
