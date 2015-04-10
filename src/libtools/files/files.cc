@@ -10,10 +10,8 @@
 
 #include <files.hh>
 
-
 namespace files
 {
-
   File::File(const std::string& filename)
     : filename_{filename}
   {
@@ -27,9 +25,6 @@ namespace files
   {
     const unsigned char* buff = reinterpret_cast<const unsigned char*>(sbuff);
     unsigned char hash[20];
-    (void)buff;
-    (void)size;
-    // FIXME : Activate hashing
     SHA1(buff, size, hash);
     std::stringstream result;
     for (int i = 0; i < 20; ++i)

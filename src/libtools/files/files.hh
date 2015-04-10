@@ -6,11 +6,8 @@
 #include <string>
 #include <boost/iostreams/device/mapped_file.hpp>
 
-
-
 namespace files
 {
-
   class File
   {
     public:

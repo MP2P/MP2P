@@ -4,7 +4,6 @@
 
 namespace files
 {
-
   inline const std::string& File::filename_get() const
   {
     return filename_;
@@ -24,5 +23,4 @@ namespace files
   {
     return file_.data();
   }
-
 }
