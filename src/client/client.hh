@@ -9,7 +9,7 @@ private:
   boost::asio::io_service io_service_; // Default constructor is enough
   network::Session master_session_;
 
-  utils::error_code handle(network::Session& session);
+  error_code handle(network::Session& session);
 
 public:
   Client(const std::string& host, const std::string& port);

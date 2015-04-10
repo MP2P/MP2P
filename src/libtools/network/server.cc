@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+using namespace boost::asio;
+
 namespace network
 {
   Server::Server(io_service &io_service,
@@ -50,13 +52,6 @@ namespace network
 
   void Server::listen()
   {
-    std::ostringstream msg;
-    //std::cout << "Listening" << std::endl;
-    //std::make_unique<libconfig::Config>();
-
-    //FIXME
-    //std::mutex tmp;
-    //utils::print(std::cout, tmp, msg.str());
     utils::Logger::cerr() << "Listening...";
 
     acceptor_.async_accept(socket_,
@@ -64,9 +59,10 @@ namespace network
         {
           if (!ec)
           {
-            //std::cout << "Connection accepted. (Thread " << std::this_thread::get_id() << ")" << std::endl;
-            utils::Logger::cout() << "Connection accepted. (Thread " << std::this_thread::get_id() << ").";
-            auto session = std::make_shared<Session>(std::move(socket_), handler_);
+            utils::Logger::cout() << "Connection accepted. (Thread "
+                                  << std::this_thread::get_id() << ").";
+            auto session = std::make_shared<Session>(std::move(socket_),
+                                                     handler_);
             session->receive();
             sessions_.push_back(session);
 

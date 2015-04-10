@@ -12,7 +12,7 @@ Client::Client(const std::string& host, const std::string& port)
 {
 }
 
-utils::error_code Client::handle(Session& session)
+error_code Client::handle(Session& session)
 {
   (void) session;
 

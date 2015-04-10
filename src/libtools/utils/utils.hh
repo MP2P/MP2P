@@ -12,11 +12,10 @@ using namespace boost::posix_time;
 
 //#define DEBUG true
 
+using error_code = uint16_t;
 
 namespace utils
 {
-  using error_code = uint16_t;
-
   /*--------.
   | init.cc |
   `--------*/
