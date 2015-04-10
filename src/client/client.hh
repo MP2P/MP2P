@@ -24,4 +24,7 @@ public:
 
   // Send a file to the master
   void send_file(files::File& file);
+
+  // Send a part of a file to the master
+  void send_file_part(files::File& file, size_t part, size_t part_size);
 };

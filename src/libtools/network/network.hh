@@ -130,6 +130,11 @@ namespace network
   public:
     Session(ip::tcp::socket &&socket, std::function<std::unique_ptr<Error>(Session &)> handler);
 
+    Session(boost::asio::io_service& io_service,
+                   const std::string& host,
+                   const std::string& port,
+                   std::function<std::unique_ptr<Error>(Session &)> handler);
+
     ip::tcp::socket &socket_get();
 
     streambuf &buff_get();

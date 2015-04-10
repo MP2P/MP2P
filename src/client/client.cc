@@ -47,8 +47,28 @@ void Client::run()
   io_service_.run();
 }
 
+void Client::send_file_part(files::File& file, size_t part, size_t part_size)
+{
+
+  // Query needs the port as a string. Ugly fix.
+  std::ostringstream port;
+  port << utils::Conf::get_instance().get_port();
+
+  auto host = utils::Conf::get_instance().get_host();
+
+  network::Session session{io_service_, host, port.str(),
+    std::bind(&Client::handle, this, std::placeholders::_1)};
+
+  const char* tmp = file.data() + part * part_size;
+  std::string hash = files::hash_buffer(tmp, part_size);
+  Packet p{0, 1, tmp, hash, part, part_size};
+  session.send(p);
+}
+
 void Client::send_file(files::File& file)
 {
+  std::vector<std::thread> threads;
+
   std::cout << "Sending file with SHA1 hash : " << file.hash_get() << std::endl;
 
   auto size = file.size_get();
@@ -56,11 +76,17 @@ void Client::send_file(files::File& file)
   auto part_size = size / parts;
   for (size_t i = 0; i < parts; ++i)
   {
-    const char* tmp = file.data() + i * part_size;
-    std::string hash = files::hash_buffer(tmp, part_size);
-    Packet p{0, 1, tmp, hash, i, part_size};
-    std::cout << p << std::endl;
-    master_session_.send(p);
+    threads.emplace_back(
+        [this, &file, i, part_size]()
+        {
+          send_file_part(file, i, part_size);
+        });
+  }
+
+  for (auto& thread : threads)
+  {
+    std::cout << "Joining thread" << std::endl;
+    thread.join();
   }
   master_session_.receive();
 }

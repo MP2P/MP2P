@@ -7,8 +7,27 @@ namespace network
 
   Session::Session(ip::tcp::socket &&socket, std::function<std::unique_ptr<Error>(Session &)> handler)
     : socket_{std::forward<ip::tcp::socket>(socket)},
-    handler_{std::move(handler)}
+      handler_{std::move(handler)}
   {
+  }
+
+  Session::Session(boost::asio::io_service& io_service,
+                   const std::string& host,
+                   const std::string& port,
+                   std::function<std::unique_ptr<Error>(Session &)> handler)
+    : socket_{io_service},
+      handler_{std::move(handler)}
+  {
+    boost::asio::ip::tcp::resolver resolver{io_service}; // Resolve the host
+    boost::asio::ip::tcp::resolver::query query{host, port};
+    boost::asio::ip::tcp::resolver::iterator iter = resolver.resolve(query);
+    boost::asio::ip::tcp::endpoint endpoint = *iter;
+
+    boost::system::error_code ec;
+    socket_.connect(endpoint, ec); // Connect to the endpoint
+    if (ec)
+      throw std::logic_error("Unable to connect to server");
+
     std::cout << "Opened session (tid=" << std::this_thread::get_id() << ")" << std::endl;
   }
 
