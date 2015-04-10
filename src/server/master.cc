@@ -36,10 +36,7 @@ bool Master::run()
         std::thread(
             [i, this]()
             {
-              // Using a mutex to avoid printing asynchronously.
-              //std::cout << "Thread " << i + 1 << " launched "
-                  //"(id=" << std::this_thread::get_id() << ")!" << std::endl;
-              utils::Logger::cout() << "Thread " + std::to_string(i + 1) + " launched "
+              utils::Logger::cout() << "Thread " << i + 1 << " launched "
                   "(id=" << std::this_thread::get_id() << ")!";
               io_service_.run();
             }
@@ -106,17 +103,35 @@ error_code Master::handle(Session & session)
   // Create and get the Packet object from the session (buff_ & length_)
   Packet packet = session.get_packet();
 
+  const std::string& buffer = packet.message_get();
 
-  if (packet.get_size() < 3)
+  std::istringstream input(buffer);
+  std::string item;
+
+  std::getline(input, item, '|');
+  std::string part(item);
+  char hash_c[41] = { 0 };
+  input.read(hash_c, 40);
+  std::string hash(hash_c);
+  std::getline(input, item, '|');
+  std::string msg(item);
+
+  {
+    std::string hash_msg = files::hash_buffer(msg.c_str(), msg.size());
+    std::cout << part << " : " << std::endl
+              << hash << std::endl
+              << hash_msg << std::endl << std::endl;
+    std::ofstream f1(part);
+    f1.write(&*msg.begin(), msg.size());
+  }
+
+  if (packet.size_get() < 1)
     return 1;
 
-  //std::cout << packet;
-  utils::Logger::cout() << packet;
-
-  switch (packet.get_fromto())
+  switch (packet.fromto_get())
   {
     case FromTo::C_to_M: // Code=0
-      switch (packet.get_what())
+      switch (packet.what_get())
       {
         case 0:
           return 10001; // Error
@@ -130,7 +145,7 @@ error_code Master::handle(Session & session)
           return 10001;
       }
     case FromTo::S_to_M: // Code=5
-      switch (packet.get_what())
+      switch (packet.what_get())
       {
         case 0:
           return 10501; // Error

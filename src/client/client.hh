@@ -11,18 +11,22 @@ class Client
 {
 private:
   io_service io_service_; // Does not requires instantiation
-  ip::tcp::socket socket_;
+  Session master_session_;
 
   error_code handle(Session &session);
-  void send(Session &session);
 
 public:
   Client();
-  ~Client();
 
   // Creates threads & make them bind the same port defined in config.
   void run();
 
   // Causes the server to stop it's running threads if any.
   void stop();
+
+  // Send a file to the master
+  void send_file(files::File& file);
+
+  // Send a part of a file to the master
+  void send_file_part(files::File& file, size_t part, size_t part_size);
 };

@@ -15,6 +15,8 @@
 #include <utils.hh>
 //#include <stdatomic.h>
 
+#include <files.hh>
+
 using namespace boost::asio;
 using error_code = uint16_t;
 
@@ -94,15 +96,22 @@ namespace network
   public:
     Packet(uint8_t fromto, uint8_t what, std::string message);
 
+    Packet(uint8_t fromto, uint8_t what,
+           const char* message, size_t size);
+
+    Packet(uint8_t fromto, uint8_t what,
+           const char* message, std::string hash,
+           size_t partid, size_t size);
+
     ~Packet();
 
-    unsigned long get_size();
+    uint32_t size_get() const;
 
-    uint8_t get_fromto();
+    uint8_t fromto_get() const;
 
-    uint8_t get_what();
+    uint8_t what_get() const;
 
-    std::string &get_message();
+    const std::string &message_get() const;
 
     const std::string serialize() const;
 
@@ -122,10 +131,14 @@ namespace network
     streambuf buff_;
     size_t length_;
     std::function<error_code(Session &)> handler_;
-    //std::mutex w_mutex_; // Just for testing purposes.
 
   public:
     Session(ip::tcp::socket &&socket, std::function<error_code(Session &)> handler);
+
+    Session(boost::asio::io_service& io_service,
+                   const std::string& host,
+                   const std::string& port,
+                   std::function<error_code(Session &)> handler);
 
     ip::tcp::socket &socket_get();
 
@@ -159,8 +172,6 @@ namespace network
         std::function<error_code(Session &)> handler);
 
     ~Server();
-
-    boost::asio::streambuf &buff_get();
 
     void listen(); // Listen to accept connections
     void stop();
