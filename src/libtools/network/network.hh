@@ -13,7 +13,6 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <glob.h>
 #include <utils.hh>
-//#include <stdatomic.h>
 
 #include <files.hh>
 

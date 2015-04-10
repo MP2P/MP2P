@@ -12,13 +12,17 @@ using namespace boost::posix_time;
 
 //#define DEBUG true
 
+
 namespace utils
 {
+  using error_code = uint16_t;
+
   /*--------.
   | init.cc |
   `--------*/
-  bool is_system_ok();
-  bool init();
+  // Functions throwing exceptions if something goes bad
+  void check_system();
+  void init();
 
   /*---------.
   | color.cc |

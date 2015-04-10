@@ -4,40 +4,23 @@
 
 #include <ostream>
 
-Client::Client()
-     : master_session_{ boost::asio::ip::tcp::socket(io_service_),
-          std::bind(&Client::handle, this, std::placeholders::_1) }
+using namespace network;
+
+Client::Client(const std::string& host, const std::string& port)
+  : master_session_{io_service_, host, port,
+      std::bind(&Client::handle, this, std::placeholders::_1)}
 {
-  std::cout << "Endpoint host = " << utils::Conf::get_instance().get_host() << std::endl;
-  std::cout << "Endpoint port = " << utils::Conf::get_instance().get_port() << std::endl;
-
-  // Query needs the port as a string. Ugly fix.
-  std::ostringstream port;
-  port << utils::Conf::get_instance().get_port();
-
-  ip::tcp::resolver resolver{io_service_}; // Needed to resolve the host
-  ip::tcp::resolver::query query{utils::Conf::get_instance().get_host(), port.str()};
-
-  // Resolve the host and define the endpoint
-  ip::tcp::resolver::iterator iter = resolver.resolve(query);
-  ip::tcp::endpoint endpoint = *iter;
-
-  boost::system::error_code ec;
-  master_session_.socket_get().connect(endpoint, ec); // Connect to the endpoint
-  if (ec)
-    throw std::logic_error("Unable to connect to server");
 }
 
-error_code Client::handle(Session & session)
+utils::error_code Client::handle(Session& session)
 {
   (void) session;
 
-  std::cout << "Client handling" << std::endl;
+  utils::Logger::cout() << "Client handling";
 
   // FIXME : Actually, we should listen after every send.
   // For now, we listen after all the sends, since it's communicating with only
   // one master
-//  session.receive();
 
   return 0;
 }
@@ -49,14 +32,12 @@ void Client::run()
 
 void Client::send_file_part(files::File& file, size_t part, size_t part_size)
 {
-
   // Query needs the port as a string. Ugly fix.
   std::ostringstream port;
   port << utils::Conf::get_instance().get_port();
+  const auto& host = utils::Conf::get_instance().get_host();
 
-  auto host = utils::Conf::get_instance().get_host();
-
-  network::Session session{io_service_, host, port.str(),
+  Session session{io_service_, host, port.str(),
     std::bind(&Client::handle, this, std::placeholders::_1)};
 
   const char* tmp = file.data() + part * part_size;

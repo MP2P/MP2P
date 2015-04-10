@@ -6,34 +6,26 @@
 
 namespace utils
 {
-  bool is_system_ok()
+  void check_system()
   {
     int sock = socket(PF_INET6, SOCK_STREAM, 0);
 
     int val = 0;
     unsigned len = 0;
     if (::getsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &val, &len))
-    {
-      std::cerr << "Fatal error: IPV6_V6ONLY must be false." << std::endl;
-      return false;
-    }
-    return true;
+      throw std::logic_error("Fatal error: IPV6_V6ONLY must be false.");
   }
 
-  bool init()
+  void init()
   {
-    //std::cout << "Initialization..." << std::endl;
     utils::Logger::cout() << "Initialization...";
-    if (!is_system_ok())
-      return false;
+    check_system();
 
     utils::Conf& cfg = utils::Conf::get_instance();
     if (!cfg.update_conf("../config/server.conf"))
-      return false;
+      throw std::logic_error("Config file not found");
 
     if (!network::Error::update_conf("../ressources/errors"))
-      return false;
-
-    return true;
+      throw std::logic_error("Error description files not found");
   }
 }

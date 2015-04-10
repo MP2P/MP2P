@@ -5,11 +5,10 @@
 
 int main()
 {
-  if (!utils::init())
-    return 1;
-
   try
   {
+    utils::init(); // Throws if anything goes bad
+
     Master master{};
 
     if (master.run())

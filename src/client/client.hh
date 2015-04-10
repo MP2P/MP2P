@@ -1,32 +1,28 @@
 #pragma once
 
-#include <libconfig.h++>
 #include <network.hh>
-
-using namespace network;
-
-using error_code = uint16_t;
+#include <utils.hh>
 
 class Client
 {
 private:
-  io_service io_service_; // Does not requires instantiation
-  Session master_session_;
+  boost::asio::io_service io_service_; // Default constructor is enough
+  network::Session master_session_;
 
-  error_code handle(Session &session);
+  utils::error_code handle(network::Session& session);
 
 public:
-  Client();
+  Client(const std::string& host, const std::string& port);
 
-  // Creates threads & make them bind the same port defined in config.
+  // Run the io service
   void run();
 
-  // Causes the server to stop it's running threads if any.
+  // Stop the server
   void stop();
 
-  // Send a file to the master
+  // Send a file to the storage
   void send_file(files::File& file);
 
-  // Send a part of a file to the master
+  // Send a part of a file to the storage
   void send_file_part(files::File& file, size_t part, size_t part_size);
 };
