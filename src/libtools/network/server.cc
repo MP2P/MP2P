@@ -59,8 +59,11 @@ namespace network
         {
           if (!ec)
           {
+            std::ostringstream s;
+            s << std::this_thread::get_id();
             utils::Logger::cout() << "Connection accepted. (Thread "
-                                  << std::this_thread::get_id() << ").";
+                                      + s.str() + ").";
+
             auto session = std::make_shared<Session>(std::move(socket_),
                                                      handler_);
             session->receive();

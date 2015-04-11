@@ -29,7 +29,9 @@ namespace network
     if (ec)
       throw std::logic_error("Unable to connect to server");
 
-    utils::Logger::cout() << "Opened session (tid=" << std::this_thread::get_id() << ")";
+    std::ostringstream s;
+    s << std::this_thread::get_id();
+    utils::Logger::cout() << "Opened session (tid=" + s.str() + ")";
   }
 
   // FIXME : Get a generic function to do this
@@ -49,8 +51,9 @@ namespace network
   // Read on the open socket
   void Session::receive()
   {
-    utils::Logger::cout() << "Session receiving...(tid="
-                          << std::this_thread::get_id() << ")";
+    std::ostringstream s;
+    s << std::this_thread::get_id();
+    utils::Logger::cout() << "Session receiving...(tid=" + s.str() + ")";
     async_read(socket_,
         buff_,
         transfer_exactly(sizeof (uint32_t)),
@@ -69,7 +72,7 @@ namespace network
             uint32_t msg_size = *sizep;
 
             utils::Logger::cout() << "Receiving a message of size: "
-                                  << msg_size;
+                                     + std::to_string(msg_size);
 
             // Read the whole message + the headers left
             async_read(socket_,
@@ -88,7 +91,7 @@ namespace network
                     buff_.consume(length_);
                     length_ = 0;
 
-                    if (error == 1)
+                    if (error == 100)
                     {
                       utils::Logger::cout() << "Closed session";
                       socket_.close(); // Close the socket
@@ -100,7 +103,7 @@ namespace network
                   }
                   else
                   {
-                    utils::Logger::cerr() << "Error: " << ec.message();
+                    utils::Logger::cerr() << "Error: " + ec.message();
                   }
                 }
             );
@@ -108,7 +111,7 @@ namespace network
           else
           {
             utils::Logger::cerr() << "Error while getting size: "
-                                  << ec.message();
+                                  + ec.message();
           }
         }
     );

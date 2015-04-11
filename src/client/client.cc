@@ -50,7 +50,7 @@ void Client::send_file(files::File& file)
 {
   std::vector<std::thread> threads;
 
-  std::cout << "Sending file with SHA1 hash : " << file.hash_get() << std::endl;
+  utils::Logger::cout() << "Sending file with SHA1 hash : " + file.hash_get();
 
   auto size = file.size_get();
   auto parts = files::parts_for_size(size);
@@ -66,7 +66,7 @@ void Client::send_file(files::File& file)
 
   for (auto& thread : threads)
   {
-    std::cout << "Joining thread" << std::endl;
+    utils::Logger::cout() << "Joining thread";
     thread.join();
   }
   master_session_.receive();

@@ -19,8 +19,8 @@ int main(int argc, const char *argv[])
     std::ostringstream port;
     port << utils::Conf::get_instance().port_get();
     const auto& host = utils::Conf::get_instance().host_get();
-    utils::Logger::cout() << "Endpoint host = " << host;
-    utils::Logger::cout() << "Endpoint port = " << port.str();
+    utils::Logger::cout() << "Endpoint host = " + host;
+    utils::Logger::cout() << "Endpoint port = " + port.str();
 
     Client client{host, port.str()};
 

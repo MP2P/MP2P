@@ -27,7 +27,7 @@ namespace network
     }
     catch (const libconfig::ParseException& pex)
     {
-      utils::Logger::cerr() << "parse error at " << pex.getFile() << ":" + std::to_string(pex.getLine())
+      utils::Logger::cerr() << "parse error at " + std::string(pex.getFile()) + ":" + std::to_string(pex.getLine())
           << " - " << pex.getError();
       return false;
     }

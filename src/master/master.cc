@@ -14,8 +14,8 @@ Master::Master()
   unsigned concurrency = utils::Conf::get_instance().concurrency_get();
   unsigned port = utils::Conf::get_instance().port_get();
 
-  utils::Logger::cout() << "Concurency level = " << concurrency;
-  utils::Logger::cout() << "Bind port = " << port;
+  utils::Logger::cout() << "Concurency level = " + std::to_string(concurrency);
+  utils::Logger::cout() << "Bind port = " + std::to_string(port);
 }
 
 Master::~Master()
@@ -37,12 +37,14 @@ bool Master::run()
   for (unsigned i = 0; i < concurrency; ++i)
   {
     threads_.emplace_front(
-        [i, this]()
+        std::thread([i, this]()
         {
-          utils::Logger::cout() << "Thread " << i + 1 << " launched (id="
-                                << std::this_thread::get_id() << ")!";
+          std::ostringstream s;
+          s << "Thread " << i + 1 << " launched (id="
+                         << std::this_thread::get_id() << ")!";
+          utils::Logger::cout() << s.str();
           io_service_.run();
-        }
+        })
     );
   }
   return true;
@@ -59,11 +61,12 @@ void Master::stop()
   std::for_each(threads_.begin(), threads_.end(),
       [](std::thread &t)
       {
-        //std::cout << "Stopping thread " << t.get_id() << "..." << std::flush;
-        utils::Logger::cout() << "Stopping thread " << t.get_id() << "...";
+        std::ostringstream id;
+        id << t.get_id();
+        utils::Logger::cout() << "Stopping thread " + id.str() + "...";;
         t.join();
         //std::cout << " Done!" << std::endl;
-        utils::Logger::cout() << "Done stopping thread " << t.get_id() << "!";
+        utils::Logger::cout() << "Done stopping thread " + id.str() + "!";
       }
   );
 
@@ -79,7 +82,8 @@ void Master::catch_stop()
 
   sigIntHandler.sa_handler = [](int s)
   {
-    utils::Logger::cout() << "\nMaster received signal " << s << "...";
+    utils::Logger::cout() << "Master received signal " + std::to_string(s)
+                             + "...";
   };
   sigemptyset(&sigIntHandler.sa_mask);
   sigIntHandler.sa_flags = 0;
@@ -98,7 +102,9 @@ void Master::catch_stop()
 // Errors are defined in the ressources/errors file.
 error_code Master::handle(Session& session)
 {
-  utils::Logger::cout() << "Master handle (tid=" << std::this_thread::get_id() << ").";
+  std::ostringstream s;
+  s << std::this_thread::get_id();
+  utils::Logger::cout() << "Master handle (tid=" + s.str() + ").";
 
   // Create and get the Packet object from the session (buff_ & length_)
   Packet packet = session.get_packet();
