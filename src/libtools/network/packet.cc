@@ -60,14 +60,14 @@ namespace network
   }
 
   // Get a packet from a string
-  const Packet Packet::deserialize(const std::string &input)
+  const Packet deserialize(const std::string &input)
   {
     uint32_t size = 0;
     uint8_t fromto = 0;
     uint8_t what = 0;
     std::string message;
 
-    size_t header_size = sizeof (size_) + sizeof (fromto_) + sizeof (what_);
+    size_t header_size = sizeof (size) + sizeof (fromto) + sizeof (what);
     const char* ptr = &*input.begin();
 
     size = *reinterpret_cast<const uint32_t*>(ptr);

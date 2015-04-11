@@ -45,7 +45,7 @@ namespace network
 
   Packet Session::get_packet()
   {
-    return Packet::deserialize(get_line());
+    return deserialize(get_line());
   }
 
   // Read on the open socket

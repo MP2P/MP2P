@@ -75,7 +75,7 @@ namespace network
   class Packet
   {
   private:
-    unsigned long size_;
+    uint32_t size_;
     const uint8_t fromto_;
     const uint8_t what_;
     std::string message_;
@@ -103,9 +103,9 @@ namespace network
     const std::string& message_get() const;
 
     const std::string serialize() const;
-
-    static const Packet deserialize(const std::string& input);
   };
+
+  const Packet deserialize(const std::string& input);
 
   std::ostream& operator<<(std::ostream& output, const Packet& packet);
 
