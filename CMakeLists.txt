@@ -82,6 +82,7 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 add_subdirectory(${SOURCE_DIR}/libtools) # The tools library
 add_subdirectory(${SOURCE_DIR}/client)   # The client
 add_subdirectory(${SOURCE_DIR}/master)   # The master server
+add_subdirectory(${SOURCE_DIR}/storage)   # The master server
 add_subdirectory(${SOURCE_DIR}/tests)    # The "tests" target
 
 

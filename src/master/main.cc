@@ -16,6 +16,6 @@ int main()
   }
   catch (std::exception &e)
   {
-    utils::Logger::cerr() << "Server failed : " + std::string(e.what());
+    utils::Logger::cerr() << "Master failed : " + std::string(e.what());
   }
 }
