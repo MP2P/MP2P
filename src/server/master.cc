@@ -3,14 +3,18 @@
 #include <utils.hh>
 #include "master.hh"
 
+using namespace network;
+using namespace boost::asio;
+using namespace boost::posix_time;
+
 Master::Master()
-    : server_{io_service_, std::bind(&Master::handle, this, std::placeholders::_1)}
+    : server_{io_service_,
+              std::bind(&Master::handle, this, std::placeholders::_1)}
 {
   unsigned concurrency = utils::Conf::get_instance().concurrency_get();
   unsigned port = utils::Conf::get_instance().port_get();
-  //std::cout << "Concurency level = " << concurrency << std::endl;
+
   utils::Logger::cout() << "Concurency level = " << concurrency;
-  //std::cout << "Bind port = " << port << std::endl;
   utils::Logger::cout() << "Bind port = " << port;
 }
 
@@ -33,14 +37,12 @@ bool Master::run()
   for (unsigned i = 0; i < concurrency; ++i)
   {
     threads_.emplace_front(
-        std::thread(
-            [i, this]()
-            {
-              utils::Logger::cout() << "Thread " << i + 1 << " launched "
-                  "(id=" << std::this_thread::get_id() << ")!";
-              io_service_.run();
-            }
-        )
+        [i, this]()
+        {
+          utils::Logger::cout() << "Thread " << i + 1 << " launched (id="
+                                << std::this_thread::get_id() << ")!";
+          io_service_.run();
+        }
     );
   }
   return true;
@@ -77,7 +79,6 @@ void Master::catch_stop()
 
   sigIntHandler.sa_handler = [](int s)
   {
-    //std::cout << std::endl << "Master received signal " << s << "..." << std::endl;
     utils::Logger::cout() << "\nMaster received signal " << s << "...";
   };
   sigemptyset(&sigIntHandler.sa_mask);
@@ -95,13 +96,15 @@ void Master::catch_stop()
 
 // Handle the session after filling the buffer
 // Errors are defined in the ressources/errors file.
-error_code Master::handle(Session & session)
+error_code Master::handle(Session& session)
 {
-  //std::cout << "Master handle (tid=" << std::this_thread::get_id() << ")" << std::endl;
   utils::Logger::cout() << "Master handle (tid=" << std::this_thread::get_id() << ").";
 
   // Create and get the Packet object from the session (buff_ & length_)
   Packet packet = session.get_packet();
+
+  if (packet.size_get() < 1)
+    return 1;
 
   const std::string& buffer = packet.message_get();
 
@@ -117,16 +120,14 @@ error_code Master::handle(Session & session)
   std::string msg(item);
 
   {
-    std::string hash_msg = files::hash_buffer(msg.c_str(), msg.size());
+    /*std::string hash_msg = files::hash_buffer(msg.c_str(), msg.size());
     std::cout << part << " : " << std::endl
               << hash << std::endl
               << hash_msg << std::endl << std::endl;
+    */
     std::ofstream f1(part);
     f1.write(&*msg.begin(), msg.size());
   }
-
-  if (packet.size_get() < 1)
-    return 1;
 
   switch (packet.fromto_get())
   {
