@@ -112,29 +112,6 @@ error_code Master::handle(Session& session)
   if (packet.size_get() < 1)
     return 1;
 
-  const std::string& buffer = packet.message_get();
-
-  std::istringstream input(buffer);
-  std::string item;
-
-  std::getline(input, item, '|');
-  std::string part(item);
-  char hash_c[41] = { 0 };
-  input.read(hash_c, 40);
-  std::string hash(hash_c);
-  std::getline(input, item, '|');
-  std::string msg(item);
-
-  {
-    /*std::string hash_msg = files::hash_buffer(msg.c_str(), msg.size());
-    std::cout << part << " : " << std::endl
-              << hash << std::endl
-              << hash_msg << std::endl << std::endl;
-    */
-    std::ofstream f1(part);
-    f1.write(&*msg.begin(), msg.size());
-  }
-
   switch (packet.fromto_get())
   {
     case FromTo::C_to_M: // Code=0
