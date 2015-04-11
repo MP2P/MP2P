@@ -81,7 +81,7 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 # ********[05][d01-02-03-04] SOURCE FILES ******** #
 add_subdirectory(${SOURCE_DIR}/libtools) # The tools library
 add_subdirectory(${SOURCE_DIR}/client)   # The client
-add_subdirectory(${SOURCE_DIR}/server)   # The server
+add_subdirectory(${SOURCE_DIR}/master)   # The master server
 add_subdirectory(${SOURCE_DIR}/tests)    # The "tests" target
 
 
