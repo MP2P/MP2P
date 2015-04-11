@@ -6,8 +6,8 @@
 Master::Master()
     : server_{io_service_, std::bind(&Master::handle, this, std::placeholders::_1)}
 {
-  unsigned concurrency = utils::Conf::get_instance().get_concurrency();
-  unsigned port = utils::Conf::get_instance().get_port();
+  unsigned concurrency = utils::Conf::get_instance().concurrency_get();
+  unsigned port = utils::Conf::get_instance().port_get();
   //std::cout << "Concurency level = " << concurrency << std::endl;
   utils::Logger::cout() << "Concurency level = " << concurrency;
   //std::cout << "Bind port = " << port << std::endl;
@@ -29,7 +29,7 @@ bool Master::run()
     return false;
   }
   // Creating (concurent_threads) threads
-  unsigned concurrency = utils::Conf::get_instance().get_concurrency();
+  unsigned concurrency = utils::Conf::get_instance().concurrency_get();
   for (unsigned i = 0; i < concurrency; ++i)
   {
     threads_.emplace_front(

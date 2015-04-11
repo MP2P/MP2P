@@ -17,8 +17,8 @@ int main(int argc, const char *argv[])
 
     // Prepare socket
     std::ostringstream port;
-    port << utils::Conf::get_instance().get_port();
-    const auto& host = utils::Conf::get_instance().get_host();
+    port << utils::Conf::get_instance().port_get();
+    const auto& host = utils::Conf::get_instance().host_get();
     utils::Logger::cout() << "Endpoint host = " << host;
     utils::Logger::cout() << "Endpoint port = " << port.str();
 

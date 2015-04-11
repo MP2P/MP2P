@@ -34,8 +34,8 @@ void Client::send_file_part(files::File& file, size_t part, size_t part_size)
 {
   // Query needs the port as a string. Ugly fix.
   std::ostringstream port;
-  port << utils::Conf::get_instance().get_port();
-  const auto& host = utils::Conf::get_instance().get_host();
+  port << utils::Conf::get_instance().port_get();
+  const auto& host = utils::Conf::get_instance().host_get();
 
   Session session{io_service_, host, port.str(),
     std::bind(&Client::handle, this, std::placeholders::_1)};

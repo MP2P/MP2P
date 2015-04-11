@@ -2,12 +2,17 @@
 
 #include <thread>
 
+using namespace boost::posix_time;
+
 namespace utils
 {
-  Conf::Conf()
-  {}
+  Conf& Conf::get_instance()
+  {
+    static Conf instance;
+    return instance;
+  }
 
-  bool Conf::update_conf(const std::string &path)
+  bool Conf::update_conf(const std::string& path)
   {
     libconfig::Config cfg;
 
@@ -15,12 +20,12 @@ namespace utils
     {
       cfg.readFile(path.c_str());
     }
-    catch (const libconfig::FileIOException &fioex)
+    catch (const libconfig::FileIOException& fioex)
     {
       std::cerr << "i/o error while reading file." << std::endl;
       return false;
     }
-    catch (const libconfig::ParseException &pex)
+    catch (const libconfig::ParseException& pex)
     {
       std::cerr << "parse error at " << pex.getFile() << ":" << pex.getLine()
           << " - " << pex.getError() << std::endl;
@@ -56,28 +61,5 @@ namespace utils
     timeout_ = seconds(timeout);
 
     return true;
-  }
-
-  /// getting the host to bind
-  std::string Conf::get_host()
-  {
-    return host_;
-  }
-  /// getting the port number to bind
-  unsigned Conf::get_port()
-  {
-    return port_;
-  }
-
-  /// getting the concurrency level
-  unsigned Conf::get_concurrency()
-  {
-    return concurrent_threads_;
-  }
-
-  /// getting the timeout for server connexions
-  time_duration Conf::get_timeout()
-  {
-    return timeout_;
   }
 }
