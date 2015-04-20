@@ -1,6 +1,6 @@
 # Notation [XX][dWW-YY-..] -> ElementId=XX / Depends from WW & YY
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 2.8)
 
 # ********[00] PROJECT VARIABLES ******** #
 project(MP2P)
@@ -77,6 +77,8 @@ include_directories(${LIBCONFIG++_INCLUDE_DIR})
 # ********[04][d02] ADDING OPENSSL LIBRARY ********** #
 include_directories(${OPENSSL_INCLUDE_DIR})
 
+add_custom_target(release)
+add_custom_target(debug)
 
 # ********[05][d01-02-03-04] SOURCE FILES ******** #
 add_subdirectory(${SOURCE_DIR}/libtools) # The tools library
@@ -84,7 +86,6 @@ add_subdirectory(${SOURCE_DIR}/client)   # The client
 add_subdirectory(${SOURCE_DIR}/master)   # The master server
 add_subdirectory(${SOURCE_DIR}/storage)   # The master server
 add_subdirectory(${SOURCE_DIR}/tests)    # The "tests" target
-
 
 
 

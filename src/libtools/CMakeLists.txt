@@ -15,6 +15,7 @@ SUBDIRLIST(SUBDIRS)
 
 #The degug target
 add_library(libtools-debug ${LIBSOURCES})
+add_dependencies(debug libtools-debug)
 
 foreach(subdir ${SUBDIRS})
   target_include_directories(libtools-debug PUBLIC ${subdir})
@@ -26,6 +27,7 @@ set_target_properties(libtools-debug PROPERTIES COMPILE_FLAGS "-ggdb3 ${SHARED_F
 target_link_libraries(libtools-debug ${Boost_LIBRARIES} ${LIBCONFIG++_LIBRARY} ${LIBCRYPTO_LIBRARY} ${OPENSSL_LIBRARY})
 #The release target
 add_library(libtools-release ${LIBSOURCES})
+add_dependencies(release libtools-release)
 
 foreach(subdir ${SUBDIRS})
   target_include_directories(libtools-release PUBLIC ${subdir})
