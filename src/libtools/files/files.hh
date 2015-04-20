@@ -35,6 +35,10 @@ namespace files
 
   // Estimate an optimal number of parts depending of the size of the file
   size_t parts_for_size(size_t size);
+
+  // Get the size of a certain part depending on its size
+  // 0 <= part_id < parts_for_size(size)
+  size_t part_size_for_size(size_t size, size_t part_id);
 }
 
 #include <files.hxx>
