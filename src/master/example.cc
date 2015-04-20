@@ -11,9 +11,9 @@
 //int main(int argc, const char **argv)
 //{
 //    //! Connect to the client
-//    string connstr(argc > 1 ? argv[1] : "couchbase://92.222.84.96/default");
+//    string connstr(argc > 1 ?  argv[1] : "couchbase://92.222.84.96/default");
 //    Couchbase::Client h(connstr);
-//    Couchbase::Status rv = h.connect();f
+//    Couchbase::Status rv = h.connect();
 //    if (!rv.success()) {
 //        cout << "Couldn't connect to '" << connstr << "'. "
 //                << "Reason: " << rv << endl;

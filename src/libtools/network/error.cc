@@ -12,7 +12,7 @@ namespace network
   {
   }
 
-  bool Error::update_conf(const std::string& path)
+  bool Error::initialize(const std::string& path)
   {
     libconfig::Config cfg;
 

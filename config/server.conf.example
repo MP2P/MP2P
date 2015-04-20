@@ -13,3 +13,11 @@ server:
   # host defines the host to be bind by the server.
   host = "localhost"; #Default to "localhost"
 }
+
+couchbase:
+{
+  host = "localhost";
+  port = 11211;
+  password = "";
+  bucket = "default";
+}

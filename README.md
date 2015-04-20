@@ -23,6 +23,11 @@ The project uses Couchbase as a Master-Master replication database system.
 
 ## How to?
 
+### Config files
+
+We provide some *.conf.example files in the config folder, you can configure
+them to set up your own settings.
+
 ### The Master application
 
 ```
@@ -47,6 +52,7 @@ cd src/client; mkdir build && cd build; cmake ..; make;
 * Boost >= 1.55
 * libconfig >= 1.4.9
 * OpenSSL >= 1.0
+* libcouchbase >= 2.4.8
 
 ## Details
 

@@ -22,10 +22,10 @@ namespace utils
     check_system();
 
     utils::Conf& cfg = utils::Conf::get_instance();
-    if (!cfg.update_conf("../config/server.conf"))
-      throw std::logic_error("Config file not found");
+    if (!cfg.initialize("../config/server.conf"))
+      throw std::logic_error("Config file failed to init");
 
-    if (!network::Error::update_conf("../ressources/errors"))
+    if (!network::Error::initialize("../ressources/errors"))
       throw std::logic_error("Error description files not found");
   }
 }

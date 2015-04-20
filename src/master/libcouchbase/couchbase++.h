@@ -1,6 +1,5 @@
 //! @file lcb++.h - Couchbase++ API
-#ifndef LCB_PLUSPLUS_H
-#define LCB_PLUSPLUS_H
+#pragma once
 
 #include <libcouchbase/couchbase.h>
 #include <libcouchbase/api3.h>
@@ -59,7 +58,7 @@ namespace Couchbase
 
     //! Get textual description of error (uses lcb_strerror())
     //! @return The error string. Do not free the return value
-    const char *description() const { return lcb_strerror(NULL, code); }
+    const char* description() const { return lcb_strerror(NULL, code); }
 
     //! Get the raw lcb_error_t value
     //! @return the error code
@@ -69,9 +68,9 @@ namespace Couchbase
 
     operator lcb_error_t() const { return code; }
 
-    operator const char *() const { return description(); }
+    operator const char*() const { return description(); }
 
-    Status(const Status &other) : code(other.code) { }
+    Status(const Status& other) : code(other.code) { }
 
   private:
     lcb_error_t code;
@@ -80,7 +79,7 @@ namespace Couchbase
 
 namespace std
 {
-  inline ostream &operator<<(ostream &os, const Couchbase::Status &obj)
+  inline ostream& operator<<(ostream& os, const Couchbase::Status& obj)
   {
     os << "[0x" << std::hex << obj.errcode() << "]: " << obj.description();
     return os;
@@ -99,13 +98,13 @@ namespace Couchbase
     //! @param len the size of the key
     //! @note The buffer must remain valid until the operation has been
     //! scheduled.
-    void key(const char *buf, size_t len) { LCB_CMD_SET_KEY(&m_cmd, buf, len); }
+    void key(const char* buf, size_t len) { LCB_CMD_SET_KEY(&m_cmd, buf, len); }
 
-    void key(const char *buf) { key(buf, strlen(buf)); }
+    void key(const char* buf) { key(buf, strlen(buf)); }
 
-    void key(const std::string &s) { key(s.c_str(), s.size()); }
+    void key(const std::string& s) { key(s.c_str(), s.size()); }
 
-    const char *get_keybuf() const { return (const char *) m_cmd.key.contig.bytes; }
+    const char* get_keybuf() const { return (const char*) m_cmd.key.contig.bytes; }
 
     size_t get_keylen() const { return m_cmd.key.contig.nbytes; }
 
@@ -123,11 +122,11 @@ namespace Couchbase
     //! @param casval the CAS
     void cas(uint64_t casval) { m_cmd.cas = casval; }
 
-    const lcb_CMDBASE *as_basecmd() const { return (const lcb_CMDBASE *) &m_cmd; }
+    const lcb_CMDBASE* as_basecmd() const { return (const lcb_CMDBASE*) &m_cmd; }
 
     Command() { memset(this, 0, sizeof *this); }
 
-    const T *operator&() const { return &m_cmd; }
+    const T* operator&() const { return &m_cmd; }
 
   protected:
     T m_cmd;
@@ -170,7 +169,7 @@ namespace Couchbase
       m_cmd.operation = op;
     }
 
-    StoreCommand(const std::string &key, const std::string &value,
+    StoreCommand(const std::string& key, const std::string& value,
                  lcb_storage_t mode = LCB_SET)
     {
       this->key(key);
@@ -178,7 +177,7 @@ namespace Couchbase
       this->mode(mode);
     }
 
-    StoreCommand(const char *key, const char *value,
+    StoreCommand(const char* key, const char* value,
                  lcb_storage_t mode = LCB_SET)
     {
       this->key(key);
@@ -195,11 +194,11 @@ namespace Couchbase
     //! @param n Buffer length
     //! @note The buffer must remain valid until the operation has been
     //!       scheduled.
-    void value(const void *b, size_t n) { LCB_CMD_SET_VALUE(&m_cmd, b, n); }
+    void value(const void* b, size_t n) { LCB_CMD_SET_VALUE(&m_cmd, b, n); }
 
-    void value(const char *s) { value(s, strlen(s)); }
+    void value(const char* s) { value(s, strlen(s)); }
 
-    void value(const std::string &s) { value(s.c_str(), s.size()); }
+    void value(const std::string& s) { value(s.c_str(), s.size()); }
 
     //! @brief Set the item's metadata flags.
     //! @param f the 32 bit flags value.
@@ -298,7 +297,7 @@ namespace Couchbase
 
     //! Get user associated data for the command
     //! @return the user data
-    void *cookie() const { return (void *) u.base.cookie; }
+    void* cookie() const { return (void*) u.base.cookie; }
 
     //! Get the CAS for the operation. Only valid if the operation succeeded,
     //! @return the CAS.
@@ -309,15 +308,15 @@ namespace Couchbase
     virtual ~Response() { }
 
     template<class D>
-    static D &setcode(D &r, Status &c)
+    static D& setcode(D& r, Status& c)
     {
       r.u.base.rc = c;
       return r;
     }
 
-    virtual void init(const lcb_RESPBASE *res)
+    virtual void init(const lcb_RESPBASE* res)
     {
-      u.resp = *reinterpret_cast<const T *>(res);
+      u.resp = *reinterpret_cast<const T*>(res);
     }
 
     virtual bool done() const
@@ -349,9 +348,9 @@ namespace Couchbase
   public:
     inline GetResponse();
 
-    GetResponse(const GetResponse &other) { assign_first(other); }
+    GetResponse(const GetResponse& other) { assign_first(other); }
 
-    inline GetResponse &operator=(const GetResponse &);
+    inline GetResponse& operator=(const GetResponse&);
 
     ~GetResponse() { clear(); }
 
@@ -362,16 +361,16 @@ namespace Couchbase
     //! @return a buffer holding the value of the buffer. This buffer is valid
     //!         until the response is destroyed or the ::clear() function is
     //!         explicitly called.
-    const char *valuebuf() const { return (const char *) u.resp.value; }
+    const char* valuebuf() const { return (const char*) u.resp.value; }
 
     //! Gets the length of the value
     size_t valuesize() const { return u.resp.nvalue; }
 
     //! Copies the contents of the value into a std::string
-    inline void value(std::string &s) const;
+    inline void value(std::string& s) const;
 
     //! Appends the contents of the value into a std::vector<char>
-    inline void value(std::vector<char> &v) const;
+    inline void value(std::vector<char>& v) const;
 
     std::string value() const
     {
@@ -386,20 +385,20 @@ namespace Couchbase
     uint32_t itemflags() const { return valueflags(); }
 
     //! @private
-    void init(const lcb_RESPBASE *) override;
+    void init(const lcb_RESPBASE*) override;
 
   private:
     friend class Client;
 
     friend class ViewRow;
 
-    void assign_first(const GetResponse &other);
+    void assign_first(const GetResponse& other);
 
     inline bool has_shared_buffer() const;
 
     inline bool has_alloc_buffer() const;
 
-    inline char *vbuf_refcnt();
+    inline char* vbuf_refcnt();
   };
 
   class StatsResponse : public Response<lcb_RESPSTATS>
@@ -407,7 +406,7 @@ namespace Couchbase
   public:
     StatsResponse() : Response(), initialized(false), m_done(false) { }
 
-    void init(const lcb_RESPBASE *resp) override;
+    void init(const lcb_RESPBASE* resp) override;
 
     bool done() const override { return m_done; }
 
@@ -420,9 +419,9 @@ namespace Couchbase
   class CounterResponse : public Response<lcb_RESPCOUNTER>
   {
   public:
-    void init(const lcb_RESPBASE *res) override
+    void init(const lcb_RESPBASE* res) override
     {
-      u.resp = *(lcb_RESPCOUNTER *) res;
+      u.resp = *(lcb_RESPCOUNTER*) res;
     }
 
     //! Get the current counter value
@@ -449,11 +448,11 @@ namespace Couchbase
 
     ObserveResponse() : Response(), initialized(false) { }
 
-    void init(const lcb_RESPBASE *res) override;
+    void init(const lcb_RESPBASE* res) override;
 
-    inline const ServerReply &master_reply() const;
+    inline const ServerReply& master_reply() const;
 
-    const std::vector<ServerReply> &all_replies() const { return sinfo; }
+    const std::vector<ServerReply>& all_replies() const { return sinfo; }
 
   private:
     bool initialized;
@@ -485,13 +484,13 @@ namespace Couchbase
     //!          time. In addition, when a batch context is active, higher
     //!          level calls on the client (such as Client::get()) cannot be
     //!          performed.
-    inline BatchContext(Client &client);
+    inline BatchContext(Client& client);
 
     inline ~BatchContext();
 
     //! Wrapper method for scheduling a get operation. This allows the operation
     //! to later be retrieved using #valueFor()
-    inline Status get(const std::string &s);
+    inline Status get(const std::string& s);
 
     //! @brief Cancel any operations submitted in the current batch. This also
     //!        deactivates the batch. This is useful if scheduling several
@@ -499,7 +498,7 @@ namespace Couchbase
     inline void bail();
 
     template<typename T>
-    Status addop(T &op)
+    Status addop(T& op)
     {
       Status rv = op.schedule_lcb(handle());
       if (rv)
@@ -523,18 +522,18 @@ namespace Couchbase
     //! @return The GetResponse object for the given item. This is only valid
     //! if `s` was requested via e.g. `get(s)` _and_ #submit() has been called
     //! _and_ Client::wait() has been called.
-    inline const GetResponse &value_for(const std::string &s);
+    inline const GetResponse& value_for(const std::string& s);
 
-    inline const GetResponse &operator[](
-        const std::string &s) { return value_for(s); }
+    inline const GetResponse& operator[](
+        const std::string& s) { return value_for(s); }
 
     inline lcb_t handle() const;
 
   private:
     bool entered;
     size_t m_remaining;
-    Client &parent;
-    std::map<std::string, Operation<GetCommand, GetResponse> *> resps;
+    Client& parent;
+    std::map<std::string, Operation<GetCommand, GetResponse>*> resps;
   };
 
 //! @brief Main client object.
@@ -551,28 +550,28 @@ namespace Couchbase
     //! @brief Initialize the client
     //! @param connstr the connection string
     //! @param passwd the password for the bucket (if password protected)
-    inline Client(const std::string &connstr = "couchbase://localhost/default",
-                  const std::string &passwd = "");
+    inline Client(const std::string& connstr = "couchbase://localhost/default",
+                  const std::string& passwd = "");
 
     inline ~Client();
 
-    inline GetResponse get(const GetCommand &);
+    inline GetResponse get(const GetCommand&);
 
-    inline TouchResponse touch(const TouchCommand &);
+    inline TouchResponse touch(const TouchCommand&);
 
-    inline StoreResponse upsert(const StoreCommand &);
+    inline StoreResponse upsert(const StoreCommand&);
 
-    inline StoreResponse add(const StoreCommand &);
+    inline StoreResponse add(const StoreCommand&);
 
-    inline StoreResponse replace(const StoreCommand &);
+    inline StoreResponse replace(const StoreCommand&);
 
-    inline RemoveResponse remove(const RemoveCommand &);
+    inline RemoveResponse remove(const RemoveCommand&);
 
-    inline CounterResponse counter(const CounterCommand &);
+    inline CounterResponse counter(const CounterCommand&);
 
-    inline StatsResponse stats(const std::string &key);
+    inline StatsResponse stats(const std::string& key);
 
-    inline UnlockResponse unlock(const UnlockCommand &cmd);
+    inline UnlockResponse unlock(const UnlockCommand& cmd);
 
     //! @brief Wait until client is connected
     //! @details
@@ -596,7 +595,7 @@ namespace Couchbase
     inline void breakout() { if (!remaining) { lcb_breakout(m_instance); }}
 
     //! @private
-    inline void _dispatch(int, const lcb_RESPBASE *);
+    inline void _dispatch(int, const lcb_RESPBASE*);
 
   private:
     friend class BatchContext;
@@ -606,7 +605,7 @@ namespace Couchbase
     lcb_t m_instance;
     size_t remaining;
 
-    Client(Client &) = delete;
+    Client(Client&) = delete;
   };
 
 //! @class Operation
@@ -628,23 +627,23 @@ namespace Couchbase
   public:
     Operation() : CommandType() { }
 
-    Operation(const CommandType &c) : CommandType(c) { }
+    Operation(const CommandType& c) : CommandType(c) { }
 
-    Operation(CommandType &c) : CommandType(c) { }
+    Operation(CommandType& c) : CommandType(c) { }
 
-    Operation(const char *key) : CommandType(key) { }
+    Operation(const char* key) : CommandType(key) { }
 
-    Operation(const char *key, size_t nkey) : CommandType(key, nkey) { }
+    Operation(const char* key, size_t nkey) : CommandType(key, nkey) { }
 
-    Operation(const std::string &key) : CommandType(key) { }
+    Operation(const std::string& key) : CommandType(key) { }
 
-    Operation<StoreCommand, R>(const std::string &k, const std::string &v,
+    Operation<StoreCommand, R>(const std::string& k, const std::string& v,
                                lcb_storage_t mode = LCB_SET)
         : StoreCommand(k, v, mode)
     {
     }
 
-    Operation<StoreCommand, R>(const char *k, const char *v,
+    Operation<StoreCommand, R>(const char* k, const char* v,
                                lcb_storage_t mode = LCB_SET)
         : StoreCommand(k, v, mode)
     {
@@ -654,7 +653,7 @@ namespace Couchbase
     //! @return a reference to the inner response object
     R response() { return res; }
 
-    const R &const_response() const { return res; }
+    const R& const_response() const { return res; }
 
     //! Schedule an operation on an active context
     //! @param ctx an active context
@@ -662,13 +661,13 @@ namespace Couchbase
     //!         has not been scheduled successfully. Otherwise,
     //!         the operation will complete once BatchContext::submit() and
     //!         Client::wait() have been invoked.
-    Status schedule(BatchContext &ctx) { return ctx.addop(*this); }
+    Status schedule(BatchContext& ctx) { return ctx.addop(*this); }
 
     //! Execute this operation immediately on the client.
     //! @param client the client to use. The client must not have an active
     //!        context.
     //! @return the status of the response
-    inline R run(Client &client);
+    inline R run(Client& client);
 
   protected:
     friend class BatchContext;
@@ -745,5 +744,3 @@ namespace Couchbase
 #include <libcouchbase/couchbase++/endure.h>
 #include <libcouchbase/couchbase++/client.inl.h>
 #include <libcouchbase/couchbase++/batch.inl.h>
-
-#endif

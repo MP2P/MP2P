@@ -48,17 +48,25 @@ namespace utils
     unsigned port_;
     unsigned concurrent_threads_;
     boost::posix_time::time_duration timeout_;
+    std::string DBhost_;
+    unsigned DBport_;
+    std::string DBpassword_;
+    std::string DBbucket_;
 
   public:
     // Singleton
     static Conf& get_instance();
 
-    bool update_conf(const std::string& config_path);
+    bool initialize(const std::string& config_path);
 
     std::string host_get() const;
     unsigned port_get() const;
     unsigned concurrency_get() const;
     boost::posix_time::time_duration timeout_get() const;
+    std::string DBhost_get() const;
+    unsigned DBport_get() const;
+    std::string DBpassword_get() const;
+    std::string DBbucket_get() const;
   };
 
 

@@ -1,40 +1,40 @@
-#ifndef LCB_PLUSPLUS_H
-#error "Include <libcouchbase/couchbase++.h> first!"
-#endif
-
-#ifndef LCB_PLUSPLUS_VIEWS_H
-#define LCB_PLUSPLUS_VIEWS_H
+#pragma once
 
 #include <deque>
 
-namespace Couchbase {
+namespace Couchbase
+{
 
-class ViewQuery;
+  class ViewQuery;
 
-namespace Internal {
-extern "C" { static void viewcb(lcb_t,int,const lcb_RESPVIEWQUERY*); }
-}
+  namespace Internal
+  {
+    extern "C" { static void viewcb(lcb_t, int, const lcb_RESPVIEWQUERY*); }
+  }
 
 // View API
-class ViewCommand : private lcb_CMDVIEWQUERY {
-public:
+  class ViewCommand : private lcb_CMDVIEWQUERY
+  {
+  public:
     //! @Create a new view command
     //! @param design the design document
     //! @param view the view to execute
-    inline ViewCommand(const char *design, const char *view);
+    inline ViewCommand(const char* design, const char* view);
 
     //! Indicate if this is a spatial view
     //! @param enabled true if this is a spatial view, false otherwise
-    inline void spatial(bool enabled = true) {
-        add_cmd_flag(LCB_CMDVIEWQUERY_F_SPATIAL, enabled);
+    inline void spatial(bool enabled = true)
+    {
+      add_cmd_flag(LCB_CMDVIEWQUERY_F_SPATIAL, enabled);
     }
 
     //! Whether to include documents with each row.
     //! If enabled, each @ref ViewRow object will contain a valid `document`
     //! field.
     //! @param enabled true if documents should be fetched alongside items
-    void include_docs(bool enabled = true) {
-        add_cmd_flag(LCB_CMDVIEWQUERY_F_INCLUDE_DOCS, enabled);
+    void include_docs(bool enabled = true)
+    {
+      add_cmd_flag(LCB_CMDVIEWQUERY_F_INCLUDE_DOCS, enabled);
     }
 
     //! Do not parse rows into id, key, value and geometry fields.
@@ -42,34 +42,41 @@ public:
     //! if given an entire row rather than distinct chunks. Note this option
     //! is incompatible with #include_docs().
     //! @param enabled whether to enable this feature
-    void no_parse_rows(bool enabled = true) {
-        add_cmd_flag(LCB_CMDVIEWQUERY_F_NOROWPARSE, enabled);
+    void no_parse_rows(bool enabled = true)
+    {
+      add_cmd_flag(LCB_CMDVIEWQUERY_F_NOROWPARSE, enabled);
     }
 
     //! Add a simple view option. The option must be properly formatted
     //! @param key the option name
     //! @param value the option value
-    inline void add_option(const char *key, const char *value);
-    inline void add_option(const char *key, bool value);
-    inline void add_option(const char *key, int value);
+    inline void add_option(const char* key, const char* value);
+
+    inline void add_option(const char* key, bool value);
+
+    inline void add_option(const char* key, int value);
 
     //! Set the raw option string, e.g. `"stale=false&limit=400"`
     //! @param options the option string.
-    inline void options(const char *options);
+    inline void options(const char* options);
 
     const std::string& get_options() const { return m_options; }
 
-private:
+  private:
     std::string m_options;
     std::string s_view;
     std::string s_design;
-    friend class ViewQuery;
-    lcb_VIEWHANDLE vhptr;
-    inline void add_cmd_flag(int flag, bool enabled);
-};
 
-class ViewRow {
-public:
+    friend class ViewQuery;
+
+    lcb_VIEWHANDLE vhptr;
+
+    inline void add_cmd_flag(int flag, bool enabled);
+  };
+
+  class ViewRow
+  {
+  public:
     //! Get the emitted key
     //! @return the emitted key as a string
     const std::string& key() const { return m_key; }
@@ -100,9 +107,10 @@ public:
     //! was fetched successfuly, just that it may be inspected.
     bool has_document() const { return m_hasdoc; }
 
-private:
+  private:
     inline static void f2s(const void*, size_t, std::string&);
-    ViewRow(const lcb_RESPVIEWQUERY *resp);
+
+    ViewRow(const lcb_RESPVIEWQUERY* resp);
 
     std::string m_key;
     std::string m_value;
@@ -111,28 +119,33 @@ private:
     std::string m_docid;
     GetResponse m_document;
     bool m_hasdoc;
-    friend class Client;
-    friend class ViewQuery;
-};
 
-class ViewMeta {
-public:
+    friend class Client;
+
+    friend class ViewQuery;
+  };
+
+  class ViewMeta
+  {
+  public:
     std::string body;
     std::string http;
     Status rc;
     short htcode;
-private:
+  private:
     friend class ViewQuery;
-    inline ViewMeta(const lcb_RESPVIEWQUERY *resp);
-};
+
+    inline ViewMeta(const lcb_RESPVIEWQUERY* resp);
+  };
 
 
-namespace Internal { class ViewIterator; }
+  namespace Internal { class ViewIterator; }
 
 //! This class may be used to execute a view query and iterate over its
 //! results.
-class ViewQuery {
-public:
+  class ViewQuery
+  {
+  public:
     //! Initialize the query object.
     //! @param client the client on which to issue the query
     //! @param cmd a populated command object
@@ -140,8 +153,10 @@ public:
     //!        of the query. If status is false (i.e. failure), then this object
     //!        must not be used further.
     inline ViewQuery(Client& client, const ViewCommand& cmd, Status& status);
+
     inline ~ViewQuery();
-    inline void _dispatch(const lcb_RESPVIEWQUERY *resp);
+
+    inline void _dispatch(const lcb_RESPVIEWQUERY* resp);
 
 
     //! @private
@@ -166,28 +181,32 @@ public:
     //! iterator will incrementally fetch rows from the network
     //! until no more rows remain.
     inline const_iterator begin();
+
     inline const_iterator end();
+
     inline Status status() const;
 
-private:
+  private:
     Client& cli;
-    ViewMeta *m_meta;
+    ViewMeta* m_meta;
     lcb_VIEWHANDLE vh;
     std::deque<ViewRow> rows;
-    friend class Internal::ViewIterator;
-    inline const ViewRow* next();
-};
 
-namespace Internal {
-extern "C" {
-static void viewcb(lcb_t, int, const lcb_RESPVIEWQUERY *resp) {
-    ViewQuery *vq = reinterpret_cast<ViewQuery*>(resp->cookie);
-    vq->_dispatch(resp);
-}
-}
-} // namespace Internal
+    friend class Internal::ViewIterator;
+
+    inline const ViewRow* next();
+  };
+
+  namespace Internal
+  {
+    extern "C" {
+    static void viewcb(lcb_t, int, const lcb_RESPVIEWQUERY* resp)
+    {
+      ViewQuery* vq = reinterpret_cast<ViewQuery*>(resp->cookie);
+      vq->_dispatch(resp);
+    }
+    }
+  } // namespace Internal
 } // namespace Couchbase
 
 #include <libcouchbase/couchbase++/views.inl.h>
-
-#endif

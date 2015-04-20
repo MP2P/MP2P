@@ -27,4 +27,24 @@ namespace utils
   {
     return timeout_;
   }
+
+  inline std::string Conf::DBhost_get() const
+  {
+    return DBhost_;
+  }
+
+  inline unsigned Conf::DBport_get() const
+  {
+    return DBport_;
+  }
+
+  inline std::string Conf::DBpassword_get() const
+  {
+    return DBpassword_;
+  }
+
+  inline std::string Conf::DBbucket_get() const
+  {
+    return DBbucket_;
+  }
 }

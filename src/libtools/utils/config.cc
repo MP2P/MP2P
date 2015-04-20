@@ -12,7 +12,7 @@ namespace utils
     return instance;
   }
 
-  bool Conf::update_conf(const std::string& path)
+  bool Conf::initialize(const std::string& path)
   {
     libconfig::Config cfg;
 
@@ -22,13 +22,14 @@ namespace utils
     }
     catch (const libconfig::FileIOException& fioex)
     {
-      std::cerr << "i/o error while reading file." << std::endl;
+      utils::Logger::cout() << "I/O error while reading configuration file.";
       return false;
     }
     catch (const libconfig::ParseException& pex)
     {
-      std::cerr << "parse error at " << pex.getFile() << ":" << pex.getLine()
-          << " - " << pex.getError() << std::endl;
+      utils::Logger::cout() << "Parse error while reading configuration file ("
+                               + std::string(pex.getFile()) +  ":"
+                               + std::to_string(pex.getLine()) + ").";
       return false;
     }
 
@@ -59,6 +60,26 @@ namespace utils
     if (timeout <= 0)
       timeout = 300;
     timeout_ = seconds(timeout);
+
+    // Getting host value - Default = "localhost"
+    cfg.lookupValue("couchbase.host", DBhost_);
+    if (DBhost_ == "")
+      DBhost_ = "localhost";
+
+    // Getting port value - Default = 11211
+    cfg.lookupValue("couchbase.port", DBport_);
+    if (DBport_ == 0)
+      DBport_ = 11211;
+
+    // Getting password value
+    cfg.lookupValue("couchbase.password", DBpassword_);
+    if (DBpassword_ == "")
+      DBpassword_ = "";
+
+    // Getting bucket name
+    cfg.lookupValue("couchbase.bucket", DBbucket_);
+    if (DBbucket_ == "")
+      DBbucket_ = "";
 
     return true;
   }
