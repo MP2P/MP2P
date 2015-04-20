@@ -6,18 +6,27 @@ namespace network
 {
 
   Session::Session(ip::tcp::socket&& socket,
-                   std::function<error_code(Session&)> handler)
+                   std::function<error_code(Session&)> handler,
+                   std::shared_ptr<std::set<std::shared_ptr<Session>>> parent_container)
       : socket_{std::forward<ip::tcp::socket>(socket)},
-        handler_{std::move(handler)}
+        handler_{std::move(handler)},
+        parent_container_{parent_container}
   {
+  }
+
+  Session::~Session()
+  {
+    utils::Logger::cout() << "Session destroyed";
   }
 
   Session::Session(io_service& io_service,
                    const std::string& host,
                    const std::string& port,
-                   std::function<error_code(Session&)> handler)
+                   std::function<error_code(Session&)> handler,
+                   std::shared_ptr<std::set<std::shared_ptr<Session>>> parent_container)
     : socket_{io_service},
-      handler_{std::move(handler)}
+      handler_{std::move(handler)},
+      parent_container_{parent_container}
   {
     ip::tcp::resolver resolver{io_service}; // Resolve the host
     ip::tcp::resolver::query query{host, port};
@@ -95,6 +104,8 @@ namespace network
                     {
                       utils::Logger::cout() << "Closed session";
                       socket_.close(); // Close the socket
+                      if (parent_container_)
+                        parent_container_->erase(shared_from_this());
                     }
                     else
                     {

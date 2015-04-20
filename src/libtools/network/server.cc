@@ -65,9 +65,11 @@ namespace network
                                       + s.str() + ").";
 
             auto session = std::make_shared<Session>(std::move(socket_),
-                                                     handler_);
+                                                     handler_,
+                             std::shared_ptr<std::set<std::shared_ptr<Session>>>(&sessions_));
+
             session->receive();
-            sessions_.push_back(session);
+            sessions_.insert(session);
 
             // At the end of each request & treatment, we call listen again.
             listen();

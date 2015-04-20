@@ -138,6 +138,6 @@ error_code Storage::handle(Session& session)
   {
     // FIXME : handle storage
     default:
-      return 1; // Error
+      return 100; // Error
   }
 }

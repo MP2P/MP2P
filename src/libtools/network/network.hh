@@ -10,8 +10,8 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
 #include <glob.h>
+#include <set>
 
 #include <utils.hh>
 #include <files.hh>
@@ -113,24 +113,29 @@ namespace network
   /*-----------.
   | session.cc |
   `-----------*/
-  class Session
+  class Session : public std::enable_shared_from_this<Session>
   {
   private:
     boost::asio::ip::tcp::socket socket_;
     boost::asio::streambuf buff_;
     size_t length_;
     std::function<error_code(Session&)> handler_;
+    std::shared_ptr<std::set<std::shared_ptr<Session>>> parent_container_;
 
   public:
     // Create a session
     Session(boost::asio::ip::tcp::socket&& socket,
-            std::function<error_code(Session& )> handler);
+            std::function<error_code(Session& )> handler,
+            std::shared_ptr<std::set<std::shared_ptr<Session>>> parent_container);
 
     // Create a session and connect to the host:port
     Session(boost::asio::io_service& io_service,
             const std::string& host,
             const std::string& port,
-            std::function<error_code(Session& )> handler);
+            std::function<error_code(Session& )> handler,
+            std::shared_ptr<std::set<std::shared_ptr<Session>>> parent_container);
+
+    ~Session();
 
     boost::asio::ip::tcp::socket& socket_get();
 
@@ -157,7 +162,7 @@ namespace network
     boost::asio::ip::tcp::acceptor acceptor_;
     boost::asio::ip::tcp::socket socket_;
     std::function<error_code(Session&)> handler_;
-    std::vector<std::shared_ptr<Session>> sessions_;
+    std::set<std::shared_ptr<Session>> sessions_;
 
   public:
     Server(boost::asio::io_service& io_service,
