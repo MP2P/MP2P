@@ -13,7 +13,7 @@ private:
   network::Server server_;
   std::forward_list<std::thread> threads_;
 
-  error_code handle(network::Session &session);
+  error_code handle(network::Session& session);
 
   // Causes the server to stop its running threads if any.
   void stop();
