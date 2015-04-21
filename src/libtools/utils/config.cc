@@ -39,7 +39,6 @@ namespace utils
     if (host_ == "")
       host_ = "localhost";
 
-
     // Getting port value - Default = 3727
     cfg.lookupValue("server.port", port_);
     if (port_ == 0)

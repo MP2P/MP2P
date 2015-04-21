@@ -1,7 +1,7 @@
 file(GLOB_RECURSE SERVERSOURCES *.cc)
 
 #The degug target
-add_executable(master-debug ${SERVERSOURCES} DbConnector.hxx DbConnector.hh)
+add_executable(master-debug ${SERVERSOURCES} DbConnector.hxx Database.hh)
 add_dependencies(debug master-debug)
 target_link_libraries(master-debug LINK_PUBLIC libtools-debug couchbase)
 target_include_directories(master-debug PUBLIC .)

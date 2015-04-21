@@ -20,6 +20,7 @@
 //        exit(EXIT_FAILURE);
 //    }
 //
+//
 //    //! Store item.
 //    Couchbase::UpsertOperation scmd("foo",
 //        "{ \"v\": 100.1, \"list\": [1,2,3,4,5,6,7], \"talk\": \"About Foo.\" }");

@@ -2,7 +2,7 @@
 
 #include <utils.hh>
 #include "master.hh"
-#include "DbConnector.hh"
+#include "Database.hh"
 
 int main()
 {
@@ -12,7 +12,8 @@ int main()
 
     Master master;
 
-    if (!DbConnector::get_instance().Initialize())
+    // Init database connection only for master
+    if (!Database::Database::get_instance().Initialize())
       throw std::logic_error("Could not connect to database.");
     else
       utils::Logger::cout() << "Successfully connected to database.";
