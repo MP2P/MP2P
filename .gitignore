@@ -32,3 +32,6 @@ build/
 
 # VIM
 *.swp
+
+# MISC
+*.conf

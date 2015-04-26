@@ -1,4 +1,9 @@
+#pragma once
+
 #include <cstdint>
+
+struct STAFIELD;
+struct STPFIELD;
 
 //using err_type = uint16_t;
 using data_type = unsigned char*;
@@ -28,41 +33,17 @@ struct ADDR
   port_type port;
 } __attribute__ ((packed));
 
-//struct ERR
-//{
-//  err_type value;
-//} __attribute__ ((packed));
-
 struct FDETAILS
 {
   fid_type fid;
   stplist_type stplist;
 } __attribute__ ((packed));
 
-//struct FID
-//{
-  //uint64_t value;
-//} __attribute__ ((packed));
-
-//struct FNAME
-//{
-  //char* tab;
-//} __attribute__ ((packed));
-
-//struct FROMTO
-//{
-  //unsigned char value;
-//} __attribute__ ((packed));
-
-//struct FSIZE
-//{
-  //uint64_t value;
-//} __attribute__ ((packed));
-
-//struct IPV6
-//{
-  //char[16] value;
-//} __attribute__ ((packed));
+struct TYPE
+{
+  fromto_type fromto;
+  what_type what;
+} __attribute__ ((packed));
 
 struct PACKET
 {
@@ -87,10 +68,4 @@ struct STPFIELD
 {
   stid_type stid;
   nb_type nb;
-} __attribute__ ((packed));
-
-struct TYPE
-{
-  fromto_type fromto;
-  what_type what;
 } __attribute__ ((packed));
