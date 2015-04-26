@@ -15,6 +15,16 @@ namespace Database
     return replication_;
   }
 
+  inline std::string FileItem::uid_get() const
+  {
+    return uid_;
+  }
+
+  inline std::string FileItem ::hash_get() const
+  {
+    return hash_;
+  }
+
   inline bool FileItem::is_replicated() const
   {
     return replicated_;
@@ -38,5 +48,20 @@ namespace Database
   inline std::string PartItem::hash_get() const
   {
     return hash_;
+  }
+
+  inline std::string MasterItem::uid_get() const
+  {
+    return uid_;
+  }
+
+  inline std::string StorageItem::uid_get() const
+  {
+    return uid_;
+  }
+
+  inline size_t StorageItem::available_space_get() const
+  {
+    return available_space_;
   }
 }

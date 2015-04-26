@@ -39,7 +39,7 @@ namespace utils
 
   Logger& Logger::cout()
   {
-    static Logger instance;
+    static Logger instance(std::cout);
     return instance;
   }
 

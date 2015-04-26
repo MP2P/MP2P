@@ -25,7 +25,7 @@ Master::~Master()
 }
 
 // Creates threads & make them bind the same port defined in the config.
-bool Master::run()
+bool Master::run() // Throws
 {
   if (!server_.is_running())
   {

@@ -2,28 +2,31 @@
 
 #include <utils.hh>
 #include "master.hh"
-#include "Database.hh"
+#include "database.hh"
 
 int main()
 {
   try
   {
-    utils::init(); // Throws if anything goes bad
+    // Throws if anything goes bad
+    utils::init();
+
+    const std::string host = utils::Conf::get_instance().DBhost_get();
+    const std::string password = utils::Conf::get_instance().DBpassword_get();
+    const std::string bucket = utils::Conf::get_instance().DBbucket_get();
+
+    // Throws if anything goes bad
+    static Database::CouchbaseDb db = Database::CouchbaseDb(host, password,
+                                                            bucket);
+    utils::Logger::cout() << "Successfully connected to database.";
 
     Master master;
-
-    // Init database connection only for master
-    if (!Database::Database::get_instance().Initialize())
-      throw std::logic_error("Could not connect to database.");
-    else
-      utils::Logger::cout() << "Successfully connected to database.";
-
     if (master.run())
       master.catch_stop();
   }
   catch (std::exception &e)
   {
-    utils::Logger::cerr() << "Master failed : " + std::string(e.what());
-    return 1;
+    utils::Logger::cerr() << "Master exception: " + std::string(e.what());
+    std::exit(EXIT_FAILURE);
   }
 }

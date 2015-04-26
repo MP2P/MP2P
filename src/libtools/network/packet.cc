@@ -4,9 +4,7 @@
 namespace network
 {
 
-  Packet::Packet(uint8_t fromto,
-      uint8_t what,
-      std::string message)
+  Packet::Packet(uint8_t fromto, uint8_t what, std::string message)
       : fromto_(fromto),
         what_(what),
         message_(message)
@@ -14,10 +12,7 @@ namespace network
     size_ = message.length();
   }
 
-  Packet::Packet(uint8_t fromto,
-      uint8_t what,
-      const char* message,
-      size_t size)
+  Packet::Packet(uint8_t fromto, uint8_t what, const char* message, size_t size)
       : size_(size),
         fromto_(fromto),
         what_(what),
@@ -25,12 +20,8 @@ namespace network
   {
   }
 
-  Packet::Packet(uint8_t fromto,
-      uint8_t what,
-      const char* message,
-      std::string hash,
-      size_t partid,
-      size_t size)
+  Packet::Packet(uint8_t fromto, uint8_t what, const char* message,
+                 std::string hash, size_t partid, size_t size)
       : fromto_(fromto),
         what_(what)
   {

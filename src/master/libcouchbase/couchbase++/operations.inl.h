@@ -1,3 +1,5 @@
+#pragma once
+
 // Inline definitions for lcb++
 namespace Couchbase
 {
@@ -42,10 +44,6 @@ template<>inline Status tinst::schedule_lcb(lcb_t instance) { \
   {
     BatchContext b(client);
     Status st = schedule(b);
-    if (!st)
-    {
-      return R::setcode(res, st);
-    }
     if (st)
     {
       b.submit();
