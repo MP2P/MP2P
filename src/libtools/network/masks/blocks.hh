@@ -15,17 +15,13 @@ using ipv6_type = unsigned char[16];
 using nb_type = uint16_t;
 using partnum_type = uint32_t;
 using port_type = uint16_t;
+using rdcy_type = uint8_t;
 using sha1_type = unsigned char[16];
 using size_type = uint32_t;
 using stid_type = uint32_t;
 using stalist_type = STAFIELD*;
 using stplist_type = STPFIELD*;
 using what_type = unsigned char;
-//using _type = ;
-//using _type = ;
-//using _type = ;
-
-//static const int ip_size = 16;
 
 struct ADDR
 {

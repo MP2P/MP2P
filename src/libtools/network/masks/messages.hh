@@ -8,6 +8,7 @@ struct c_m_up_req
 {
   fsize_type fsize;
   fname_type fname;
+  rdcy_type rdcy;
 } __attribute__ ((packed));
 
 struct c_s_up_act
@@ -28,4 +29,5 @@ struct s_m_part_ack
 {
   PARTID partid;
   ipv6_type ip;
+  avspace_type avspace;
 } __attribute__ ((packed));
