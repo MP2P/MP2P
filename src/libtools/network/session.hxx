@@ -18,4 +18,9 @@ namespace network
   {
     return length_;
   }
+
+  inline size_t Session::id_get() const
+  {
+    return id_;
+  }
 }

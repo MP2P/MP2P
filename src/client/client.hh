@@ -10,6 +10,7 @@ private:
   network::Session master_session_;
 
   error_code handle(network::Session& session);
+  void remove_handle(network::Session& session);
 
 public:
   Client(const std::string& host, const std::string& port);

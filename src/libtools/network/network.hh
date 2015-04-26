@@ -115,11 +115,14 @@ namespace network
   class Session
   {
   private:
+    const size_t id_;
     boost::asio::ip::tcp::socket socket_;
     boost::asio::streambuf buff_;
     size_t length_;
     std::function<error_code(Session&)> handler_;
     std::function<void(Session&)> delete_handler_;
+
+    static size_t unique_id();
 
   public:
     // Create a session
@@ -144,6 +147,8 @@ namespace network
 
     size_t length_get() const;
 
+    size_t id_get() const;
+
     std::string get_line();
 
     Packet get_packet();
@@ -155,7 +160,6 @@ namespace network
     void delete_handler(Session& session);
   };
 
-
   /*----------.
   | server.cc |
   `----------*/
@@ -165,7 +169,6 @@ namespace network
     boost::asio::ip::tcp::acceptor acceptor_;
     boost::asio::ip::tcp::socket socket_;
     std::function<error_code(Session&)> handler_;
-    std::unordered_set<Session> sessions_;
 
   public:
     Server(boost::asio::io_service& io_service,
@@ -187,3 +190,15 @@ namespace network
 #include "packet.hxx"
 #include "error.hxx"
 #include "session.hxx"
+
+namespace std
+{
+  template <>
+  struct hash<network::Session>
+  {
+    size_t operator()(const network::Session& session) const
+    {
+      return session.id_get();
+    }
+  };
+}

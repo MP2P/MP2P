@@ -8,10 +8,10 @@ namespace network
   Session::Session(ip::tcp::socket&& socket,
                    std::function<error_code(Session&)> handler,
                    std::function<void(Session&)> delete_handler)
-      : socket_{std::forward<ip::tcp::socket>(socket)},
+      : id_{unique_id()},
+        socket_{std::forward<ip::tcp::socket>(socket)},
         handler_{std::move(handler)},
         delete_handler_{std::move(delete_handler)}
-
   {
   }
 
@@ -25,7 +25,8 @@ namespace network
                    const std::string& port,
                    std::function<error_code(Session&)> handler,
                    std::function<void(Session&)> delete_handler)
-    : socket_{io_service},
+    : id_{unique_id()},
+      socket_{io_service},
       handler_{std::move(handler)},
       delete_handler_{std::move(delete_handler)}
   {
@@ -136,5 +137,11 @@ namespace network
     auto error = handler_(*this);
     if (error == 1)
       socket_.close();
+  }
+
+  size_t Session::unique_id()
+  {
+    static std::atomic_size_t id;
+    return id++;
   }
 }

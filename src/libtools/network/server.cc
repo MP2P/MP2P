@@ -64,13 +64,14 @@ namespace network
             utils::Logger::cout() << "Connection accepted. (Thread "
                                       + s.str() + ").";
 
-            auto emplaced = sessions_.emplace(std::move(socket_), handler_,
+            /*auto emplaced = sessions_.emplace(std::move(socket_), handler_,
               std::bind(&Server::delete_handler, this, std::placeholders::_1)
               );
 
             assert(emplaced.second);
 
             emplaced.first->receive();
+            */
 
             // At the end of each request & treatment, we call listen again.
             listen();
@@ -81,6 +82,7 @@ namespace network
 
   void Server::delete_handler(Session& session)
   {
-    sessions_.erase(session);
+    (void)session;
+    //sessions_.erase(session);
   }
 }
