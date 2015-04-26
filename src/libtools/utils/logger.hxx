@@ -29,4 +29,10 @@ namespace utils
     Print(t);
     return *this;
   }
+
+  //template <typename T>
+  //Logger& std::ostringstream& operator<<(T t)
+  //{
+    //Print(t);
+  //}
 }

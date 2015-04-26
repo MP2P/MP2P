@@ -110,6 +110,9 @@ namespace utils
       template <typename T>
       Logger& operator<<(T t);
 
+      //template <typename T>
+      //std::ostringstream& operator<<(T t);
+
     private:
       std::ostream& stream_;
       Active a_;
