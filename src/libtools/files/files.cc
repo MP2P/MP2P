@@ -64,7 +64,7 @@ namespace files
   size_t parts_for_size(size_t size)
   {
     // Max authorized file size = 256TB
-    <// FIXME : Compute the parts relative to the size.
+    // FIXME : Compute the parts relative to the size.
     (void)size;
     return 4;
   }

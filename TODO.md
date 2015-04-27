@@ -25,3 +25,7 @@ Cyphering
 **DONE** - IPV6
 Log system
  * Add our own throwable function to be able to log it
+
+
+* Libcouchbase-cxx
+ * Resolve leak of lcb_create in Client constructot

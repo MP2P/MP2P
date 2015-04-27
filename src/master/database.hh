@@ -3,6 +3,8 @@
 #include <string>
 #include <libcouchbase/couchbase++.h>
 
+#include <masks/blocks.hh>
+
 namespace Database
 {
   // Abstract class
@@ -12,9 +14,10 @@ namespace Database
     Database() = default;
     Database(Database const&) = delete;
     void operator=(Database const&) = delete;
-    ~Database() {};
 
   public:
+    virtual ~Database() = default;
+
     // Db commands
     virtual std::string cmd_get(const std::string& key) = 0;
     virtual bool cmd_put(const std::string& key, const std::string& value) = 0;
@@ -29,10 +32,11 @@ namespace Database
   public:
     CouchbaseDb(const std::string& host, const std::string& pass,
                 const std::string& buckt);
+    ~CouchbaseDb() { Database::~Database(); };
 
     // Db commands
-    std::string cmd_get(const std::string& key);
-    bool cmd_put(const std::string& key, const std::string& value);
+    std::string cmd_get(const std::string& key) override;
+    bool cmd_put(const std::string& key, const std::string& value) override;
   };
 
   class Item
@@ -47,21 +51,19 @@ namespace Database
   class FileItem : public Item
   {
   private:
-    size_t nb_part_ = 0;
-    size_t file_size_ = 0;
-    uint replication_ = 1;
-    std::string uid_;
-    std::string hash_;
+    fsize_type file_size_ = 0;
+    rdcy_type replication_ = 1;
+    fid_type id_;
+    sha1_type hash_;
     bool replicated_ = false;
     bool uploaded_ = false;
 
   public:
     FileItem() : Item() {};
-    size_t nb_part_get() const;
-    size_t file_size_get() const;
-    size_t replication_get() const;
-    std::string uid_get() const;
-    std::string hash_get() const;
+    fsize_type file_size_get() const;
+    rdcy_type replication_get() const;
+    fid_type id_get() const;
+    sha1_return_type hash_get();
     bool is_replicated() const;
     bool is_uploaded() const;
   };
@@ -69,34 +71,33 @@ namespace Database
   class PartItem : public Item
   {
   private:
-    size_t size_ = 0;
-    std::string uid_;
-    std::string hash_;
+    PARTID partid_;
+    sha1_type hash_;
   public:
     PartItem() : Item() {};
-    size_t size_get() const;
-    std::string uid_get() const;
-    std::string hash_get() const;
+    fid_type fileid_get() const;
+    partnum_type num_get() const;
+    sha1_return_type hash_get();
   };
 
   class MasterItem : public Item
   {
   private:
-    std::string uid_;
+    mtid_type id_;
   public:
     MasterItem() : Item() {};
-    std::string uid_get() const;
+    mtid_type id_get() const;
   };
 
   class StorageItem : public Item
   {
   private:
-    std::string uid_;
-    size_t available_space_;
+    stid_type id_;
+    avspace_type available_space_;
   public:
     StorageItem() : Item() {};
-    std::string uid_get() const;
-    size_t available_space_get() const;
+    stid_type id_get() const;
+    avspace_type available_space_get() const;
   };
 }
 

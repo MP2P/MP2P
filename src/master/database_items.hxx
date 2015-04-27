@@ -1,28 +1,25 @@
+#include <masks/blocks.hh>
+
 namespace Database
 {
-  inline size_t FileItem::nb_part_get() const
-  {
-    return nb_part_;
-  }
-
-  inline size_t FileItem::file_size_get() const
+  inline fsize_type FileItem::file_size_get() const
   {
     return file_size_;
   }
 
-  inline size_t FileItem::replication_get() const
+  inline rdcy_type FileItem::replication_get() const
   {
     return replication_;
   }
 
-  inline std::string FileItem::uid_get() const
+  inline fid_type FileItem::id_get() const
   {
-    return uid_;
+    return id_;
   }
 
-  inline std::string FileItem ::hash_get() const
+  sha1_return_type FileItem::hash_get()
   {
-    return hash_;
+    return &hash_[0];
   }
 
   inline bool FileItem::is_replicated() const
@@ -35,32 +32,32 @@ namespace Database
     return uploaded_;
   }
 
-  inline size_t PartItem::size_get() const
+  inline fid_type PartItem::fileid_get() const
   {
-    return size_;
+    return partid_.fid;
   }
 
-  inline std::string PartItem::uid_get() const
+  inline partnum_type PartItem::num_get() const
   {
-    return uid_;
+    return partid_.partnum;
   }
 
-  inline std::string PartItem::hash_get() const
+  inline sha1_return_type PartItem::hash_get()
   {
-    return hash_;
+    return &hash_[0];
   }
 
-  inline std::string MasterItem::uid_get() const
+  inline mtid_type MasterItem::id_get() const
   {
-    return uid_;
+    return id_;
   }
 
-  inline std::string StorageItem::uid_get() const
+  inline stid_type StorageItem::id_get() const
   {
-    return uid_;
+    return id_;
   }
 
-  inline size_t StorageItem::available_space_get() const
+  inline avspace_type StorageItem::available_space_get() const
   {
     return available_space_;
   }

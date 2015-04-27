@@ -4,6 +4,8 @@
 #include "master.hh"
 #include "database.hh"
 
+static Database::Database* db;
+
 int main()
 {
   try
@@ -16,13 +18,14 @@ int main()
     const std::string bucket = utils::Conf::get_instance().DBbucket_get();
 
     // Throws if anything goes bad
-    static Database::CouchbaseDb db = Database::CouchbaseDb(host, password,
-                                                            bucket);
+    db = new Database::CouchbaseDb(host, password, bucket);
     utils::Logger::cout() << "Successfully connected to database.";
 
     Master master;
     if (master.run())
       master.catch_stop();
+    delete db;
+    std::cout << "deleted db" << db << std::endl;
   }
   catch (std::exception &e)
   {
