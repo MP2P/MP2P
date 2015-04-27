@@ -23,4 +23,9 @@ namespace network
   {
     return id_;
   }
+
+  inline bool operator==(const Session& lhs, const Session& rhs)
+  {
+    return lhs.id_get() == rhs.id_get();
+  }
 }

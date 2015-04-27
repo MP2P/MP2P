@@ -2,16 +2,25 @@
 
 using namespace boost::asio;
 
+namespace std
+{
+  size_t hash<network::Session>::operator()(const network::Session& session) const
+  {
+    return session.id_get();
+  }
+}
+
 namespace network
 {
 
   Session::Session(ip::tcp::socket&& socket,
                    std::function<error_code(Session&)> handler,
-                   std::function<void(Session&)> delete_handler)
-      : id_{unique_id()},
-        socket_{std::forward<ip::tcp::socket>(socket)},
+                   std::function<void(Session&)> delete_handler,
+                   size_t id)
+      : socket_{std::forward<ip::tcp::socket>(socket)},
         handler_{std::move(handler)},
-        delete_handler_{std::move(delete_handler)}
+        delete_handler_{std::move(delete_handler)},
+        id_{id}
   {
   }
 
@@ -24,11 +33,12 @@ namespace network
                    const std::string& host,
                    const std::string& port,
                    std::function<error_code(Session&)> handler,
-                   std::function<void(Session&)> delete_handler)
-    : id_{unique_id()},
-      socket_{io_service},
+                   std::function<void(Session&)> delete_handler,
+                   size_t id)
+    : socket_{io_service},
       handler_{std::move(handler)},
-      delete_handler_{std::move(delete_handler)}
+      delete_handler_{std::move(delete_handler)},
+      id_{id}
   {
     ip::tcp::resolver resolver{io_service}; // Resolve the host
     ip::tcp::resolver::query query{host, port};

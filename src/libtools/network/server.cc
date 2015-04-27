@@ -64,14 +64,16 @@ namespace network
             utils::Logger::cout() << "Connection accepted. (Thread "
                                       + s.str() + ").";
 
-            /*auto emplaced = sessions_.emplace(std::move(socket_), handler_,
-              std::bind(&Server::delete_handler, this, std::placeholders::_1)
+            size_t id = Session::unique_id();
+            Session ses(std::move(socket_), handler_,
+                std::bind(&Server::delete_handler, this, std::placeholders::_1),
+                id
               );
 
-            assert(emplaced.second);
+            sessions_.insert(std::make_pair(std::move(id), std::move(ses)));
 
-            emplaced.first->receive();
-            */
+            auto& inserted = sessions_.at(id);
+            inserted.receive();
 
             // At the end of each request & treatment, we call listen again.
             listen();

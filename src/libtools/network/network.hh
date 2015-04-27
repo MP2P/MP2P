@@ -17,6 +17,20 @@
 
 namespace network
 {
+  class Session;
+}
+
+namespace std
+{
+  template <>
+  struct hash<network::Session>
+  {
+    size_t operator()(const network::Session& session) const;
+  };
+}
+
+namespace network
+{
   enum FromTo
   {
     C_to_M = 0,
@@ -115,29 +129,33 @@ namespace network
   class Session
   {
   private:
-    const size_t id_;
     boost::asio::ip::tcp::socket socket_;
     boost::asio::streambuf buff_;
     size_t length_;
     std::function<error_code(Session&)> handler_;
     std::function<void(Session&)> delete_handler_;
-
-    static size_t unique_id();
+    const size_t id_;
 
   public:
     // Create a session
     Session(boost::asio::ip::tcp::socket&& socket,
             std::function<error_code(Session&)> handler,
-            std::function<void(Session&)> delete_handler);
+            std::function<void(Session&)> delete_handler,
+            size_t id = unique_id());
 
     // Create a session and connect to the host:port
     Session(boost::asio::io_service& io_service,
             const std::string& host,
             const std::string& port,
             std::function<error_code(Session&)> handler,
-            std::function<void(Session&)> delete_handler);
+            std::function<void(Session&)> delete_handler,
+            size_t id = unique_id());
 
-    Session(const Session& other) = delete;
+    Session(Session&& other) = default;
+    Session(Session& other) = delete;
+
+    Session& operator=(Session&& other) = default;
+
 
     ~Session();
 
@@ -158,7 +176,11 @@ namespace network
     void send(const Packet& packet);
 
     void delete_handler(Session& session);
+
+    static size_t unique_id();
   };
+
+  bool operator==(const Session& lhs, const Session& rhs);
 
   /*----------.
   | server.cc |
@@ -169,6 +191,7 @@ namespace network
     boost::asio::ip::tcp::acceptor acceptor_;
     boost::asio::ip::tcp::socket socket_;
     std::function<error_code(Session&)> handler_;
+    std::unordered_map<size_t, Session> sessions_;
 
   public:
     Server(boost::asio::io_service& io_service,
@@ -191,14 +214,4 @@ namespace network
 #include "error.hxx"
 #include "session.hxx"
 
-namespace std
-{
-  template <>
-  struct hash<network::Session>
-  {
-    size_t operator()(const network::Session& session) const
-    {
-      return session.id_get();
-    }
-  };
-}
+
