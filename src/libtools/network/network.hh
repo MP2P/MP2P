@@ -17,20 +17,6 @@
 
 namespace network
 {
-  class Session;
-}
-
-namespace std
-{
-  template <>
-  struct hash<network::Session>
-  {
-    size_t operator()(const network::Session& session) const;
-  };
-}
-
-namespace network
-{
   enum FromTo
   {
     C_to_M = 0,
@@ -151,13 +137,7 @@ namespace network
             std::function<void(Session&)> delete_handler,
             size_t id = unique_id());
 
-    Session(Session&& other) = default;
-    Session(Session& other) = delete;
-
-    Session& operator=(Session&& other) = default;
-
-
-    ~Session();
+    Session(Session&& other);
 
     boost::asio::ip::tcp::socket& socket_get();
 

@@ -2,14 +2,6 @@
 
 using namespace boost::asio;
 
-namespace std
-{
-  size_t hash<network::Session>::operator()(const network::Session& session) const
-  {
-    return session.id_get();
-  }
-}
-
 namespace network
 {
 
@@ -22,11 +14,6 @@ namespace network
         delete_handler_{std::move(delete_handler)},
         id_{id}
   {
-  }
-
-  Session::~Session()
-  {
-    utils::Logger::cout() << "Session destroyed";
   }
 
   Session::Session(io_service& io_service,
@@ -53,6 +40,15 @@ namespace network
     std::ostringstream s;
     s << std::this_thread::get_id();
     utils::Logger::cout() << "Opened session (tid=" + s.str() + ")";
+  }
+
+  Session::Session(Session&& other)
+      : socket_{std::move(other.socket_)},
+        length_{other.length_},
+        handler_{std::move(other.handler_)},
+        delete_handler_{std::move(other.delete_handler_)},
+        id_{other.id_}
+  {
   }
 
   // FIXME : Get a generic function to do this
@@ -82,15 +78,18 @@ namespace network
         {
           if (!ec)
           {
-            streambuf::const_buffers_type bufs = buff_.data();
+            uint32_t msg_size = 0;
+            {
+              streambuf::const_buffers_type bufs = buff_.data();
 
-            std::string str(buffers_begin(bufs),
-                            buffers_begin(bufs) + size_length);
+              std::string str(buffers_begin(bufs),
+                              buffers_begin(bufs) + size_length);
 
-            const uint32_t* sizep =
-              reinterpret_cast<const uint32_t*>(str.c_str());
+              const uint32_t* sizep =
+                reinterpret_cast<const uint32_t*>(str.c_str());
 
-            uint32_t msg_size = *sizep;
+              msg_size = *sizep;
+            }
 
             utils::Logger::cout() << "Receiving a message of size: "
                                      + std::to_string(msg_size);

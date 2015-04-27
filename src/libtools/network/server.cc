@@ -65,12 +65,12 @@ namespace network
                                       + s.str() + ").";
 
             size_t id = Session::unique_id();
-            Session ses(std::move(socket_), handler_,
+            sessions_.emplace(id,
+              Session{std::move(socket_), handler_,
                 std::bind(&Server::delete_handler, this, std::placeholders::_1),
                 id
-              );
-
-            sessions_.insert(std::make_pair(std::move(id), std::move(ses)));
+              }
+            );
 
             auto& inserted = sessions_.at(id);
             inserted.receive();
@@ -84,7 +84,6 @@ namespace network
 
   void Server::delete_handler(Session& session)
   {
-    (void)session;
-    //sessions_.erase(session);
+    sessions_.erase(session.id_get());
   }
 }
