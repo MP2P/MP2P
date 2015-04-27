@@ -7,7 +7,7 @@ File transfer application using a custom protocol.
 
 # Details
 
-This project is divided into three different parts:
+This project is divided into for different parts:
 
 * The 'Utils' library
 * The 'Storage' application
@@ -31,19 +31,19 @@ them to set up your own settings.
 ### The Master application
 
 ```
-cd src/master; mkdir build && cd build; cmake ..; make;
+mkdir build && cd build; cmake ..; make master-release -j;
 ```
 
 ### The Storage application
 
 ```
-cd src/storage; mkdir build && cd build; cmake ..; make;
+mkdir build && cd build; cmake ..; make storage-release -j;
 ```
 
 ### The Client application
 
 ```
-cd src/client; mkdir build && cd build; cmake ..; make;
+mkdir build && cd build; cmake ..; make client-release -j;
 ```
 
 ## Requirements
