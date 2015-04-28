@@ -93,11 +93,11 @@ namespace network
             // Read the whole message + the headers left
             callback(msg_size);
           }
+          else if (e == boost::asio::error::eof)
+            kill();
           else
-          {
             utils::Logger::cerr() << "Error while getting size: "
                                   + ec.message();
-          }
         }
     );
   }
@@ -119,21 +119,16 @@ namespace network
                    length_ = 0;
 
                    if (error == 100)
-                   {
-                     utils::Logger::cout() << "Closed session";
-                     socket_.close(); // Close the socket
-                     delete_handler_(*this); // Ask the owner to delete
-                   }
+                     kill();
                    else
-                   {
                      receive(); // Keep the socket alive
-                   }
                  }
                  else
                  {
                    utils::Logger::cerr() << "Error: " + ec.message();
+                   kill();
                  }
-                }
+               }
     );
   }
 
@@ -143,7 +138,9 @@ namespace network
     std::ostringstream s;
     s << std::this_thread::get_id();
     utils::Logger::cout() << "Session receiving...(tid=" + s.str() + ")";
-    receive_size(std::bind(&Session::receive_message, this, std::placeholders::_1));
+    receive_size(std::bind(&Session::receive_message,
+                           this,
+                           std::placeholders::_1));
   }
 
   // Send a packet on the open socket
@@ -160,5 +157,12 @@ namespace network
   {
     static std::atomic_size_t id;
     return id++;
+  }
+
+  void Session::kill()
+  {
+    utils::Logger::cout() << "Closed session";
+    socket_.close(); // Close the socket
+    delete_handler_(*this); // Ask the owner to delete
   }
 }

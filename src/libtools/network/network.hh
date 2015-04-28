@@ -140,7 +140,11 @@ namespace network
             std::function<void(Session&)> delete_handler,
             size_t id = unique_id());
 
+    // Custom move constructor. Since buff_ doesn't have a move constructor
     Session(Session&& other);
+
+    // Kill the session. Close the socket and remove from parent container
+    void kill();
 
     boost::asio::ip::tcp::socket& socket_get();
 
