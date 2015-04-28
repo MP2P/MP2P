@@ -88,8 +88,8 @@ namespace network
 
     // Create a packet with a pointer to data and a size
     // Add the hash and the part id
-//    Packet::Packet(fromto_type fromto, what_type what, const char* message,
-//                   std::string hash, size_t partid, size_t size);
+    Packet(fromto_type fromto, what_type what, const char* message,
+                   std::string hash, size_t partid, size_t size);
 //    // Create a packet with a message
 //    Packet::Packet(fromto_type fromto, what_type what, message_type message);
 //
@@ -133,7 +133,7 @@ namespace network
     std::function<void(Session&)> delete_handler_;
     const size_t id_;
 
-    void receive_size(std::function<void(size_t)> callback);
+    void receive_header(std::function<void(size_t)> callback);
     void receive_message(size_t msg_size);
 
   public:

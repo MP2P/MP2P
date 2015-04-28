@@ -69,33 +69,27 @@ namespace network
     //return deserialize(get_line());
   }
 
-  void Session::receive_size(std::function<void(size_t)> callback)
+  void Session::receive_header(std::function<void(size_t)> callback)
   {
     async_read(socket_,
         buff_,
-        transfer_exactly(sizeof (uint32_t)),
+        transfer_exactly(sizeof (PACKET_HEADER)),
         [this, callback](boost::system::error_code ec, std::size_t size_length)
         {
           if (!ec)
           {
-            uint32_t msg_size = 0;
-            {
-              streambuf::const_buffers_type bufs = buff_.data();
+            const char* ch_buff =
+              boost::asio::buffer_cast<const char*>(buff_.data());
 
-              std::string str(buffers_begin(bufs),
-                              buffers_begin(bufs) + size_length);
-
-              const uint32_t* sizep =
-                reinterpret_cast<const uint32_t*>(str.c_str());
-
-              msg_size = *sizep;
-            }
-
+            const auto* header =
+              reinterpret_cast<const PACKET_HEADER*>(ch_buff);
             utils::Logger::cout() << "Receiving a message of size: "
-                                     + std::to_string(msg_size);
+                                     + std::to_string(header->size);
+
+            length_ = size_length;
 
             // Read the whole message + the headers left
-            callback(msg_size);
+            callback(header->size);
           }
           else if (ec == boost::asio::error::eof)
             kill();
@@ -110,13 +104,13 @@ namespace network
   {
     async_read(socket_,
                buff_,
-               transfer_exactly(msg_size + 2 * sizeof (uint8_t)),
+               transfer_exactly(msg_size),
                [this, msg_size](boost::system::error_code ec,
                                 std::size_t length)
                {
                  if (!ec)
                  {
-                   length_ = length + sizeof (uint32_t);
+                   length_ += length;
                    auto error = handler_(*this);
                    // Reset buffer and length to be ready for reading again
                    buff_.consume(length_);
@@ -142,9 +136,9 @@ namespace network
     std::ostringstream s;
     s << std::this_thread::get_id();
     utils::Logger::cout() << "Session receiving...(tid=" + s.str() + ")";
-    receive_size(std::bind(&Session::receive_message,
-                           this,
-                           std::placeholders::_1));
+    receive_header(std::bind(&Session::receive_message,
+                             this,
+                             std::placeholders::_1));
   }
 
   // Send a packet on the open socket

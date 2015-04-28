@@ -24,24 +24,24 @@ namespace network
 //  {
 //  }
 //
-//  Packet::Packet(fromto_type fromto, what_type what, const char* message,
-//                 std::string hash, size_t partid, size_t size)
-//      : fromto_(fromto),
-//        what_(what)
-//  {
-//    // FIXME : use sizeof int for the partid
-//    std::stringstream s;
-//    s << partid << "|" << hash << std::string(message, size);
-//    message_ = s.str();
-//    size_ = message_.size();
-//  }
+  Packet::Packet(fromto_type fromto, what_type what, const char* message,
+                 std::string hash, size_t partid, size_t size)
+  {
+    header_.size = size;
+    header_.type = { fromto, what };
+    // FIXME : use sizeof int for the partid
+    std::stringstream s;
+    s << partid << "|" << hash << std::string(message, size);
+    message_ = std::vector<unsigned char>(s.str().begin(), s.str().end());
+    header_.size = message_.size();
+  }
 
   // Create a std::string from the Packet
   const message_type Packet::serialize() const
   {
     std::vector<unsigned char> res(sizeof(header_) + header_.size);
-    std::memcpy(&res, &header_, sizeof(header_));
-    std::memcpy(&res + sizeof(header_), message_.data(), header_.size);
+    std::memcpy(&*res.begin(), &header_, sizeof(header_));
+    std::memcpy(&*res.begin() + sizeof(header_), message_.data(), header_.size);
     return res;
   }
 
