@@ -1,40 +1,43 @@
-#pragma once
+#ifndef LCB_PLUSPLUS_H
+#error "Include <libcouchbase/couchbase++.h> first!"
+#endif
+
+#ifndef LCB_PLUSPLUS_VIEWS_H
+#define LCB_PLUSPLUS_VIEWS_H
 
 #include <deque>
 
-namespace Couchbase
-{
+namespace Couchbase {
 
-  class ViewQuery;
+class CallbackViewQuery;
+class ViewQuery;
 
-  namespace Internal
-  {
-    extern "C" { static void viewcb(lcb_t, int, const lcb_RESPVIEWQUERY*); }
-  }
+namespace Internal {
+extern "C" { static void viewcb(lcb_t,int,const lcb_RESPVIEWQUERY*); }
+}
+
+enum class StaleMode { OK, FALSE, UPDATE_AFTER };
 
 // View API
-  class ViewCommand : private lcb_CMDVIEWQUERY
-  {
-  public:
+class ViewCommand : private lcb_CMDVIEWQUERY {
+public:
     //! @Create a new view command
     //! @param design the design document
     //! @param view the view to execute
-    inline ViewCommand(const char* design, const char* view);
+    inline ViewCommand(const char *design, const char *view);
 
     //! Indicate if this is a spatial view
     //! @param enabled true if this is a spatial view, false otherwise
-    inline void spatial(bool enabled = true)
-    {
-      add_cmd_flag(LCB_CMDVIEWQUERY_F_SPATIAL, enabled);
+    inline void spatial(bool enabled = true) {
+        add_cmd_flag(LCB_CMDVIEWQUERY_F_SPATIAL, enabled);
     }
 
     //! Whether to include documents with each row.
     //! If enabled, each @ref ViewRow object will contain a valid `document`
     //! field.
     //! @param enabled true if documents should be fetched alongside items
-    void include_docs(bool enabled = true)
-    {
-      add_cmd_flag(LCB_CMDVIEWQUERY_F_INCLUDE_DOCS, enabled);
+    void include_docs(bool enabled = true) {
+        add_cmd_flag(LCB_CMDVIEWQUERY_F_INCLUDE_DOCS, enabled);
     }
 
     //! Do not parse rows into id, key, value and geometry fields.
@@ -42,56 +45,58 @@ namespace Couchbase
     //! if given an entire row rather than distinct chunks. Note this option
     //! is incompatible with #include_docs().
     //! @param enabled whether to enable this feature
-    void no_parse_rows(bool enabled = true)
-    {
-      add_cmd_flag(LCB_CMDVIEWQUERY_F_NOROWPARSE, enabled);
+    void no_parse_rows(bool enabled = true) {
+        add_cmd_flag(LCB_CMDVIEWQUERY_F_NOROWPARSE, enabled);
     }
 
     //! Add a simple view option. The option must be properly formatted
     //! @param key the option name
     //! @param value the option value
-    inline void add_option(const char* key, const char* value);
+    inline void add_option(const char *key, const char *value);
+    inline void add_option(const char *key, bool value);
+    inline void add_option(const char *key, int value);
 
-    inline void add_option(const char* key, bool value);
-
-    inline void add_option(const char* key, int value);
+    // More specific view options
+    void skip(int value) { add_option("skip", value); }
+    void limit(int value) { add_option("limit", value); }
+    void descending(bool value) { add_option("descending", value); }
+    void reduce(bool value) { add_option("descending", value); }
+    void group(bool value) { add_option("group", value); }
+    void group_level(int value) { add_option("group_level", value); }
+    inline void stale(StaleMode mode);
 
     //! Set the raw option string, e.g. `"stale=false&limit=400"`
     //! @param options the option string.
-    inline void options(const char* options);
+    inline void options(const char *options);
 
     const std::string& get_options() const { return m_options; }
 
-  private:
+private:
     std::string m_options;
     std::string s_view;
     std::string s_design;
-
-    friend class ViewQuery;
-
+    friend class CallbackViewQuery;
     lcb_VIEWHANDLE vhptr;
-
     inline void add_cmd_flag(int flag, bool enabled);
-  };
+};
 
-  class ViewRow
-  {
-  public:
+class ViewRow {
+public:
     //! Get the emitted key
     //! @return the emitted key as a string
-    const std::string& key() const { return m_key; }
+    const Buffer& key() const { return m_key; }
 
     //! Get the emitted value
     //! @return the emitted value as a string
-    const std::string& value() const { return m_value; }
+    const Buffer& value() const { return m_value; }
 
     //! Get the emitted geometry (only valid for GeoSpatial views)
     //! @return the GeoJSON, as a string
-    const std::string& geometry() const { return m_geometry; }
+    const Buffer& geometry() const { return m_geometry; }
 
     //! Get the document ID for the item (not applicable for reduce)
     //! @return the document ID.
-    const std::string& docid() const { return m_docid; }
+    const Buffer& docid() const { return m_docid; }
 
     //! Get the corresponding document.
     //! This returns a reference to the document. A document will only
@@ -101,63 +106,65 @@ namespace Couchbase
     //! @return A reference to a document
     const GetResponse& document() const { return m_document; }
 
+    inline void detatch();
+
     //! Indicates whether a GetResponse is available.
     //! @return true if there is a GetResponse
     //! @note a true return value does not indicate the contained document
     //! was fetched successfuly, just that it may be inspected.
     bool has_document() const { return m_hasdoc; }
+private:
+    inline char *detatch_buf(Buffer& tgt, char *tmp);
+    ViewRow(Client&, const lcb_RESPVIEWQUERY *resp);
 
-  private:
-    inline static void f2s(const void*, size_t, std::string&);
+    std::shared_ptr<char> m_buf;
+    Buffer m_key;
+    Buffer m_value;
+    Buffer m_geometry;
+    Buffer m_docid;
 
-    ViewRow(const lcb_RESPVIEWQUERY* resp);
-
-    std::string m_key;
-    std::string m_value;
-    std::string m_geometry;
-    std::string m_id;
-    std::string m_docid;
     GetResponse m_document;
     bool m_hasdoc;
-
     friend class Client;
+    friend class CallbackViewQuery;
+};
 
-    friend class ViewQuery;
-  };
+class ViewMeta {
+public:
+    const std::string& body() const { return m_body; }
+    const std::string& http_body() const { return m_http; }
+    Status status() const { return m_rc; }
+    short http_status() const { return m_htcode; }
+    ViewMeta(){}
+private:
+    std::string m_body;
+    std::string m_http;
+    Status m_rc;
+    short m_htcode = 0;
+    friend class CallbackViewQuery;
+    inline ViewMeta(const lcb_RESPVIEWQUERY *resp);
+};
 
-  class ViewMeta
-  {
-  public:
-    std::string body;
-    std::string http;
-    Status rc;
-    short htcode;
-  private:
-    friend class ViewQuery;
 
-    inline ViewMeta(const lcb_RESPVIEWQUERY* resp);
-  };
+namespace Internal { class ViewIterator; }
 
+// View query which can be used with a callback!
+class CallbackViewQuery {
+public:
+    typedef std::function<void(ViewRow&&, CallbackViewQuery*)> RowCallback;
+    typedef std::function<void(ViewMeta&&, CallbackViewQuery*)> DoneCallback;
 
-  namespace Internal { class ViewIterator; }
-
-//! This class may be used to execute a view query and iterate over its
-//! results.
-  class ViewQuery
-  {
-  public:
     //! Initialize the query object.
     //! @param client the client on which to issue the query
     //! @param cmd a populated command object
     //! @param status used to indicate any errors during the construction
     //!        of the query. If status is false (i.e. failure), then this object
     //!        must not be used further.
-    inline ViewQuery(Client& client, const ViewCommand& cmd, Status& status);
+    inline CallbackViewQuery(Client& client, const ViewCommand& cmd, Status& status,
+        RowCallback rowcb = NULL, DoneCallback done_cb = NULL);
 
-    inline ~ViewQuery();
-
-    inline void _dispatch(const lcb_RESPVIEWQUERY* resp);
-
+    inline virtual ~CallbackViewQuery();
+    inline void _dispatch(const lcb_RESPVIEWQUERY *resp);
 
     //! @private
 
@@ -169,11 +176,24 @@ namespace Couchbase
     //! Whether this query object is still active (still has rows to be fetched)
     //! @return true if still active.
     bool active() const { return vh != NULL; }
+protected:
+    Client& cli;
+private:
+    RowCallback m_rowcb = NULL;
+    DoneCallback m_donecb = NULL;
+    lcb_VIEWHANDLE vh = NULL;
+};
+
+//! This class may be used to execute a view query and iterate over its
+//! results.
+class ViewQuery : public CallbackViewQuery {
+public:
+    inline ViewQuery(Client&, const ViewCommand&, Status&);
 
     //! Get the metadata for the query execution. This contains JSON metadata as
     //! well as the return code. This should only be called if `!active()`
-    //! @return a pointer to the view metadata
-    const ViewMeta* meta() const { return m_meta; }
+    //! @return the view metadata
+    const ViewMeta& meta() const { return m_meta; }
 
     typedef Internal::ViewIterator const_iterator;
 
@@ -181,32 +201,28 @@ namespace Couchbase
     //! iterator will incrementally fetch rows from the network
     //! until no more rows remain.
     inline const_iterator begin();
-
     inline const_iterator end();
-
     inline Status status() const;
 
-  private:
-    Client& cli;
-    ViewMeta* m_meta;
-    lcb_VIEWHANDLE vh;
+private:
+    ViewMeta m_meta;
     std::deque<ViewRow> rows;
-
     friend class Internal::ViewIterator;
-
     inline const ViewRow* next();
-  };
+    void handle_row(ViewRow&&);
+    void handle_done(ViewMeta&&);
+};
 
-  namespace Internal
-  {
-    extern "C" {
-    static void viewcb(lcb_t, int, const lcb_RESPVIEWQUERY* resp)
-    {
-      ViewQuery* vq = reinterpret_cast<ViewQuery*>(resp->cookie);
-      vq->_dispatch(resp);
-    }
-    }
-  } // namespace Internal
+namespace Internal {
+extern "C" {
+static void viewcb(lcb_t, int, const lcb_RESPVIEWQUERY *resp) {
+    ViewQuery *vq = reinterpret_cast<ViewQuery*>(resp->cookie);
+    vq->_dispatch(resp);
+}
+}
+} // namespace Internal
 } // namespace Couchbase
 
 #include <libcouchbase/couchbase++/views.inl.h>
+
+#endif

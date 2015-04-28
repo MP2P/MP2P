@@ -11,6 +11,7 @@ namespace Database
   class Database
   {
   protected:
+  public:
     Database() = default;
     Database(Database const&) = delete;
     void operator=(Database const&) = delete;
@@ -32,7 +33,7 @@ namespace Database
   public:
     CouchbaseDb(const std::string& host, const std::string& pass,
                 const std::string& buckt);
-    ~CouchbaseDb() { Database::~Database(); };
+    ~CouchbaseDb() {/* Database::~Database(); */};
 
     // Db commands
     std::string cmd_get(const std::string& key) override;

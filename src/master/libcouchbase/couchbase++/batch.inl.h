@@ -1,66 +1,93 @@
-namespace Couchbase
+#ifndef LCB_PLUSPLUS_H
+#error "include <libcouchbase/couchbase++.h> first!"
+#endif
+
+
+namespace Couchbase {
+
+Context::Context(Client& h) : parent(h)
 {
-
-  BatchContext::BatchContext(Client& h) : entered(false), parent(h)
-  {
     reset();
-  }
+}
 
-  BatchContext::~BatchContext()
-  {
-    if (entered)
-    {
-      bail();
+Context::~Context() {
+    if (entered) {
+        bail();
     }
+}
 
-    for (auto ii = resps.begin(); ii != resps.end(); ii++)
-    {
-      delete ii->second;
+Context::Context(Context&& other)
+: parent(other.parent) {
+    *this = std::move(other);
+}
+
+Context&
+Context::operator =(Context&& other) {
+    entered = other.entered;
+    m_remaining = other.m_remaining;
+
+    other.entered = false;
+    other.m_remaining = 0;
+    return *this;
+}
+
+template <typename T> Status
+Context::add(const Command<T>& cmd, Handler *handler) {
+    Status st = cmd.scheduler()(parent.handle(), handler->as_cookie(), &cmd);
+    if (st) {
+        m_remaining++;
     }
-  }
+    return st;
+}
 
-  void
-  BatchContext::bail()
-  {
+void
+Context::bail() {
     entered = false;
-    lcb_sched_fail(parent.handle());
-  }
+    parent.fail();
+}
 
-  void
-  BatchContext::submit()
-  {
+void
+Context::submit() {
     entered = false;
     parent.remaining += m_remaining;
-    lcb_sched_leave(parent.handle());
-  }
+    parent.leave();
+}
 
-  void
-  BatchContext::reset()
-  {
+void
+Context::reset() {
     entered = true;
     m_remaining = 0;
-    lcb_sched_enter(parent.handle());
-  }
+    parent.enter();
+}
 
-  Status
-  BatchContext::get(const std::string& key)
-  {
-    GetOperation* cmd = new GetOperation(key);
-    resps[key] = cmd;
-    return cmd->schedule(*this);
-  }
+// Batched commands
+template <typename C, typename R>
+BatchCommand<C,R>::BatchCommand(Client &c) : m_ctx(c) {
+}
 
-  const GetResponse&
-  BatchContext::value_for(const std::string& s)
-  {
-    static GetResponse dummy;
-    GetOperation* op = resps[s];
-    if (op != NULL)
-    {
-      return op->const_response();
-    } else
-    {
-      return dummy;
-    }
-  }
+template <typename C, typename R> Status
+BatchCommand<C,R>::add(const C& cmd) {
+    m_resplist.push_back(R());
+    return m_ctx.add(cmd, &m_resplist.back());
+}
+
+// Callback stuff
+template <typename C, typename R>
+CallbackCommand<C,R>::CallbackCommand(Client& c, CallbackType& cb)
+: m_ctx(c), m_callback(cb) {
+}
+
+template <typename C, typename R> Status
+CallbackCommand<C,R>::add(const C& cmd) {
+    return m_ctx.add(cmd, this);
+}
+
+template <typename C, typename R> void
+CallbackCommand<C,R>::handle_response(Client& c, int t, const lcb_RESPBASE *r) {
+    R resp;
+    resp.handle_response(c, t, r);
+    resp.set_key(r);
+    m_callback(resp);
+}
+
 } //namespace Couchbase
