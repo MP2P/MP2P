@@ -96,7 +96,6 @@ void Storage::catch_stop()
   utils::Logger::cout() << "Storage: Bye bye!";
 }
 
-
 // Handle the session after filling the buffer
 // Errors are defined in the ressources/errors file.
 error_code Storage::handle(Session& session)
@@ -138,6 +137,6 @@ error_code Storage::handle(Session& session)
   {
     // FIXME : handle storage
     default:
-      return 1; // Error
+      return 100; // Error
   }
 }

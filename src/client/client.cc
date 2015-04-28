@@ -8,8 +8,14 @@ using namespace network;
 
 Client::Client(const std::string& host, const std::string& port)
   : master_session_{io_service_, host, port,
-      std::bind(&Client::handle, this, std::placeholders::_1)}
+      std::bind(&Client::handle, this, std::placeholders::_1),
+      std::bind(&Client::remove_handle, this, std::placeholders::_1)}
 {
+}
+
+void Client::remove_handle(Session& session)
+{
+  (void) session;
 }
 
 error_code Client::handle(Session& session)
@@ -38,7 +44,8 @@ void Client::send_file_part(files::File& file, size_t part, size_t part_size)
   const auto& host = utils::Conf::get_instance().host_get();
 
   Session session{io_service_, host, port.str(),
-    std::bind(&Client::handle, this, std::placeholders::_1)};
+    std::bind(&Client::handle, this, std::placeholders::_1),
+    std::bind(&Client::remove_handle, this, std::placeholders::_1)};
 
   const char* tmp = file.data() + part * part_size;
   std::string hash = files::hash_buffer(tmp, part_size);

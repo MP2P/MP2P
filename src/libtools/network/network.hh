@@ -9,9 +9,8 @@
 #include <mutex>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
 #include <glob.h>
+#include <unordered_set>
 
 #include <utils.hh>
 #include <files.hh>
@@ -120,23 +119,33 @@ namespace network
     boost::asio::streambuf buff_;
     size_t length_;
     std::function<error_code(Session&)> handler_;
+    std::function<void(Session&)> delete_handler_;
+    const size_t id_;
 
   public:
     // Create a session
     Session(boost::asio::ip::tcp::socket&& socket,
-            std::function<error_code(Session& )> handler);
+            std::function<error_code(Session&)> handler,
+            std::function<void(Session&)> delete_handler,
+            size_t id = unique_id());
 
     // Create a session and connect to the host:port
     Session(boost::asio::io_service& io_service,
             const std::string& host,
             const std::string& port,
-            std::function<error_code(Session& )> handler);
+            std::function<error_code(Session&)> handler,
+            std::function<void(Session&)> delete_handler,
+            size_t id = unique_id());
+
+    Session(Session&& other);
 
     boost::asio::ip::tcp::socket& socket_get();
 
     boost::asio::streambuf& buff_get();
 
     size_t length_get() const;
+
+    size_t id_get() const;
 
     std::string get_line();
 
@@ -145,8 +154,13 @@ namespace network
     void receive();
 
     void send(const Packet& packet);
+
+    void delete_handler(Session& session);
+
+    static size_t unique_id();
   };
 
+  bool operator==(const Session& lhs, const Session& rhs);
 
   /*----------.
   | server.cc |
@@ -157,7 +171,7 @@ namespace network
     boost::asio::ip::tcp::acceptor acceptor_;
     boost::asio::ip::tcp::socket socket_;
     std::function<error_code(Session&)> handler_;
-    std::vector<std::shared_ptr<Session>> sessions_;
+    std::unordered_map<size_t, Session> sessions_;
 
   public:
     Server(boost::asio::io_service& io_service,
@@ -169,6 +183,8 @@ namespace network
     void stop();
 
     bool is_running();
+
+    void delete_handler(Session& session);
   };
 
   std::ostream& operator<<(std::ostream& o, const Error& e);
@@ -177,3 +193,5 @@ namespace network
 #include "packet.hxx"
 #include "error.hxx"
 #include "session.hxx"
+
+
