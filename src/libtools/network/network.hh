@@ -76,7 +76,6 @@ namespace network
   class Packet
   {
   private:
-//    PACKET_HEADER header_;
     PACKET_HEADER header_;
     std::vector<unsigned char> message_;
 
@@ -116,8 +115,8 @@ namespace network
     const message_type serialize() const;
   };
 
-//  static Packet deserialize(const PACKET_HEADER header,
-//                           const message_type& message);
+  Packet deserialize(const PACKET_HEADER header,
+                           const message_type& message);
 
   std::ostream& operator<<(std::ostream& output, const Packet& packet);
 

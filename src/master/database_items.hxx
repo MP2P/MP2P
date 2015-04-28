@@ -2,6 +2,8 @@
 
 namespace Database
 {
+  using namespace network;
+
   inline fsize_type FileItem::file_size_get() const
   {
     return file_size_;

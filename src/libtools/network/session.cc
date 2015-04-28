@@ -43,10 +43,14 @@ namespace network
         buffers_begin(bufs) + length_);
   }
 
-//  Packet Session::get_packet()
-//  {
-//    return deserialize(get_line());
-//  }
+  Packet Session::get_packet()
+  {
+    // FIXME : Create a real packet from the buffer
+    std::vector<unsigned char> v;
+    Packet p{0, 0, v};
+    return p;
+    //return deserialize(get_line());
+  }
 
 
   // Read on the open socket

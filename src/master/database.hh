@@ -32,7 +32,7 @@ namespace Database
 
   public:
     CouchbaseDb(const std::string& host, const std::string& pass,
-                const std::s&tring& buckt);
+                const std::string& bucket);
     ~CouchbaseDb() { Database::~Database(); };
 
     // Db commands
@@ -52,21 +52,21 @@ namespace Database
   class FileItem : public Item
   {
   private:
-    fid_type id_;
-    fname_type name_;
-    fsize_type file_size_ = 0;
-    rdcy_type replication_ = 1;
-    rdcy_type current_replication_ = 1;
-    sha1_type hash_;
+    network::fid_type id_;
+    network::fname_type name_;
+    network::fsize_type file_size_ = 0;
+    network::rdcy_type replication_ = 1;
+    network::rdcy_type current_replication_ = 1;
+    network::sha1_type hash_;
     bool uploaded_ = false;
 
   public:
     FileItem() : Item() {};
-    fsize_type file_size_get() const;
-    rdcy_type replication_get() const;
-    rdcy_type current_replication_get() const;
-    fid_type id_get() const;
-    sha1_return_type hash_get();
+    network::fsize_type file_size_get() const;
+    network::rdcy_type replication_get() const;
+    network::rdcy_type current_replication_get() const;
+    network::fid_type id_get() const;
+    network::sha1_return_type hash_get();
     bool is_replicated() const;
     bool is_uploaded() const;
     std::string serialize() const;
@@ -75,39 +75,39 @@ namespace Database
   class PartItem : public Item
   {
   private:
-    PARTID partid_;
-    sha1_type hash_;
+    network::PARTID partid_;
+    network::sha1_type hash_;
   public:
     PartItem() : Item() {};
-    fid_type fileid_get() const;
-    partnum_type num_get() const;
-    sha1_return_type hash_get();
+    network::fid_type fileid_get() const;
+    network::partnum_type num_get() const;
+    network::sha1_return_type hash_get();
     std::string serialize() const;
   };
 
   class MasterItem : public Item
   {
   private:
-    mtid_type id_;
+    network::mtid_type id_;
     boost::asio::ip::address_v6 addr_;
   public:
     MasterItem() : Item() {};
     boost::asio::ip::address_v6 const& addr_get() const;
-    mtid_type id_get() const;
+    network::mtid_type id_get() const;
     std::string serialize() const;
   };
 
   class StorageItem : public Item
   {
   private:
-    stid_type id_;
+    network::stid_type id_;
     boost::asio::ip::address_v6 addr_;
-    avspace_type available_space_;
+    network::avspace_type available_space_;
   public:
     StorageItem() : Item() {};
-    stid_type id_get() const;
+    network::stid_type id_get() const;
     boost::asio::ip::address_v6 const& addr_get() const;
-    avspace_type available_space_get() const;
+    network::avspace_type available_space_get() const;
     std::string serialize() const;
   };
 }

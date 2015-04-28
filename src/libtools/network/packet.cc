@@ -46,10 +46,10 @@ namespace network
   }
 
   // Get a packet from a string
-//  Packet deserialize(const PACKET_HEADER header, const message_type& message)
-//  {
-//    return Packet(header.type.fromto, header.type.what, message);
-//  }
+  Packet deserialize(const PACKET_HEADER header, const message_type& message)
+  {
+    return Packet(header.type.fromto, header.type.what, message);
+  }
 
   std::ostream &operator<<(std::ostream &output, const Packet &packet)
   {
