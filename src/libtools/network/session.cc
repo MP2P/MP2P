@@ -93,7 +93,7 @@ namespace network
             // Read the whole message + the headers left
             callback(msg_size);
           }
-          else if (e == boost::asio::error::eof)
+          else if (ec == boost::asio::error::eof)
             kill();
           else
             utils::Logger::cerr() << "Error while getting size: "
