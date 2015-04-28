@@ -122,6 +122,9 @@ namespace network
     std::function<void(Session&)> delete_handler_;
     const size_t id_;
 
+    void receive_size(std::function<void(size_t)> callback);
+    void receive_message(size_t msg_size);
+
   public:
     // Create a session
     Session(boost::asio::ip::tcp::socket&& socket,

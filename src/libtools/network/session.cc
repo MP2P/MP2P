@@ -65,16 +65,12 @@ namespace network
     return deserialize(get_line());
   }
 
-  // Read on the open socket
-  void Session::receive()
+  void Session::receive_size(std::function<void(size_t)> callback)
   {
-    std::ostringstream s;
-    s << std::this_thread::get_id();
-    utils::Logger::cout() << "Session receiving...(tid=" + s.str() + ")";
     async_read(socket_,
         buff_,
         transfer_exactly(sizeof (uint32_t)),
-        [this](boost::system::error_code ec, std::size_t size_length)
+        [this, callback](boost::system::error_code ec, std::size_t size_length)
         {
           if (!ec)
           {
@@ -95,39 +91,7 @@ namespace network
                                      + std::to_string(msg_size);
 
             // Read the whole message + the headers left
-            async_read(socket_,
-                buff_,
-                transfer_exactly(msg_size + 2 * sizeof (uint8_t)),
-                [this, msg_size, size_length](boost::system::error_code ec,
-                                              std::size_t length)
-                {
-                  if (!ec)
-                  {
-                    length_ = length + size_length;
-
-                    auto error = handler_(*this);
-
-                    // Reset buffer and length to be ready for reading again
-                    buff_.consume(length_);
-                    length_ = 0;
-
-                    if (error == 100)
-                    {
-                      utils::Logger::cout() << "Closed session";
-                      socket_.close(); // Close the socket
-                      delete_handler_(*this); // Ask the owner to delete
-                    }
-                    else
-                    {
-                      receive(); // Keep the socket alive
-                    }
-                  }
-                  else
-                  {
-                    utils::Logger::cerr() << "Error: " + ec.message();
-                  }
-                }
-            );
+            callback(msg_size);
           }
           else
           {
@@ -136,6 +100,50 @@ namespace network
           }
         }
     );
+  }
+
+  void Session::receive_message(size_t msg_size)
+  {
+    async_read(socket_,
+               buff_,
+               transfer_exactly(msg_size + 2 * sizeof (uint8_t)),
+               [this, msg_size](boost::system::error_code ec,
+                                std::size_t length)
+               {
+                 if (!ec)
+                 {
+                   length_ = length + sizeof (uint32_t);
+                   auto error = handler_(*this);
+                   // Reset buffer and length to be ready for reading again
+                   buff_.consume(length_);
+                   length_ = 0;
+
+                   if (error == 100)
+                   {
+                     utils::Logger::cout() << "Closed session";
+                     socket_.close(); // Close the socket
+                     delete_handler_(*this); // Ask the owner to delete
+                   }
+                   else
+                   {
+                     receive(); // Keep the socket alive
+                   }
+                 }
+                 else
+                 {
+                   utils::Logger::cerr() << "Error: " + ec.message();
+                 }
+                }
+    );
+  }
+
+  // Read on the open socket
+  void Session::receive()
+  {
+    std::ostringstream s;
+    s << std::this_thread::get_id();
+    utils::Logger::cout() << "Session receiving...(tid=" + s.str() + ")";
+    receive_size(std::bind(&Session::receive_message, this, std::placeholders::_1));
   }
 
   // Send a packet on the open socket
