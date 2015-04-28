@@ -110,7 +110,8 @@ error_code Storage::handle(Session& session)
   if (packet.size_get() < 1)
     return 1;
 
-  const std::string& buffer = packet.message_get();
+  const auto& buf = packet.message_get();
+  const std::string buffer = std::string(buf.begin(), buf.end());
 
   std::istringstream input(buffer);
   std::string item;

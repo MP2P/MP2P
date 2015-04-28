@@ -24,6 +24,7 @@ namespace Database
     //return s;
     return key; //Just so that it could compile.
   }
+
   inline bool CouchbaseDb::cmd_put(const std::string& key, const std::string& value)
   {
     //FIXME
@@ -36,5 +37,42 @@ namespace Database
     std::string a = key;
     std::string b = value;
     return 0; //Just so that it could compile.
+  }
+
+  inline std::string FileItem::serialize() const
+  {
+    std::stringstream ss;
+    ss << "{"
+          << "\"id\":" << string_from(id_) << ','
+          << "\"file_size\":" << string_from(file_size_) << ','
+          << "\"replication\":" << string_from(replication_) << ','
+          << "\"current_replication\":" << string_from(current_replication_) << ','
+          << "\"hash\":" << string_from(hash_, sha1_type_size)
+      << "}";
+    return ss.str();
+  }
+
+  inline std::string PartItem::serialize() const
+  {
+    std::stringstream ss;
+    ss << "{"
+    << "}";
+    return ss.str();
+  }
+
+  inline std::string MasterItem::serialize() const
+  {
+    std::stringstream ss;
+    ss << "{"
+    << "}";
+    return ss.str();
+  }
+
+  inline std::string StorageItem::serialize() const
+  {
+    std::stringstream ss;
+    ss << "{"
+    << "}";
+    return ss.str();
   }
 }

@@ -11,6 +11,7 @@
 #include <boost/bind.hpp>
 #include <glob.h>
 #include <unordered_set>
+#include <masks/blocks.hh>
 
 #include <utils.hh>
 #include <files.hh>
@@ -74,37 +75,47 @@ namespace network
   class Packet
   {
   private:
-    uint32_t size_;
-    const uint8_t fromto_;
-    const uint8_t what_;
-    std::string message_;
+    PACKET_HEADER header_;
+    std::vector<unsigned char> message_;
 
   public:
     // Create a packet with a message
-    Packet(uint8_t fromto, uint8_t what, std::string message);
+    Packet(fromto_type fromto, what_type what, message_type message);
 
     // Create a packet with a pointer to data and a size
-    Packet(uint8_t fromto, uint8_t what,
-           const char* message, size_t size);
+//    Packet::Packet(fromto_type fromto, what_type what,
+//                   const char* message, size_t size);
 
     // Create a packet with a pointer to data and a size
     // Add the hash and the part id
-    Packet(uint8_t fromto, uint8_t what,
-           const char* message, std::string hash,
-           size_t partid, size_t size);
+//    Packet::Packet(fromto_type fromto, what_type what, const char* message,
+//                   std::string hash, size_t partid, size_t size);
+//    // Create a packet with a message
+//    Packet::Packet(fromto_type fromto, what_type what, message_type message);
+//
+//    // Create a packet with a pointer to data and a size
+//    Packet(fromto_type fromto, what_type what,
+//           const char* message, size_t size);
+//
+//    // Create a packet with a pointer to data and a size
+//    // Add the hash and the part id
+//    Packet(fromto_type fromto, what_type what,
+//           const char* message, std::string hash,
+//           size_t partid, size_t size);
 
-    uint32_t size_get() const;
+    size_type size_get() const;
 
-    uint8_t fromto_get() const;
+    fromto_type fromto_get() const;
 
-    uint8_t what_get() const;
+    what_type what_get() const;
 
-    const std::string& message_get() const;
+    const message_type message_get() const;
 
-    const std::string serialize() const;
+    const message_type serialize() const;
   };
 
-  const Packet deserialize(const std::string& input);
+  Packet deserialize(const PACKET_HEADER header,
+                           const message_type& message);
 
   std::ostream& operator<<(std::ostream& output, const Packet& packet);
 
@@ -200,5 +211,3 @@ namespace network
 #include "packet.hxx"
 #include "error.hxx"
 #include "session.hxx"
-
-

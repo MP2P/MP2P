@@ -62,7 +62,11 @@ namespace network
 
   Packet Session::get_packet()
   {
-    return deserialize(get_line());
+    // FIXME : Create a real packet from the buffer
+    std::vector<unsigned char> v;
+    Packet p{0, 0, v};
+    return p;
+    //return deserialize(get_line());
   }
 
   void Session::receive_size(std::function<void(size_t)> callback)

@@ -4,7 +4,7 @@
 #include "master.hh"
 #include "database.hh"
 
-static Database::Database* db;
+static Database::Database* db = nullptr;
 
 int main()
 {
@@ -24,12 +24,12 @@ int main()
     Master master;
     if (master.run())
       master.catch_stop();
-    delete db;
-    std::cout << "deleted db" << db << std::endl;
   }
   catch (std::exception &e)
   {
     utils::Logger::cerr() << "Master exception: " + std::string(e.what());
-    std::exit(EXIT_FAILURE);
+//    std::exit(EXIT_FAILURE);
   }
+  if (db != nullptr)
+    delete db;
 }

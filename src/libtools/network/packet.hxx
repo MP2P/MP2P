@@ -1,25 +1,26 @@
 #pragma once
 
 #include <network.hh>
+#include <masks/blocks.hh>
 
 namespace network
 {
-  inline uint32_t Packet::size_get() const
+  inline size_type Packet::size_get() const
   {
-    return size_;
+    return header_.size;
   }
 
-  inline uint8_t Packet::fromto_get() const
+  inline fromto_type Packet::fromto_get() const
   {
-    return fromto_;
+    return header_.type.fromto;
   }
 
-  inline uint8_t Packet::what_get() const
+  inline what_type Packet::what_get() const
   {
-    return what_;
+    return header_.type.what;
   }
 
-  inline const std::string &Packet::message_get() const
+  inline const message_type Packet::message_get() const
   {
     return message_;
   }
