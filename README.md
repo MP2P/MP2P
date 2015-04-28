@@ -31,19 +31,19 @@ them to set up your own settings.
 ### The Master application
 
 ```
-mkdir build && cd build; cmake ..; make master-release -j;
+mkdir -p build && cd build; cmake ..; make master-release -j;
 ```
 
 ### The Storage application
 
 ```
-mkdir build && cd build; cmake ..; make storage-release -j;
+mkdir -p build && cd build; cmake ..; make storage-release -j;
 ```
 
 ### The Client application
 
 ```
-mkdir build && cd build; cmake ..; make client-release -j;
+mkdir -p build && cd build; cmake ..; make client-release -j;
 ```
 
 ## Requirements

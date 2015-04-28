@@ -22,6 +22,7 @@ namespace Database
     utils::Logger::cout() << "Got value2: " + s;
     return s;
   }
+
   inline bool CouchbaseDb::cmd_put(const std::string& key, const std::string& value)
   {
     Couchbase::UpsertOperation scmd(key, value);
@@ -30,5 +31,42 @@ namespace Database
     if (result_code != 0)
       utils::Logger::cerr() << "Can't put value, error: " + std::to_string(sres.cas());
     return result_code == 0;
+  }
+
+  inline std::string FileItem::serialize() const
+  {
+    std::stringstream ss;
+    ss << "{"
+          << "\"id\":" << string_from(id_) << ','
+          << "\"file_size\":" << string_from(file_size_) << ','
+          << "\"replication\":" << string_from(replication_) << ','
+          << "\"current_replication\":" << string_from(current_replication_) << ','
+          << "\"hash\":" << string_from(hash_, sha1_type_size)
+      << "}";
+    return ss.str();
+  }
+
+  inline std::string PartItem::serialize() const
+  {
+    std::stringstream ss;
+    ss << "{"
+    << "}";
+    return ss.str();
+  }
+
+  inline std::string MasterItem::serialize() const
+  {
+    std::stringstream ss;
+    ss << "{"
+    << "}";
+    return ss.str();
+  }
+
+  inline std::string StorageItem::serialize() const
+  {
+    std::stringstream ss;
+    ss << "{"
+    << "}";
+    return ss.str();
   }
 }

@@ -3,7 +3,8 @@
 
 using namespace network;
 
-error_code CM_callback_may_i_upload_a_file(Packet& packet, Session& session)
+// May I upload a file?
+error_code cm_up_req(Packet& packet, Session& session)
 {
   //TODO: Check if the packet was correct, and send m_c_error if it was not.
   //packet.size_get();
@@ -29,22 +30,26 @@ error_code CM_callback_may_i_upload_a_file(Packet& packet, Session& session)
   return (packet.size_get() && session.length_get());
 }
 
-error_code CM_callback_may_i_download_this_file(Packet& packet, Session& session)
+// May I download this file?
+error_code cm_down_req(Packet& packet, Session& session)
 {
   return (packet.size_get() && session.length_get());
 }
 
-error_code CM_callback_can_you_delete_this_file(Packet& packet, Session& session)
+// Can you delete this file?
+error_code cm_del_req(Packet& packet, Session& session)
 {
   return (packet.size_get() && session.length_get());
 }
 
-error_code SM_callback_part_deletion_succeded(Packet& packet, Session& session)
+// Part deletetion succedeed!
+error_code sm_del_ack(Packet& packet, Session& session)
 {
   return (packet.size_get() && session.length_get());
 }
 
-error_code SM_callback_part_received(Packet& packet, Session& session)
+// Part successfully received!
+error_code sm_part_ack(Packet& packet, Session& session)
 {
   return (packet.size_get() && session.length_get());
 }

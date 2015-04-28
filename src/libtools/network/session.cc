@@ -43,10 +43,11 @@ namespace network
         buffers_begin(bufs) + length_);
   }
 
-  Packet Session::get_packet()
-  {
-    return deserialize(get_line());
-  }
+//  Packet Session::get_packet()
+//  {
+//    return deserialize(get_line());
+//  }
+
 
   // Read on the open socket
   void Session::receive()
@@ -54,7 +55,51 @@ namespace network
     std::ostringstream s;
     s << std::this_thread::get_id();
     utils::Logger::cout() << "Session receiving...(tid=" + s.str() + ")";
-    async_read(socket_,
+
+//    PACKET_HEADER header;
+//    // FIXME: async_read of exactly sizeof(PACKET_HEADER) & fill header
+//
+//    // FIXME: define a correct buffsize
+//    unsigned short buff_size = 8192;
+
+    // We are receiving a file_part... (Client to Storage)
+//    if (header.type.fromto == 2 && header.type.what == 1)
+//    {
+//      // FIXME: Generate a new filename
+//      std::string filename = "test.bin";
+//
+//      // Create a file, fallocate it, close it.
+//      // fallocate exemple: bit.ly/1Eg3Eti
+//      int fd = open(filename.c_str(), O_CREAT | O_WRONLY);
+//      if (fd == -1)
+//        throw std::logic_error(
+//            "Could not create a new file named " + filename + '.');
+//
+//      #ifdef HAVE_POSIX_FALLOCATE
+//      if (!posix_fallocate(fd, 0, message_size))
+//        throw std::logic_error("Fallocate failed to preallocate space.")
+//      #endif /* !HAVE_POSIX_FALLOCATE */
+//
+//      close(fd);
+//
+//      // Write bytes to the filestream. Throws std::ifstream::failure if I/O failure.
+//      std::fstream fs(filename,
+//                      std::ios::binary | std::ios::out | std::ios::app);
+//      // async_read with buff_size
+//      // write bytes to fs
+//      fs.close();
+//
+//      // Call the callback with the filename
+//    }
+//    else // Just receive the message in a buffer
+//    {
+//      // Just async_read with exactly the size of header.size
+//      // and put it in a byte array (maybe std::vector<unsigned char>)
+//      // then just call the handler
+//    }
+
+    async_read(
+        socket_,
         buff_,
         transfer_exactly(sizeof (uint32_t)),
         [this](boost::system::error_code ec, std::size_t size_length)

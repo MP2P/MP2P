@@ -62,7 +62,6 @@ namespace Couchbase
 
   Client::~Client()
   {
-    std::cout << "Client destroyed!" << std::endl;
     lcb_destroy(m_instance);
   }
 

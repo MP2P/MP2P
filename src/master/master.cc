@@ -32,7 +32,7 @@ bool Master::run() // Throws
     stop();
     return false;
   }
-  // Creating (concurent_threads) threads
+  // Creating (concurrent_threads) threads
   unsigned concurrency = utils::Conf::get_instance().concurrency_get();
   for (unsigned i = 0; i < concurrency; ++i)
   {
@@ -120,11 +120,11 @@ error_code Master::handle(Session& session)
         case 0:
           return 10001; // Error
         case 1:
-          return CM_callback_may_i_upload_a_file(packet, session);
+          return cm_up_req(packet, session);
         case 2:
-          return CM_callback_may_i_download_this_file(packet, session);
+          return cm_down_req(packet, session);
         case 3:
-          return CM_callback_can_you_delete_this_file(packet, session);
+          return cm_del_req(packet, session);
         default:
           return 10001;
       }
@@ -134,9 +134,9 @@ error_code Master::handle(Session& session)
         case 0:
           return 10501; // Error
         case 1:
-          return SM_callback_part_deletion_succeded(packet, session);
+          return sm_del_ack(packet, session);
         case 2:
-          return SM_callback_part_received(packet, session);
+          return sm_part_ack(packet, session);
         default:
           return 10501;
       }
