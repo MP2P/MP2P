@@ -83,25 +83,9 @@ namespace network
     Packet(fromto_type fromto, what_type what, message_type message);
 
     // Create a packet with a pointer to data and a size
-//    Packet::Packet(fromto_type fromto, what_type what,
-//                   const char* message, size_t size);
-
-    // Create a packet with a pointer to data and a size
     // Add the hash and the part id
     Packet(fromto_type fromto, what_type what, const char* message,
                    std::string hash, size_t partid, size_t size);
-//    // Create a packet with a message
-//    Packet::Packet(fromto_type fromto, what_type what, message_type message);
-//
-//    // Create a packet with a pointer to data and a size
-//    Packet(fromto_type fromto, what_type what,
-//           const char* message, size_t size);
-//
-//    // Create a packet with a pointer to data and a size
-//    // Add the hash and the part id
-//    Packet(fromto_type fromto, what_type what,
-//           const char* message, std::string hash,
-//           size_t partid, size_t size);
 
     size_type size_get() const;
 
