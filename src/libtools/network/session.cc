@@ -1,4 +1,5 @@
 #include <network.hh>
+#include <shared-const-buffer.hh>
 
 using namespace boost::asio;
 
@@ -64,7 +65,7 @@ namespace network
   {
     // FIXME : Create a real packet from the buffer
     std::vector<unsigned char> v;
-    Packet p{0, 0, 0, message_type{&*v.begin(), 0}};
+    Packet p{0, 0, 0, message_type{0}};
     return p;
     //return deserialize(get_line());
   }
@@ -76,7 +77,7 @@ namespace network
         transfer_exactly(sizeof (PACKET_HEADER)),
         [this, callback](boost::system::error_code ec, std::size_t size_length)
         {
-          if (!ec)
+          if (!ec && size_length == sizeof (PACKET_HEADER))
           {
             const char* ch_buff =
               boost::asio::buffer_cast<const char*>(buff_.data());
@@ -85,8 +86,6 @@ namespace network
               reinterpret_cast<const PACKET_HEADER*>(ch_buff);
             utils::Logger::cout() << "Receiving a message of size: "
                                      + std::to_string(header->size);
-
-            length_ = size_length;
 
             // Read the whole message + the headers left
             callback(header->size);
@@ -145,7 +144,7 @@ namespace network
   void Session::send(const Packet& packet)
   {
     auto str = packet.serialize();
-    write(socket_, buffer(str));
+    write(socket_, buffer(str.buffer_get()));
     auto error = handler_(*this);
     if (error == 1)
       socket_.close();

@@ -14,6 +14,12 @@ namespace network
     header_.type = { fromto, what };
   }
 
+  Packet::Packet(const PACKET_HEADER& header)
+    : header_(header),
+      message_{header.size}
+  {
+  }
+
 //  Packet::Packet(fromto_type fromto, what_type what,
 //                 const char* message, size_t size)
 //      : size_(size),
@@ -24,14 +30,14 @@ namespace network
 //  }
 //
   Packet::Packet(fromto_type fromto, what_type what, const char* message,
-                 std::string hash, size_t partid, size_t size)
+                 std::string hash, size_t partid, size_type size)
+    : header_{size, {fromto, what} },
+      message_{ 0 }
+
   {
-    header_.size = size;
-    header_.type = { fromto, what };
     // FIXME : use sizeof int for the partid
     std::stringstream s;
     s << partid << "|" << hash << std::string(message, size);
-    message_ = boost::asio::const_buffer(&*s.str().begin(), s.str().size());
     header_.size = boost::asio::buffer_size(message_);
   }
 
@@ -40,9 +46,9 @@ namespace network
   {
     std::vector<unsigned char> res(sizeof(header_) + header_.size);
     std::memcpy(&*res.begin(), &header_, sizeof(header_));
-    auto* data = boost::asio::buffer_cast<const unsigned char*>(message_);
+    auto* data = boost::asio::buffer_cast<const unsigned char*>(message_.buffer_get());
     std::memcpy(&*res.begin() + sizeof(header_), data, header_.size);
-    return message_type(&*res.begin(), res.size());
+    return message_type(res.size());
   }
 
   // Get a packet from a string

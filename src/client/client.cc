@@ -36,7 +36,7 @@ void Client::run()
   io_service_.run();
 }
 
-void Client::send_file_part(files::File& file, size_t part, size_t part_size)
+void Client::send_file_part(files::File& file, size_t part, size_type part_size)
 {
   // Query needs the port as a string. Ugly fix.
   std::ostringstream port;

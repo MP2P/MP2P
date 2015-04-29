@@ -111,8 +111,8 @@ error_code Storage::handle(Session& session)
     return 1;
 
   const auto& buf = packet.message_get();
-  const std::string buffer = std::string(buffer_cast<const char*>(buf),
-                                         buffer_size(buf));
+  const std::string buffer = std::string(buffer_cast<const char*>(buf.buffer_get()),
+                                         buffer_size(buf.buffer_get()));
 
   std::istringstream input(buffer);
   std::string item;

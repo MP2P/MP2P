@@ -76,7 +76,7 @@ namespace network
   {
   private:
     PACKET_HEADER header_;
-    boost::asio::const_buffer message_;
+    message_type message_;
 
   public:
     // Create a packet with all the necessary fields
@@ -85,10 +85,13 @@ namespace network
            what_type what,
            message_type message);
 
+    // Create an empty packet with an allocated size
+    Packet(const PACKET_HEADER& header);
+
     // Create a packet with a pointer to data and a size
     // Add the hash and the part id
     Packet(fromto_type fromto, what_type what, const char* message,
-                   std::string hash, size_t partid, size_t size);
+                   std::string hash, size_t partid, size_type size);
 
     size_type size_get() const;
 
