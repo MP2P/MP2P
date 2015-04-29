@@ -64,7 +64,7 @@ namespace network
   {
     // FIXME : Create a real packet from the buffer
     std::vector<unsigned char> v;
-    Packet p{0, 0, v};
+    Packet p{0, 0, 0, message_type{&*v.begin(), 0}};
     return p;
     //return deserialize(get_line());
   }
