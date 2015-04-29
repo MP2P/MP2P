@@ -2,18 +2,18 @@
 
 namespace utils
 {
-  shared_const_buffer::shared_const_buffer(size_t size)
-    : data_{make_shared<std::vector<char>>(size, '\0')},
+  inline shared_const_buffer::shared_const_buffer(size_t size)
+    : data_{std::make_shared<std::vector<char>>(size, '\0')},
       buffer_{&data_->front(), size}
   {
   }
 
-  const_iterator shared_const_buffer::begin()
+  inline shared_const_buffer::const_iterator shared_const_buffer::begin() const
   {
     return &buffer_;
   }
 
-  const_iterator shared_const_buffer::end()
+  inline shared_const_buffer::const_iterator shared_const_buffer::end() const
   {
     return &buffer_ + 1;
   }
