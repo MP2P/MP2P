@@ -76,11 +76,14 @@ namespace network
   {
   private:
     PACKET_HEADER header_;
-    std::vector<unsigned char> message_;
+    boost::asio::const_buffer message_;
 
   public:
-    // Create a packet with a message
-    Packet(fromto_type fromto, what_type what, message_type message);
+    // Create a packet with all the necessary fields
+    Packet(size_type size,
+           fromto_type fromto,
+           what_type what,
+           message_type message);
 
     // Create a packet with a pointer to data and a size
     // Add the hash and the part id

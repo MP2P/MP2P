@@ -4,15 +4,15 @@
 namespace network
 {
 
-  Packet::Packet(fromto_type fromto, what_type what, message_type message)
-      : message_(message)
+  Packet::Packet(size_type size,
+                 fromto_type fromto,
+                 what_type what,
+                 message_type message)
+      : message_(message, size)
   {
+    header_.size = size;
     header_.type.fromto = fromto;
     header_.type.what = what;
-    if (message.size() > std::numeric_limits<size_type>::max())
-      throw std::logic_error("Message size is too large to fit in a "
-                             + std::string(typeid(size_type).name()));
-    header_.size = (size_type) message.size();
   }
 
 //  Packet::Packet(fromto_type fromto, what_type what,
