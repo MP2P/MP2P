@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <unistd.h>
 #include <cmath>
+#include <ios>
 
 #include <files.hh>
 
@@ -17,8 +18,36 @@ namespace files
     : filename_{filename}
   {
     auto size = filesize_get(filename);
-    file_ = boost::iostreams::mapped_file_source{filename_, size};
+    file_ = boost::iostreams::mapped_file{filename_,
+                                          std::ios_base::binary,
+                                          size};
     hash_ = hash_buffer(file_.data(), size_get());
+  }
+
+  File::File(const std::string& filename, size_t size)
+    : filename_{filename}
+  {
+    // Create a file on disk
+    int fd = ::open(filename.c_str(), O_WRONLY | O_CREAT | O_EXCL);
+    if (fd == -1)
+      throw std::logic_error(strerror(errno)); // FIXME : who frees strerror?
+
+    // Ask the fs to allocate some space
+    int did_fallocate = fallocate(fd, FALLOC_FL_KEEP_SIZE, 0, size);
+    if (did_fallocate != 0)
+      throw std::logic_error(strerror(errno)); // FIXME : who frees strerror?
+
+    // Close the file descriptor.
+    close(fd);
+
+    file_ = boost::iostreams::mapped_file{filename_,
+                                          std::ios_base::binary,
+                                          size};
+  }
+
+  File File::empty_file(const std::string& filename, size_t size)
+  {
+    return File{filename, size};
   }
 
   // SHA-1 hash a buffer of bytes

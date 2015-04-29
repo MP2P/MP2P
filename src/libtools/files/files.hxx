@@ -19,7 +19,7 @@ namespace files
     return hash_;
   }
 
-  inline const char* File::data() const
+  inline char* File::data()
   {
     return file_.data();
   }

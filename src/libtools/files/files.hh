@@ -19,12 +19,18 @@ namespace files
       const std::string& filename_get() const;
       size_t size_get() const;
       const std::string& hash_get() const;
-      const char* data() const;
+      char* data();
+
+      static File empty_file(const std::string& filename, size_t size);
 
     private:
       const std::string filename_;
-      boost::iostreams::mapped_file_source file_;
+      boost::iostreams::mapped_file file_;
       std::string hash_;
+
+      // Private constructor for an empty file.
+      // Should be used only for empty_file
+      File(const std::string& filename, size_t size);
   };
 
   // Hash a buffer of chars and return the SHA1 hash as a string
