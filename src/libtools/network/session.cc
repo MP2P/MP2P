@@ -7,7 +7,7 @@ namespace network
 {
 
   Session::Session(ip::tcp::socket&& socket,
-                   std::function<error_code(Session&)> handler,
+                   std::function<error_code(Packet,Session&)> handler,
                    std::function<void(Session&)> delete_handler,
                    size_t id)
       : socket_{std::forward<ip::tcp::socket>(socket)},
@@ -20,7 +20,7 @@ namespace network
   Session::Session(io_service& io_service,
                    const std::string& host,
                    const std::string& port,
-                   std::function<error_code(Session&)> handler,
+                   std::function<error_code(Packet,Session&)> handler,
                    std::function<void(Session&)> delete_handler,
                    size_t id)
     : socket_{io_service},
@@ -115,7 +115,7 @@ namespace network
                    utils::Logger::cout() << "Received : " + msg;
 
                    length_ = length;
-                   auto error = handler_(*this);
+                   auto error = handler_(p, *this);
                    length_ = 0;
 
                    if (error == 100)
@@ -149,7 +149,7 @@ namespace network
   {
     auto str = packet.serialize();
     write(socket_, buffer(str.buffer_get()));
-    auto error = handler_(*this);
+    auto error = handler_(packet, *this);
     if (error == 1)
       socket_.close();
   }

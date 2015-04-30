@@ -126,7 +126,7 @@ namespace network
     boost::asio::ip::tcp::socket socket_;
     boost::asio::streambuf buff_;
     size_t length_;
-    std::function<error_code(Session&)> handler_;
+    std::function<error_code(Packet, Session&)> handler_;
     std::function<void(Session&)> delete_handler_;
     const size_t id_;
 
@@ -136,7 +136,7 @@ namespace network
   public:
     // Create a session
     Session(boost::asio::ip::tcp::socket&& socket,
-            std::function<error_code(Session&)> handler,
+            std::function<error_code(Packet,Session&)> handler,
             std::function<void(Session&)> delete_handler,
             size_t id = unique_id());
 
@@ -144,7 +144,7 @@ namespace network
     Session(boost::asio::io_service& io_service,
             const std::string& host,
             const std::string& port,
-            std::function<error_code(Session&)> handler,
+            std::function<error_code(Packet,Session&)> handler,
             std::function<void(Session&)> delete_handler,
             size_t id = unique_id());
 
@@ -185,12 +185,12 @@ namespace network
   private:
     boost::asio::ip::tcp::acceptor acceptor_;
     boost::asio::ip::tcp::socket socket_;
-    std::function<error_code(Session&)> handler_;
+    std::function<error_code(Packet,Session&)> handler_;
     std::unordered_map<size_t, Session> sessions_;
 
   public:
     Server(boost::asio::io_service& io_service,
-           std::function<error_code(Session&)> handler);
+           std::function<error_code(Packet,Session&)> handler);
 
     ~Server();
 

@@ -9,7 +9,7 @@ private:
   boost::asio::io_service io_service_; // Default constructor is enough
   network::Session master_session_;
 
-  error_code handle(network::Session& session);
+  error_code handle(network::Packet, network::Session& session);
   void remove_handle(network::Session& session);
 
 public:

@@ -8,7 +8,7 @@ using namespace network;
 
 Client::Client(const std::string& host, const std::string& port)
   : master_session_{io_service_, host, port,
-      std::bind(&Client::handle, this, std::placeholders::_1),
+      std::bind(&Client::handle, this, std::placeholders::_1, std::placeholders::_2),
       std::bind(&Client::remove_handle, this, std::placeholders::_1)}
 {
 }
@@ -18,9 +18,10 @@ void Client::remove_handle(Session& session)
   (void) session;
 }
 
-error_code Client::handle(Session& session)
+error_code Client::handle(Packet packet, Session& session)
 {
   (void) session;
+  (void) packet;
 
   utils::Logger::cout() << "Client handling";
 
@@ -44,7 +45,7 @@ void Client::send_file_part(files::File& file, size_t part, size_type part_size)
   const auto& host = utils::Conf::get_instance().host_get();
 
   Session session{io_service_, host, port.str(),
-    std::bind(&Client::handle, this, std::placeholders::_1),
+    std::bind(&Client::handle, this, std::placeholders::_1, std::placeholders::_2),
     std::bind(&Client::remove_handle, this, std::placeholders::_1)};
 
   const char* tmp = file.data() + part * part_size;

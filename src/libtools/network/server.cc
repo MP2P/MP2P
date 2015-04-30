@@ -8,7 +8,7 @@ using namespace boost::asio;
 namespace network
 {
   Server::Server(io_service &io_service,
-      std::function<error_code(Session &)> handler)
+      std::function<error_code(Packet, Session &)> handler)
       : acceptor_{io_service},
         socket_{io_service},
         handler_{std::move(handler)}

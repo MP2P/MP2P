@@ -29,15 +29,6 @@ namespace network
     }
 
 
-//  Packet::Packet(fromto_type fromto, what_type what,
-//                 const char* message, size_t size)
-//      : size_(size),
-//        fromto_(fromto),
-//        what_(what),
-//        message_{message, size}
-//  {
-//  }
-//
   Packet::Packet(fromto_type fromto, what_type what, const char* message,
                  std::string hash, size_t partid, size_type size)
     : header_{size, {fromto, what} },
