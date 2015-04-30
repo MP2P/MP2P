@@ -23,10 +23,19 @@ namespace network
                  fromto_type fromto,
                  what_type what,
                  const char* data)
-      : header_{size, {fromto, what} },
-        message_{data, size}
-    {
-    }
+    : header_{size, {fromto, what} },
+      message_{data, size}
+  {
+  }
+
+  Packet::Packet(size_type size,
+                 fromto_type fromto,
+                 what_type what,
+                 const std::shared_ptr<std::vector<char>>& data)
+    : header_{size, {fromto, what} },
+      message_{data}
+  {
+  }
 
 
   Packet::Packet(fromto_type fromto, what_type what, const char* message,

@@ -110,19 +110,22 @@ error_code Storage::handle(Packet packet, Session& session)
     return 1;
 
   const auto& buf = packet.message_get();
-  const std::string buffer = std::string(buffer_cast<const char*>(buf.buffer_get()),
-                                         buffer_size(buf.buffer_get()));
 
-  std::istringstream input(buffer);
+  std::istringstream input;
+  input.rdbuf()->pubsetbuf(const_cast<char*>(&buf.data_get()[0]),
+                                                buf.data_get().size());
+
   std::string item;
 
   std::getline(input, item, '|');
+  std::cout << item << std::endl;
   std::string part(item);
   char hash_c[41] = { 0 };
   input.read(hash_c, 40);
   std::string hash(hash_c);
   std::getline(input, item, '|');
   std::string msg(item);
+
 
   {
     /*std::string hash_msg = files::hash_buffer(msg.c_str(), msg.size());

@@ -44,6 +44,11 @@ namespace utils
     return buffer_;
   }
 
+  inline const std::vector<char>& shared_buffer::data_get() const
+  {
+    return *data_;
+  }
+
   inline const std::string shared_buffer::string_get() const
   {
     return std::string(data_->begin(), data_->end());

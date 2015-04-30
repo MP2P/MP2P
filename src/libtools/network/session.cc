@@ -111,9 +111,6 @@ namespace network
                {
                  if (!ec)
                  {
-                   auto msg = p.message_get().string_get();
-                   utils::Logger::cout() << "Received : " + msg;
-
                    length_ = length;
                    auto error = handler_(p, *this);
                    length_ = 0;

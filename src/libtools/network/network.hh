@@ -91,6 +91,10 @@ namespace network
            what_type what,
            const char* data);
 
+    Packet(size_type size,
+           fromto_type fromto,
+           what_type what,
+           const std::shared_ptr<std::vector<char>>& data);
 
     // Create an empty packet with an allocated size
     Packet(const PACKET_HEADER& header);

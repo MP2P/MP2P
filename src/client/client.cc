@@ -50,7 +50,17 @@ void Client::send_file_part(files::File& file, size_t part, size_type part_size)
 
   const char* tmp = file.data() + part * part_size;
   std::string hash = files::hash_buffer(tmp, part_size);
-  Packet p{part_size, 0, 1, tmp};
+
+  std::stringstream s;
+  s << part << "|" << hash;
+
+  auto v_ptr = std::make_shared<std::vector<char>>(part_size + s.str().size(), '\0');
+  auto& v = *v_ptr;
+
+  memcpy(&*v.begin(), s.str().c_str(), s.str().size());
+  memcpy(&*v.begin() + s.str().size(), tmp, part_size);
+
+  Packet p{part_size + (size_type)s.str().size(), 0, 1, v_ptr};
   session.send(p);
 }
 

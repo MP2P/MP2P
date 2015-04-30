@@ -19,6 +19,7 @@ namespace utils
       const_iterator end() const;
 
       const value_type buffer_get() const;
+      const std::vector<char>& data_get() const;
 
       const std::string string_get() const;
 
