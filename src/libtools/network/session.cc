@@ -1,5 +1,5 @@
 #include <network.hh>
-#include <shared-const-buffer.hh>
+#include <shared-buffer.hh>
 
 using namespace boost::asio;
 

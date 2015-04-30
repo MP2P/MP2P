@@ -4,16 +4,16 @@
 
 namespace utils
 {
-  class shared_const_buffer
+  class shared_buffer
   {
     public:
       using value_type = boost::asio::mutable_buffer;
       using const_iterator = const boost::asio::mutable_buffer*;
 
-      shared_const_buffer(size_t size);
-      shared_const_buffer(const std::shared_ptr<std::vector<char>>& data);
-      shared_const_buffer(std::vector<char>&& data);
-      shared_const_buffer(const char* data, size_t size);
+      shared_buffer(size_t size);
+      shared_buffer(const std::shared_ptr<std::vector<char>>& data);
+      shared_buffer(std::vector<char>&& data);
+      shared_buffer(const char* data, size_t size);
 
       const_iterator begin() const;
       const_iterator end() const;
@@ -28,4 +28,4 @@ namespace utils
   };
 }
 
-#include "shared-const-buffer.hxx"
+#include "shared-buffer.hxx"
