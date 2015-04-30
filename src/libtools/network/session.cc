@@ -70,7 +70,7 @@ namespace network
     //return deserialize(get_line());
   }
 
-  void Session::receive_header(std::function<void(size_t)> callback)
+  void Session::receive_header(std::function<void(size_t, Packet)> callback)
   {
     async_read(socket_,
         buff_,
@@ -87,8 +87,10 @@ namespace network
             utils::Logger::cout() << "Receiving a message of size: "
                                      + std::to_string(header->size);
 
+            Packet p{*header};
+
             // Read the whole message + the headers left
-            callback(header->size);
+            callback(header->size, p);
           }
           else if (ec == boost::asio::error::eof)
             kill();
@@ -99,20 +101,21 @@ namespace network
     );
   }
 
-  void Session::receive_message(size_t msg_size)
+  void Session::receive_message(size_t msg_size, Packet p)
   {
     async_read(socket_,
-               buff_,
+               buffer(p.message_get().buffer_get()),
                transfer_exactly(msg_size),
-               [this, msg_size](boost::system::error_code ec,
+               [this, msg_size, p](boost::system::error_code ec,
                                 std::size_t length)
                {
                  if (!ec)
                  {
-                   length_ += length;
+                   auto msg = p.message_get().string_get();
+                   utils::Logger::cout() << "Received : " + msg;
+
+                   length_ = length;
                    auto error = handler_(*this);
-                   // Reset buffer and length to be ready for reading again
-                   buff_.consume(length_);
                    length_ = 0;
 
                    if (error == 100)
@@ -137,7 +140,8 @@ namespace network
     utils::Logger::cout() << "Session receiving...(tid=" + s.str() + ")";
     receive_header(std::bind(&Session::receive_message,
                              this,
-                             std::placeholders::_1));
+                             std::placeholders::_1,
+                             std::placeholders::_2));
   }
 
   // Send a packet on the open socket

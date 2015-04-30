@@ -49,7 +49,7 @@ void Client::send_file_part(files::File& file, size_t part, size_type part_size)
 
   const char* tmp = file.data() + part * part_size;
   std::string hash = files::hash_buffer(tmp, part_size);
-  Packet p{0, 1, tmp, hash, part, part_size};
+  Packet p{part_size, 0, 1, tmp};
   session.send(p);
 }
 

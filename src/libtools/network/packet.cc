@@ -8,10 +8,9 @@ namespace network
                  fromto_type fromto,
                  what_type what,
                  message_type message)
-      : message_(message)
+    : header_{size, {fromto, what} },
+      message_{message}
   {
-    header_.size = size;
-    header_.type = { fromto, what };
   }
 
   Packet::Packet(const PACKET_HEADER& header)
@@ -19,6 +18,16 @@ namespace network
       message_{header.size}
   {
   }
+
+  Packet::Packet(size_type size,
+                 fromto_type fromto,
+                 what_type what,
+                 const char* data)
+      : header_{size, {fromto, what} },
+        message_{data, size}
+    {
+    }
+
 
 //  Packet::Packet(fromto_type fromto, what_type what,
 //                 const char* message, size_t size)
@@ -44,11 +53,13 @@ namespace network
   // Create a std::string from the Packet
   const message_type Packet::serialize() const
   {
-    std::vector<unsigned char> res(sizeof(header_) + header_.size);
+    auto ptr = std::make_shared<std::vector<char>>(sizeof(header_)
+                                                          + header_.size);
+    auto& res = *ptr;
     std::memcpy(&*res.begin(), &header_, sizeof(header_));
     auto* data = boost::asio::buffer_cast<const unsigned char*>(message_.buffer_get());
     std::memcpy(&*res.begin() + sizeof(header_), data, header_.size);
-    return message_type(res.size());
+    return message_type(ptr);
   }
 
   // Get a packet from a string

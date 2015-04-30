@@ -21,7 +21,7 @@ namespace utils
   {
   }
 
-  inline shared_const_buffer::shared_const_buffer(unsigned char* data, size_t size)
+  inline shared_const_buffer::shared_const_buffer(const char* data, size_t size)
     : data_{std::make_shared<std::vector<char>>(size, '\0')},
       buffer_{&*data_->begin(), size}
   {
@@ -42,5 +42,10 @@ namespace utils
   shared_const_buffer::buffer_get() const
   {
     return buffer_;
+  }
+
+  inline const std::string shared_const_buffer::string_get() const
+  {
+    return std::string(data_->begin(), data_->end());
   }
 }

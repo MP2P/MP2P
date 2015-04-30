@@ -85,6 +85,13 @@ namespace network
            what_type what,
            message_type message);
 
+    // Create a packet with a pointer to data and a size
+    Packet(size_type size,
+           fromto_type fromto,
+           what_type what,
+           const char* data);
+
+
     // Create an empty packet with an allocated size
     Packet(const PACKET_HEADER& header);
 
@@ -123,8 +130,8 @@ namespace network
     std::function<void(Session&)> delete_handler_;
     const size_t id_;
 
-    void receive_header(std::function<void(size_t)> callback);
-    void receive_message(size_t msg_size);
+    void receive_header(std::function<void(size_t, Packet)> callback);
+    void receive_message(size_t msg_size, Packet p);
 
   public:
     // Create a session
