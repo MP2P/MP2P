@@ -15,7 +15,7 @@ namespace network
 
   Packet::Packet(const PACKET_HEADER& header)
     : header_(header),
-      message_{header.size}
+      message_{utils::shared_buffer{header.size}.buffer_get()}
   {
   }
 
@@ -24,7 +24,7 @@ namespace network
                  what_type what,
                  const char* data)
     : header_{size, {fromto, what} },
-      message_{data, size}
+      message_{message_type{(void*)data, size}}
   {
   }
 
@@ -33,7 +33,7 @@ namespace network
                  what_type what,
                  const std::shared_ptr<std::vector<char>>& data)
     : header_{size, {fromto, what} },
-      message_{data}
+      message_{message_type{&*data->begin(), size}}
   {
   }
 
@@ -41,7 +41,7 @@ namespace network
   Packet::Packet(fromto_type fromto, what_type what, const char* message,
                  std::string hash, size_t partid, size_type size)
     : header_{size, {fromto, what} },
-      message_{ 0 }
+      message_{message_type{(void*)message, size}}
 
   {
     // FIXME : use sizeof int for the partid
@@ -57,9 +57,9 @@ namespace network
                                                           + header_.size);
     auto& res = *ptr;
     std::memcpy(&*res.begin(), &header_, sizeof(header_));
-    auto* data = boost::asio::buffer_cast<const unsigned char*>(message_.buffer_get());
+    auto* data = boost::asio::buffer_cast<const unsigned char*>(message_[0]);
     std::memcpy(&*res.begin() + sizeof(header_), data, header_.size);
-    return message_type(ptr);
+    return message_type(&*ptr->begin(), header_.size);
   }
 
   // Get a packet from a string

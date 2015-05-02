@@ -112,8 +112,7 @@ error_code Storage::handle(Packet packet, Session& session)
   const auto& buf = packet.message_get();
 
   std::istringstream input;
-  input.rdbuf()->pubsetbuf(const_cast<char*>(&buf.data_get()[0]),
-                                                buf.data_get().size());
+  input.rdbuf()->pubsetbuf(buffer_cast<char*>(buf), buffer_size(buf));
 
   std::string item;
 

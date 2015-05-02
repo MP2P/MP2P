@@ -65,7 +65,7 @@ namespace network
   {
     // FIXME : Create a real packet from the buffer
     std::vector<unsigned char> v;
-    Packet p{0, 0, 0, message_type{0}};
+    Packet p{0, 0, 0, message_type{&*v.begin(), 0}};
     return p;
     //return deserialize(get_line());
   }
@@ -104,7 +104,7 @@ namespace network
   void Session::receive_message(size_t msg_size, Packet p)
   {
     async_read(socket_,
-               buffer(p.message_get().buffer_get()),
+               buffer(p.message_get()),
                transfer_exactly(msg_size),
                [this, msg_size, p](boost::system::error_code ec,
                                 std::size_t length)
@@ -145,7 +145,7 @@ namespace network
   void Session::send(const Packet& packet)
   {
     auto str = packet.serialize();
-    write(socket_, buffer(str.buffer_get()));
+    write(socket_, buffer(str));
     auto error = handler_(packet, *this);
     if (error == 1)
       socket_.close();

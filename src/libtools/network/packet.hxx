@@ -22,6 +22,6 @@ namespace network
 
   inline const message_type Packet::message_get() const
   {
-    return message_;
+    return message_[0];
   }
 }

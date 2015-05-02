@@ -76,7 +76,7 @@ namespace network
   {
   private:
     PACKET_HEADER header_;
-    message_type message_;
+    std::vector<message_type> message_;
 
   public:
     // Create a packet with all the necessary fields
