@@ -4,14 +4,6 @@
 namespace network
 {
 
-  Packet::Packet(size_type size,
-                 fromto_type fromto,
-                 what_type what,
-                 message_type message)
-    : header_{size, {fromto, what} },
-      message_{message}
-  {
-  }
 
   Packet::Packet(const PACKET_HEADER& header)
     : header_(header),

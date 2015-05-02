@@ -5,6 +5,16 @@
 
 namespace network
 {
+  template <typename...Messages>
+  Packet::Packet(size_type size,
+                 fromto_type fromto,
+                 what_type what,
+                 Messages...messages)
+    : header_{size, {fromto, what} },
+      message_{messages...}
+  {
+  }
+
   inline size_type Packet::size_get() const
   {
     return header_.size;

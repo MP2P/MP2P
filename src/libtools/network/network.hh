@@ -80,10 +80,11 @@ namespace network
 
   public:
     // Create a packet with all the necessary fields
+    template <typename...Messages>
     Packet(size_type size,
            fromto_type fromto,
            what_type what,
-           message_type message);
+           Messages...messages);
 
     // Create a packet with a pointer to data and a size
     Packet(size_type size,
