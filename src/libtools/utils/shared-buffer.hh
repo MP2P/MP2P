@@ -25,6 +25,9 @@ namespace utils
       // Construct a buffer by copying (or not) the data from a pointer to POD
       shared_buffer(char* data, size_t size, bool copy);
 
+      // Construct a buffer by copying (or not) the data from a pointer to POD
+      shared_buffer(const char* data, size_t size, bool copy);
+
       // MutableBufferSequence requirements
 
       using value_type = boost::asio::mutable_buffer;
@@ -46,6 +49,8 @@ namespace utils
     private:
       std::shared_ptr<container_type> data_;
       boost::asio::mutable_buffer buffer_;
+
+      void copy_helper(const char* data, size_t size);
 
       // Overload buffer_cast for the shared_buffer
       template <typename PointerToPodType>

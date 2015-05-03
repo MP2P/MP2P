@@ -26,11 +26,22 @@ namespace utils
       buffer_{data, size}
   {
     if (copy)
-    {
-      data_ = std::make_shared<container_type>(size, '\0');
-      memcpy(&*data_->begin(), data, size);
-      buffer_ = boost::asio::mutable_buffer(&*data_->begin(), size);
-    }
+      copy_helper(data, size);
+  }
+
+  inline shared_buffer::shared_buffer(const char* data, size_t size, bool copy)
+    : data_{nullptr},
+      buffer_{const_cast<char*>(data), size}
+  {
+    if (copy)
+      copy_helper(data, size);
+  }
+
+  inline void shared_buffer::copy_helper(const char* data, size_t size)
+  {
+    data_ = std::make_shared<container_type>(size, '\0');
+    memcpy(&*data_->begin(), data, size);
+    buffer_ = boost::asio::mutable_buffer(&*data_->begin(), size);
   }
 
   inline shared_buffer::const_iterator shared_buffer::begin() const
