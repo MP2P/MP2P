@@ -13,17 +13,17 @@ namespace utils
     public:
       using container_type = std::vector<char>;
 
-      // Empty buffer with a preallocated size
+      // Construct an empty buffer with a preallocated size
       shared_buffer(size_t size);
 
-      // Buffer with a preallocated container
+      // Construct a uffer with a preallocated container
       shared_buffer(const std::shared_ptr<container_type>& data);
 
-      // Create a buffer by moving a container inside the old one
+      // Construct a buffer by moving a container inside the current one
       shared_buffer(container_type&& data);
 
-      // Copy data from a char buffer to the container
-      shared_buffer(const char* data, size_t size);
+      // Construct a buffer by copying (or not) the data from a pointer to POD
+      shared_buffer(char* data, size_t size, bool copy);
 
       // MutableBufferSequence requirements
 
@@ -41,14 +41,18 @@ namespace utils
       // Testing purpose only
       const std::string string_get() const;
 
+      operator boost::asio::const_buffer() const;
+
     private:
       std::shared_ptr<container_type> data_;
       boost::asio::mutable_buffer buffer_;
 
+      // Overload buffer_cast for the shared_buffer
       template <typename PointerToPodType>
       friend PointerToPodType buffer_cast(const shared_buffer& b);
   };
 
+  // Overload buffer_cast for the shared_buffer
   template <typename PointerToPodType>
   PointerToPodType buffer_cast(const shared_buffer& b);
 }

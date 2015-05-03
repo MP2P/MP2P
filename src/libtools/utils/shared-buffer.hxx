@@ -3,7 +3,7 @@
 namespace utils
 {
   inline shared_buffer::shared_buffer(size_t size)
-    : data_{std::make_shared<container_type>(size, '\0')},
+    : data_{std::make_shared<container_type>(size)},
       buffer_{&*data_->begin(), size}
   {
   }
@@ -21,11 +21,16 @@ namespace utils
   {
   }
 
-  inline shared_buffer::shared_buffer(const char* data, size_t size)
-    : data_{std::make_shared<container_type>(size, '\0')},
-      buffer_{&*data_->begin(), size}
+  inline shared_buffer::shared_buffer(char* data, size_t size, bool copy)
+    : data_{nullptr},
+      buffer_{data, size}
   {
-    memcpy(&*data_->begin(), data, size);
+    if (copy)
+    {
+      data_ = std::make_shared<container_type>(size, '\0');
+      memcpy(&*data_->begin(), data, size);
+      buffer_ = boost::asio::mutable_buffer(&*data_->begin(), size);
+    }
   }
 
   inline shared_buffer::const_iterator shared_buffer::begin() const
@@ -53,6 +58,11 @@ namespace utils
   inline const std::string shared_buffer::string_get() const
   {
     return std::string(data_->begin(), data_->end());
+  }
+
+  inline shared_buffer::operator boost::asio::const_buffer() const
+  {
+    return boost::asio::const_buffer(buffer_);
   }
 
   template <typename PointerToPodType>
