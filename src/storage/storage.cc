@@ -109,7 +109,7 @@ error_code Storage::handle(Packet packet, Session& session)
   if (packet.size_get() < 1)
     return 1;
 
-  const auto& buf = packet.message_get();
+  const auto& buf = packet.message_get().buffer_get();
 
   std::istringstream input;
   input.rdbuf()->pubsetbuf(buffer_cast<char*>(buf), buffer_size(buf));

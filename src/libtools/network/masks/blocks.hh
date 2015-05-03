@@ -21,7 +21,7 @@ namespace network
   static const size_t ipv6_type_size = 16;
   using ipv6_type = unsigned char[ipv6_type_size];
   using ipv6_return_type = unsigned char*;
-  using message_type = boost::asio::mutable_buffer;
+  using message_type = utils::shared_buffer;
   using mtid_type = uint32_t;
   using nb_type = uint16_t; // Number of parts to send to a storage
   using partnum_type = uint32_t;

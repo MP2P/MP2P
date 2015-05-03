@@ -42,7 +42,7 @@ namespace network
 
   inline message_type empty_message(size_type size)
   {
-    return utils::shared_buffer(size).buffer_get();
+    return utils::shared_buffer(size);
   }
 
 }
