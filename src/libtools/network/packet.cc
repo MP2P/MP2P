@@ -14,32 +14,19 @@ namespace network
   Packet::Packet(size_type size,
                  fromto_type fromto,
                  what_type what,
-                 const char* data)
+                 CharT* data)
     : header_{size, {fromto, what} },
-      message_{message_type{data, size}}
+      message_seq_{message_type{data, size, true}}
   {
   }
 
   Packet::Packet(size_type size,
                  fromto_type fromto,
                  what_type what,
-                 const std::shared_ptr<std::vector<char>>& data)
+                 const std::shared_ptr<std::vector<CharT>>& data)
     : header_{size, {fromto, what} },
-      message_{message_type{&*data->begin(), size}}
+      message_seq_{message_type{data}}
   {
-  }
-
-
-  Packet::Packet(fromto_type fromto, what_type what, const char* message,
-                 std::string hash, size_t partid, size_type size)
-    : header_{size, {fromto, what} },
-      message_{message_type{message, size}}
-
-  {
-    // FIXME : use sizeof int for the partid
-    std::stringstream s;
-    s << partid << "|" << hash << std::string(message, size);
-    header_.size = buffer_size(message_[0]);
   }
 
   void Packet::copy_message(const message_type& message)
@@ -50,19 +37,12 @@ namespace network
     add_message(utils::shared_buffer(ptr));
   }
 
-  // Create a std::string from the Packet
-  const message_type Packet::serialize() const
+  const message_type Packet::serialize_header() const
   {
-    auto ptr = std::make_shared<std::vector<char>>(sizeof(header_)
-                                                          + header_.size);
-    auto& res = *ptr;
-    std::memcpy(&*res.begin(), &header_, sizeof(header_));
-    auto* data = buffer_cast<const char*>(message_[0]);
-    std::memcpy(&*res.begin() + sizeof(header_), data, header_.size);
-    return message_type(&*ptr->begin(), header_.size);
+    const char* p_header = reinterpret_cast<const char*>(&header_);
+    return message_type(p_header, sizeof (header_), true);
   }
 
-  // Get a packet from a string
   Packet deserialize(const PACKET_HEADER header, const message_type& message)
   {
     return Packet(buffer_size(message),
@@ -74,8 +54,8 @@ namespace network
   std::ostream &operator<<(std::ostream &output, const Packet &packet)
   {
     output << string_from(packet.size_get()) << "|"
-    << string_from(packet.fromto_get()) << "|"
-    << string_from(packet.what_get());
+    << (int)packet.fromto_get() << "|"
+    << (int)packet.what_get();
     return output;
   }
 }

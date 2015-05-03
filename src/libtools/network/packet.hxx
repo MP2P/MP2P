@@ -11,13 +11,13 @@ namespace network
                  what_type what,
                  Messages...messages)
     : header_{size, {fromto, what} },
-      message_{messages...}
+      message_seq_{messages...}
   {
   }
 
   inline void Packet::add_message(const message_type& message)
   {
-    message_.push_back(message);
+    message_seq_.push_back(message);
   }
 
   inline size_type Packet::size_get() const
@@ -35,9 +35,9 @@ namespace network
     return header_.type.what;
   }
 
-  inline const message_type Packet::message_get() const
+  inline const Packet::message_container& Packet::message_seq_get() const
   {
-    return message_[0];
+    return message_seq_;
   }
 
   inline message_type empty_message(size_type size)

@@ -74,50 +74,54 @@ namespace network
   `----------*/
   class Packet
   {
+    using message_container = std::vector<message_type>;
   private:
     PACKET_HEADER header_;
-    std::vector<message_type> message_;
+    message_container message_seq_;
 
   public:
-    // Create a packet with all the necessary fields
+    // Create a packet with necessary header fields
+    // Append messages as shared_buffers
     template <typename...Messages>
     Packet(size_type size,
            fromto_type fromto,
            what_type what,
            Messages...messages);
 
-    // Create a packet with a pointer to data and a size
+    // Create a packet with a pointer to data and a size.
+    // The data is copied to a shared_buffer
     Packet(size_type size,
            fromto_type fromto,
            what_type what,
-           const char* data);
+           CharT* data);
 
     Packet(size_type size,
            fromto_type fromto,
            what_type what,
-           const std::shared_ptr<std::vector<char>>& data);
+           const std::shared_ptr<std::vector<CharT>>& data);
 
-    // Create an empty packet with an allocated size
+    // Create an empty packet without any message.
+    // Use add_message to append messages to the packet
     Packet(const PACKET_HEADER& header);
 
-    // Create a packet with a pointer to data and a size
-    // Add the hash and the part id
-    Packet(fromto_type fromto, what_type what, const char* message,
-                   std::string hash, size_t partid, size_type size);
-
+    // Add a message to the packet. Usually used for sending
     void add_message(const message_type& message);
 
+    // Add a message to the packet by copying the internal data
     void copy_message(const message_type& message);
 
+    // Accessors
     size_type size_get() const;
 
     fromto_type fromto_get() const;
 
     what_type what_get() const;
 
-    const message_type message_get() const;
+    const message_container& message_seq_get() const;
 
-    const message_type serialize() const;
+    // Serialize the header of the message to a header to a buffer.
+    // It should be added to a sending sequence as well.
+    const message_type serialize_header() const;
   };
 
   message_type empty_message(size_type size);
@@ -135,14 +139,14 @@ namespace network
   {
   private:
     boost::asio::ip::tcp::socket socket_;
-    boost::asio::streambuf buff_;
+    boost::asio::streambuf buff_; // FIXME : Is this a good choice?
     size_t length_;
     std::function<error_code(Packet, Session&)> handler_;
     std::function<void(Session&)> delete_handler_;
     const size_t id_;
 
     void receive_header(std::function<void(size_t, Packet)> callback);
-    void receive_message(size_t msg_size, Packet p);
+    void receive_message(size_t msg_size, const Packet& p);
 
   public:
     // Create a session
