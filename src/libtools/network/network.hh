@@ -103,6 +103,9 @@ namespace network
     // Create an empty packet without any message.
     // Use add_message to append messages to the packet
     Packet(const PACKET_HEADER& header);
+    Packet(size_type size,
+           fromto_type fromto,
+           what_type what);
 
     // Add a message to the packet. Usually used for sending
     void add_message(const message_type& message);

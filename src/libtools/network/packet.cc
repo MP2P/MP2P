@@ -6,16 +6,11 @@ namespace network
   using namespace boost::asio;
   using namespace utils;
 
-  Packet::Packet(const PACKET_HEADER& header)
-    : header_(header)
-  {
-  }
-
   Packet::Packet(size_type size,
                  fromto_type fromto,
                  what_type what,
                  CharT* data)
-    : header_{size, {fromto, what} },
+    : header_{size, {fromto, what}},
       message_seq_{message_type{data, size, true}}
   {
   }
@@ -26,6 +21,18 @@ namespace network
                  const std::shared_ptr<std::vector<CharT>>& data)
     : header_{size, {fromto, what} },
       message_seq_{message_type{data}}
+  {
+  }
+
+  Packet::Packet(const PACKET_HEADER& header)
+    : header_(header)
+  {
+  }
+
+  Packet::Packet(size_type size,
+                 fromto_type fromto,
+                 what_type what)
+    : header_{size, {fromto, what}}
   {
   }
 
