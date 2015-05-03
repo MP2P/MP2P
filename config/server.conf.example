@@ -1,22 +1,22 @@
 server:
 {
   # Timeout in SECONDS for receive function.
-  timeout = 300;
+  timeout = 300,
 
   # concurency defines the number of threads to be launched when running the
   # server. If concurency is 0, the server will automatically define it.
-  concurency = 0;
+  concurency = 0,
 
   # port defines the port that all threads will listen to.
-  port = 0; #Default to 3727
+  port = 0, #Default to 3727
 
   # host defines the host to be bind by the server.
-  host = "localhost"; #Default to "localhost"
+  host = "localhost" #Default to "localhost"
 }
 
 couchbase:
 {
-  host = "localhost";
-  password = "";
-  bucket = "default";
+  host = "localhost",
+  password = "",
+  bucket = "default",
 }

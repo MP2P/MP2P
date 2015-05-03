@@ -221,8 +221,15 @@ namespace network
   };
 
   std::ostream& operator<<(std::ostream& o, const Error& e);
+
+  namespace tools
+  {
+    auto resolve_host(const std::string& host);
+    auto one_ip_from_host(const std::string& host);
+  }
 }
 
+#include "tools.hxx"
 #include "packet.hxx"
 #include "error.hxx"
 #include "session.hxx"
