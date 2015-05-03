@@ -91,7 +91,6 @@ void Storage::catch_stop()
 
   stop();
 
-  //std::cout << "Storage: Bye bye!" << std::endl;
   utils::Logger::cout() << "Storage: Bye bye!";
 }
 
@@ -116,7 +115,6 @@ error_code Storage::handle(Packet packet, Session& session)
   std::string item;
 
   std::getline(input, item, '|');
-  std::cout << item << std::endl;
   std::string part(item);
   char hash_c[41] = { 0 };
   input.read(hash_c, 40);
