@@ -20,9 +20,9 @@ namespace Database
   public:
     virtual ~Database() = default;
 
-    // Db commands
+    // Db commands -> Throws when it fails
     virtual std::string cmd_get(const std::string& key) = 0;
-    virtual bool cmd_put(const std::string& key, const std::string& value) = 0;
+    virtual void cmd_put(const std::string& key, const std::string& value) = 0;
   };
 
   class CouchbaseDb : public Database
