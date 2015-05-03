@@ -9,7 +9,7 @@ error_code cm_up_req(Packet& packet, Session& session)
   //TODO: Check if the packet was correct, and send m_c_error if it was not.
   //packet.size_get();
 
-  FDETAILS fdetails;
+  //FDETAILS fdetails;
   //TODO: Assign the fdetails.fid using the database (get the next available id).
   //Compute the number of parts.
   //uint32_t nb_parts = ;
@@ -25,7 +25,6 @@ error_code cm_up_req(Packet& packet, Session& session)
   }*/
   //Packet n(1, 2, fdetails, nb_storage * 6 + 8);
   //session.send(n);
-  delete fdetails.stplist;
 
   return (packet.size_get() && session.length_get());
 }
