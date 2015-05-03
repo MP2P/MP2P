@@ -11,6 +11,8 @@ namespace network
   struct STAFIELD;
   struct STPFIELD;
 
+  using CharT = char;
+
   //using err_type = uint16_t;
   using avspace_type = uint64_t;
   using data_type = unsigned char*;

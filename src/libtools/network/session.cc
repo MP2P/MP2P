@@ -65,7 +65,7 @@ namespace network
   {
     // FIXME : Create a real packet from the buffer
     std::vector<char> v;
-    Packet p{0, 0, 0, message_type{&*v.begin(), 0}};
+    Packet p{0, 0, 0, message_type{&*v.begin(), 0, true}};
     return p;
     //return deserialize(get_line());
   }
@@ -79,15 +79,17 @@ namespace network
         {
           if (!ec && size_length == sizeof (PACKET_HEADER))
           {
-            const char* ch_buff =
-              boost::asio::buffer_cast<const char*>(buff_.data());
+            const CharT* ch_buff = buffer_cast<const CharT*>(buff_.data());
 
             const auto* header =
               reinterpret_cast<const PACKET_HEADER*>(ch_buff);
+
             utils::Logger::cout() << "Receiving a message of size: "
                                      + std::to_string(header->size);
 
-            Packet p{*header};
+            Packet p{*header}; // Create a packet with the read header
+            // Allocate a buffer to read the message into
+            p.add_message(empty_message(header->size));
 
             // Read the whole message + the headers left
             callback(header->size, p);
@@ -101,10 +103,10 @@ namespace network
     );
   }
 
-  void Session::receive_message(size_t msg_size, Packet p)
+  void Session::receive_message(size_t msg_size, const Packet& p)
   {
     async_read(socket_,
-               p.message_get(),
+               p.message_seq_get()[0],
                transfer_exactly(msg_size),
                [this, msg_size, p](boost::system::error_code ec,
                                 std::size_t length)
@@ -144,8 +146,9 @@ namespace network
   // Send a packet on the open socket
   void Session::send(const Packet& packet)
   {
-    auto str = packet.serialize();
-    write(socket_, str);
+    auto seq = packet.message_seq_get();
+    seq.insert(seq.begin(), packet.serialize_header());
+    write(socket_, seq);
     auto error = handler_(packet, *this);
     if (error == 1)
       socket_.close();
