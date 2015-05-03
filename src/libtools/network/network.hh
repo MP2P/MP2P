@@ -105,6 +105,10 @@ namespace network
     Packet(fromto_type fromto, what_type what, const char* message,
                    std::string hash, size_t partid, size_type size);
 
+    void add_message(const message_type& message);
+
+    void copy_message(const message_type& message);
+
     size_type size_get() const;
 
     fromto_type fromto_get() const;
@@ -116,8 +120,10 @@ namespace network
     const message_type serialize() const;
   };
 
+  message_type empty_message(size_type size);
+
   Packet deserialize(const PACKET_HEADER header,
-                           const message_type& message);
+                     const message_type& message);
 
   std::ostream& operator<<(std::ostream& output, const Packet& packet);
 

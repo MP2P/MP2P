@@ -15,6 +15,11 @@ namespace network
   {
   }
 
+  inline void Packet::add_message(const message_type& message)
+  {
+    message_.push_back(message);
+  }
+
   inline size_type Packet::size_get() const
   {
     return header_.size;
@@ -34,4 +39,10 @@ namespace network
   {
     return message_[0];
   }
+
+  inline message_type empty_message(size_type size)
+  {
+    return utils::shared_buffer(size).buffer_get();
+  }
+
 }

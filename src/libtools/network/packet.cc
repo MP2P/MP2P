@@ -42,6 +42,16 @@ namespace network
     header_.size = boost::asio::buffer_size(message_);
   }
 
+  void Packet::copy_message(const message_type& message)
+  {
+    auto size = buffer_size(message);
+    auto* buffer = boost::asio::buffer_cast<const unsigned char*>(message);
+    auto ptr = std::make_shared<std::vector<char>>(size);
+    auto& v = *ptr;
+    memcpy(&*v.begin(), buffer, size);
+    add_message(utils::shared_buffer(&*v.begin(), size).buffer_get());
+  }
+
   // Create a std::string from the Packet
   const message_type Packet::serialize() const
   {
