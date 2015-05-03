@@ -2,7 +2,6 @@
 
 #include <string>
 #include <libcouchbase/couchbase++.h>
-#include <boost/asio/ip/address_v6.hpp>
 
 #include <masks/blocks.hh>
 
@@ -55,16 +54,16 @@ namespace Database
     network::fid_type id_;
     network::fname_type name_;
     network::fsize_type file_size_ = 0;
-    network::rdcy_type replication_ = 1;
-    network::rdcy_type current_replication_ = 1;
+    network::rdcy_type redundancy_ = 1;
+    network::rdcy_type current_redundancy_ = 1;
     network::sha1_type hash_;
     bool uploaded_ = false;
 
   public:
     FileItem() : Item() {};
     network::fsize_type file_size_get() const;
-    network::rdcy_type replication_get() const;
-    network::rdcy_type current_replication_get() const;
+    network::rdcy_type redundancy_get() const;
+    network::rdcy_type current_redundancy_get() const;
     network::fid_type id_get() const;
     network::sha1_return_type hash_get();
     bool is_replicated() const;
@@ -77,22 +76,24 @@ namespace Database
   private:
     network::PARTID partid_;
     network::sha1_type hash_;
+    std::vector<network::stid_type> locations_;
   public:
     PartItem() : Item() {};
     network::fid_type fileid_get() const;
     network::partnum_type num_get() const;
     network::sha1_return_type hash_get();
     std::string serialize() const;
+    std::vector<network::stid_type> locations_get() const;
   };
 
   class MasterItem : public Item
   {
   private:
     network::mtid_type id_;
-    boost::asio::ip::address_v6 addr_;
+    std::string host_addr_;
   public:
     MasterItem() : Item() {};
-    boost::asio::ip::address_v6 const& addr_get() const;
+    std::string host_addr_get() const;
     network::mtid_type id_get() const;
     std::string serialize() const;
   };
@@ -101,12 +102,12 @@ namespace Database
   {
   private:
     network::stid_type id_;
-    boost::asio::ip::address_v6 addr_;
+    std::string host_addr_;
     network::avspace_type available_space_;
   public:
     StorageItem() : Item() {};
     network::stid_type id_get() const;
-    boost::asio::ip::address_v6 const& addr_get() const;
+    std::string host_addr_get() const;
     network::avspace_type available_space_get() const;
     std::string serialize() const;
   };

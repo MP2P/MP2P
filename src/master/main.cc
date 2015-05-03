@@ -3,8 +3,6 @@
 #include "master.hh"
 #include "database.hh"
 
-
-
 static Database::Database* db = nullptr;
 
 int main()
@@ -29,8 +27,9 @@ int main()
   catch (std::exception &e)
   {
     utils::Logger::cerr() << "Master exception: " + std::string(e.what());
-//    std::exit(EXIT_FAILURE);
   }
+
+  utils::Logger::cout() << "Exiting...";
   if (db != nullptr)
     delete db;
 

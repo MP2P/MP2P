@@ -52,7 +52,7 @@ namespace network
 
   void Server::listen()
   {
-    utils::Logger::cerr() << "Listening...";
+    utils::Logger::cout() << "Listening...";
 
     acceptor_.async_accept(socket_,
         [this](boost::system::error_code ec)

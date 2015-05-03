@@ -36,8 +36,8 @@ namespace Database
     ss << "{"
           << "\"id\":" << network::string_from(id_) << ','
           << "\"file_size\":" << network::string_from(file_size_) << ','
-          << "\"replication\":" << network::string_from(replication_) << ','
-          << "\"current_replication\":" << network::string_from(current_replication_) << ','
+          << "\"redundancy\":" << network::string_from(redundancy_) << ','
+          << "\"current_redundancy\":" << network::string_from(current_redundancy_) << ','
           << "\"hash\":" << network::string_from(hash_, network::sha1_type_size)
       << "}";
     return ss.str();

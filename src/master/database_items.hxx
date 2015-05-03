@@ -9,14 +9,14 @@ namespace Database
     return file_size_;
   }
 
-  inline rdcy_type FileItem::replication_get() const
+  inline rdcy_type FileItem::redundancy_get() const
   {
-    return replication_;
+    return redundancy_;
   }
 
-  inline rdcy_type FileItem::current_replication_get() const
+  inline rdcy_type FileItem::current_redundancy_get() const
   {
-    return current_replication_;
+    return current_redundancy_;
   }
 
   inline fid_type FileItem::id_get() const
@@ -31,7 +31,7 @@ namespace Database
 
   inline bool FileItem::is_replicated() const
   {
-    return current_replication_ == replication_;
+    return current_redundancy_ == redundancy_;
   }
 
   inline bool FileItem::is_uploaded() const
@@ -54,14 +54,19 @@ namespace Database
     return &hash_[0];
   }
 
+  inline std::vector<network::stid_type> PartItem::locations_get() const
+  {
+    return locations_;
+  }
+
   inline mtid_type MasterItem::id_get() const
   {
     return id_;
   }
 
-  inline boost::asio::ip::address_v6 const& MasterItem::addr_get() const
+  inline std::string MasterItem::host_addr_get() const
   {
-    return addr_;
+    return host_addr_;
   }
 
   inline stid_type StorageItem::id_get() const
@@ -69,9 +74,9 @@ namespace Database
     return id_;
   }
 
-  inline boost::asio::ip::address_v6 const& StorageItem::addr_get() const
+  inline std::string StorageItem::host_addr_get() const
   {
-    return addr_;
+    return host_addr_;
   }
 
   inline avspace_type StorageItem::available_space_get() const
