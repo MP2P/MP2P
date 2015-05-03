@@ -3,6 +3,9 @@
 
 namespace network
 {
+  using namespace boost::asio;
+  using namespace utils;
+
   Packet::Packet(const PACKET_HEADER& header)
     : header_(header)
   {
@@ -36,7 +39,7 @@ namespace network
     // FIXME : use sizeof int for the partid
     std::stringstream s;
     s << partid << "|" << hash << std::string(message, size);
-    header_.size = boost::asio::buffer_size(message_[0].buffer_get());
+    header_.size = buffer_size(message_[0]);
   }
 
   void Packet::copy_message(const message_type& message)
@@ -54,7 +57,7 @@ namespace network
                                                           + header_.size);
     auto& res = *ptr;
     std::memcpy(&*res.begin(), &header_, sizeof(header_));
-    auto* data = boost::asio::buffer_cast<const unsigned char*>(message_[0].buffer_get());
+    auto* data = buffer_cast<const char*>(message_[0]);
     std::memcpy(&*res.begin() + sizeof(header_), data, header_.size);
     return message_type(&*ptr->begin(), header_.size);
   }
@@ -62,7 +65,7 @@ namespace network
   // Get a packet from a string
   Packet deserialize(const PACKET_HEADER header, const message_type& message)
   {
-    return Packet(boost::asio::buffer_size(message),
+    return Packet(buffer_size(message),
                   header.type.fromto,
                   header.type.what,
                   message);

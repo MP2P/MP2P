@@ -44,7 +44,13 @@ namespace utils
     private:
       std::shared_ptr<container_type> data_;
       boost::asio::mutable_buffer buffer_;
+
+      template <typename PointerToPodType>
+      friend PointerToPodType buffer_cast(const shared_buffer& b);
   };
+
+  template <typename PointerToPodType>
+  PointerToPodType buffer_cast(const shared_buffer& b);
 }
 
 #include "shared-buffer.hxx"

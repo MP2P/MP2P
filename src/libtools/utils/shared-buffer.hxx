@@ -54,4 +54,11 @@ namespace utils
   {
     return std::string(data_->begin(), data_->end());
   }
+
+  template <typename PointerToPodType>
+  PointerToPodType buffer_cast(const shared_buffer& b)
+  {
+    auto& data = *b.data_;
+    return static_cast<PointerToPodType>(&*data.begin());
+  }
 }
