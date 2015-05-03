@@ -5,6 +5,7 @@
 #include <ostream>
 
 using namespace network;
+using namespace utils;
 
 Client::Client(const std::string& host, const std::string& port)
   : master_session_{io_service_, host, port,
@@ -23,7 +24,7 @@ error_code Client::handle(Packet packet, Session& session)
   (void) session;
   (void) packet;
 
-  utils::Logger::cout() << "Client handling";
+  Logger::cout() << "Client handling";
 
   // FIXME : Actually, we should listen after every send.
   // For now, we listen after all the sends, since it's communicating with only
@@ -41,8 +42,8 @@ void Client::send_file_part(files::File& file, size_t part, size_type part_size)
 {
   // Query needs the port as a string. Ugly fix.
   std::ostringstream port;
-  port << utils::Conf::get_instance().port_get();
-  const auto& host = utils::Conf::get_instance().host_get();
+  port << Conf::get_instance().port_get();
+  const auto& host = Conf::get_instance().host_get();
 
   Session session{io_service_, host, port.str(),
     std::bind(&Client::handle, this, std::placeholders::_1, std::placeholders::_2),
@@ -51,16 +52,15 @@ void Client::send_file_part(files::File& file, size_t part, size_type part_size)
   const char* tmp = file.data() + part * part_size;
   std::string hash = files::hash_buffer(tmp, part_size);
 
-  std::stringstream s;
-  s << part << "|" << hash;
+  std::ostringstream ss;
+  ss << part << "|" << hash;
+  size_type ss_size = ss.str().size();
 
-  auto v_ptr = std::make_shared<std::vector<char>>(part_size + s.str().size(), '\0');
-  auto& v = *v_ptr;
-
-  memcpy(&*v.begin(), s.str().c_str(), s.str().size());
-  memcpy(&*v.begin() + s.str().size(), tmp, part_size);
-
-  Packet p{part_size + (size_type)s.str().size(), 0, 1, v_ptr};
+  // Example of a packet construction.
+  // Add multiple shared_buffers to create a sequence without merging them
+  Packet p{ss_size + part_size, 0, 1,
+           shared_buffer(ss.str().c_str(), ss.str().size(), true),
+           shared_buffer(tmp, part_size, false)};
   session.send(p);
 }
 
