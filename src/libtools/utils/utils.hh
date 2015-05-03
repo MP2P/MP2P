@@ -118,7 +118,26 @@ namespace utils
       Active a_;
   };
   //void print(std::ostream& out, std::mutex& wmutex, const std::string& msg);
+
+  namespace misc
+  {
+    template <class C, typename S>
+    class Separator
+    {
+    private:
+      const C& container_;
+      const S& separator_;
+    public:
+      Separator(const C& c, const S& s);
+      std::ostream& operator()(std::ostream& o) const;
+    };
+
+    template <class C, typename S>
+    Separator<C, S>
+    separate(const C& c, const S& s);
+  }
 }
 
+#include "misc.hxx"
 #include "config.hxx"
 #include "logger.hxx"

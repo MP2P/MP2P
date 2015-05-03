@@ -54,8 +54,8 @@ namespace Database
     network::fid_type id_;
     network::fname_type name_;
     network::fsize_type file_size_ = 0;
-    network::rdcy_type redundancy_ = 1;
-    network::rdcy_type current_redundancy_ = 1;
+    network::rdcy_type redundancy_ = 0;
+    network::rdcy_type current_redundancy_ = 0;
     network::sha1_type hash_;
     bool uploaded_ = false;
 

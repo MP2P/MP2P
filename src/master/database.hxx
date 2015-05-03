@@ -1,3 +1,6 @@
+#include <utils.hh>
+#include <typeinfo>
+
 namespace Database
 {
   inline CouchbaseDb::CouchbaseDb(const std::string& host,
@@ -47,6 +50,12 @@ namespace Database
   {
     std::stringstream ss;
     ss << "{"
+          << "\"partid\": {"
+                          << network::string_from(partid_.fid) << ','
+                          << network::string_from(partid_.partnum)
+                          << "},"
+          << "\"hash\":" << network::string_from(hash_, network::sha1_type_size) << ','
+//          << "\"locations\": [" << utils::misc::separate(locations_, ",") << "]"
     << "}";
     return ss.str();
   }
@@ -55,6 +64,8 @@ namespace Database
   {
     std::stringstream ss;
     ss << "{"
+          << "\"id\":" << network::string_from(id_) << ','
+          << "\"host_addr\":" << network::string_from(host_addr_) << ','
     << "}";
     return ss.str();
   }
@@ -63,6 +74,9 @@ namespace Database
   {
     std::stringstream ss;
     ss << "{"
+          << "\"id\":" << network::string_from(id_) << ','
+          << "\"host_addr\":" << network::string_from(host_addr_) << ','
+          << "\"available_space\":" << network::string_from(available_space_)
     << "}";
     return ss.str();
   }
