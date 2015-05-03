@@ -28,5 +28,12 @@ namespace utils
     {
       return Separator<C, S>(c, s);
     }
+
+    template <class C, typename S>
+    inline std::ostream&
+    operator<<(std::ostream& o, const Separator<C, S>& s)
+    {
+      return s(o);
+    }
   }
 }

@@ -135,6 +135,10 @@ namespace utils
     template <class C, typename S>
     Separator<C, S>
     separate(const C& c, const S& s);
+
+    template <class C, typename S>
+    inline std::ostream&
+    operator<<(std::ostream& o, const Separator<C, S>& s);
   }
 }
 

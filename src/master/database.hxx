@@ -55,7 +55,7 @@ namespace Database
                           << network::string_from(partid_.partnum)
                           << "},"
           << "\"hash\":" << network::string_from(hash_, network::sha1_type_size) << ','
-//          << "\"locations\": [" << utils::misc::separate(locations_, ",") << "]"
+          << "\"locations\": [" << utils::misc::separate(locations_, ",") << "]"
     << "}";
     return ss.str();
   }
