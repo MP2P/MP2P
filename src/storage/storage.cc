@@ -53,7 +53,6 @@ bool Storage::run()
 // Causes the server to stop it's running threads if any.
 void Storage::stop()
 {
-  //std::cout << "The server is going to stop..." << std::endl;
   utils::Logger::cout() << "The server is going to stop...";
   server_.stop();
 
@@ -109,10 +108,10 @@ error_code Storage::handle(Packet packet, Session& session)
   if (packet.size_get() < 1)
     return 1;
 
-  const auto& buf = packet.message_get().buffer_get();
+  auto& buf = packet.message_seq_get()[0];
 
   std::istringstream input;
-  input.rdbuf()->pubsetbuf(buffer_cast<char*>(buf), buffer_size(buf));
+  input.rdbuf()->pubsetbuf(buffer_cast<CharT*>(buf), buffer_size(buf));
 
   std::string item;
 
@@ -125,13 +124,7 @@ error_code Storage::handle(Packet packet, Session& session)
   std::getline(input, item, '|');
   std::string msg(item);
 
-
   {
-    /*std::string hash_msg = files::hash_buffer(msg.c_str(), msg.size());
-    std::cout << part << " : " << std::endl
-              << hash << std::endl
-              << hash_msg << std::endl << std::endl;
-    */
     std::ofstream f1(part);
     f1.write(&*msg.begin(), msg.size());
   }
