@@ -29,16 +29,15 @@ namespace Database
   {
   private:
     Couchbase::Client client_;
-    Couchbase::Status status_;
 
   public:
     CouchbaseDb(const std::string& host, const std::string& pass,
                 const std::string& bucket);
     ~CouchbaseDb() = default;
 
-    // Db commands
+    // Db commands -> Throws when it fails
     std::string cmd_get(const std::string& key) override;
-    bool cmd_put(const std::string& key, const std::string& value) override;
+    void cmd_put(const std::string& key, const std::string& value) override;
   };
 
   class Item
@@ -113,5 +112,5 @@ namespace Database
   };
 }
 
-#include "database_items.hxx"
 #include "database.hxx"
+#include "database_items.hxx"

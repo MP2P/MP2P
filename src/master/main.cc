@@ -1,8 +1,9 @@
 #include <ostream>
-
 #include <utils.hh>
 #include "master.hh"
 #include "database.hh"
+
+
 
 static Database::Database* db = nullptr;
 
@@ -32,4 +33,6 @@ int main()
   }
   if (db != nullptr)
     delete db;
+
+  return 0;
 }
