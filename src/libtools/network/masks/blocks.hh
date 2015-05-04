@@ -31,7 +31,7 @@ namespace network
   using rdcy_type = uint8_t;
   static const size_t sha1_type_size = 20;
   using sha1_type = unsigned char[sha1_type_size];
-  using sha1_return_type = unsigned char*;
+  using sha1_ptr_type = unsigned char*;
   using size_type = uint32_t;
   using stid_type = uint32_t;
   using stalist_type = STAFIELD*;

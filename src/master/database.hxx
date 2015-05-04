@@ -3,7 +3,8 @@
 
 namespace Database
 {
-  inline CouchbaseDb::CouchbaseDb(const std::string& host,
+  inline
+  CouchbaseDb::CouchbaseDb(const std::string& host,
                                   const std::string& pass,
                                   const std::string& bucket)
       : Database{},
@@ -17,7 +18,8 @@ namespace Database
   }
 
   // Db commands
-  inline std::string CouchbaseDb::cmd_get(const std::string& key)
+  inline std::string
+  CouchbaseDb::cmd_get(const std::string& key)
   {
     auto result = client_.get(key);
     if (!result.status().success())
@@ -25,7 +27,8 @@ namespace Database
     return result.value();
   }
 
-  inline void CouchbaseDb::cmd_put(const std::string& key, const std::string& value)
+  inline void
+  CouchbaseDb::cmd_put(const std::string& key, const std::string& value)
   {
     auto result = client_.upsert(key, value);
     if (!result.status().success())
@@ -33,7 +36,30 @@ namespace Database
                                    std::to_string(result.cas()));
   }
 
-  inline std::string FileItem::serialize() const
+//  inline
+//  FileItem::FileItem(network::fid_type id, const network::fname_type& name,
+//                     network::fsize_type file_size,
+//                     network::rdcy_type redundancy,
+//                     network::rdcy_type current_redundancy,
+//                     network::sha1_ptr_type hash, bool uploaded)
+//      : id_{id}, name_{name}, file_size_{file_size}, redundancy_{redundancy},
+//        current_redundancy_{current_redundancy}, uploaded_{uploaded};
+//  {
+//    memcpy((void*)hash, hash_, network::sha1_type_size);
+//  }
+
+  inline
+  PartItem::PartItem(const network::PARTID& partid,
+                     network::sha1_ptr_type hash,
+                     const std::vector<network::stid_type>& locations)
+      : locations_{locations}
+  {
+    memcpy((void*)&partid, &partid_, sizeof(network::PARTID));
+    memcpy((void*)hash, hash_, network::sha1_type_size);
+  }
+
+  inline std::string
+  FileItem::serialize() const
   {
     std::stringstream ss;
     ss << "{"
@@ -46,7 +72,13 @@ namespace Database
     return ss.str();
   }
 
-  inline std::string PartItem::serialize() const
+//  Item
+//  FileItem::deserialize(std::string& json)
+//  {
+//  }
+
+  inline std::string
+  PartItem::serialize() const
   {
     std::stringstream ss;
     ss << "{"
@@ -60,7 +92,8 @@ namespace Database
     return ss.str();
   }
 
-  inline std::string MasterItem::serialize() const
+  inline std::string
+  MasterItem::serialize() const
   {
     std::stringstream ss;
     ss << "{"
@@ -70,7 +103,8 @@ namespace Database
     return ss.str();
   }
 
-  inline std::string StorageItem::serialize() const
+  inline std::string
+  StorageItem::serialize() const
   {
     std::stringstream ss;
     ss << "{"
@@ -80,4 +114,4 @@ namespace Database
     << "}";
     return ss.str();
   }
-}
+};

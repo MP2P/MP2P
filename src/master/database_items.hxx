@@ -24,7 +24,7 @@ namespace Database
     return id_;
   }
 
-  inline sha1_return_type FileItem::hash_get()
+  inline sha1_ptr_type FileItem::hash_get()
   {
     return &hash_[0];
   }
@@ -49,7 +49,7 @@ namespace Database
     return partid_.partnum;
   }
 
-  inline sha1_return_type PartItem::hash_get()
+  inline sha1_ptr_type PartItem::hash_get()
   {
     return &hash_[0];
   }
