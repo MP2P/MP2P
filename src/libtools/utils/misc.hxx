@@ -15,7 +15,7 @@ namespace utils
       for (auto i = begin; i != end; ++i)
       {
         o << *i;
-        if (i == end - 1)
+        if (i != end - 1)
           o << separator_;
       }
       return o;

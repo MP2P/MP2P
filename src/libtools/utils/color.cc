@@ -10,38 +10,41 @@ static const std::string CYAN = "\033[96m";
 
 namespace utils
 {
-  std::ostream &w(std::ostream &o/*=std::cout*/)
+  namespace color
   {
-    return o << WHITE;
-  }
+    std::ostream &w(std::ostream &o/*=std::cout*/)
+    {
+      return o << WHITE;
+    }
 
-  std::ostream &r(std::ostream &o/*=std::cout*/)
-  {
-    return o << RED;
-  }
+    std::ostream &r(std::ostream &o/*=std::cout*/)
+    {
+      return o << RED;
+    }
 
-  std::ostream &b(std::ostream &o/*=std::cout*/)
-  {
-    return o << BLUE;
-  }
+    std::ostream &b(std::ostream &o/*=std::cout*/)
+    {
+      return o << BLUE;
+    }
 
-  std::ostream &c(std::ostream &o/*=std::cout*/)
-  {
-    return o << CYAN;
-  }
+    std::ostream &c(std::ostream &o/*=std::cout*/)
+    {
+      return o << CYAN;
+    }
 
-  std::ostream &g(std::ostream &o/*=std::cout*/)
-  {
-    return o << GREEN;
-  }
+    std::ostream &g(std::ostream &o/*=std::cout*/)
+    {
+      return o << GREEN;
+    }
 
-  std::ostream &y(std::ostream &o/*=std::cout*/)
-  {
-    return o << YELLOW;
-  }
+    std::ostream &y(std::ostream &o/*=std::cout*/)
+    {
+      return o << YELLOW;
+    }
 
-  std::ostream &p(std::ostream &o/*=std::cout*/)
-  {
-    return o << PURPLE;
+    std::ostream &p(std::ostream &o/*=std::cout*/)
+    {
+      return o << PURPLE;
+    }
   }
 }

@@ -15,9 +15,9 @@ namespace utils
         tstruct = *localtime(&now);
         //strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
         strftime(buf, sizeof(buf), "%X", &tstruct);
-        g(stream_);
+        color::g(stream_);
         stream_ << "<" << buf << "> ";
-        w(stream_);
+        color::w(stream_);
         stream_ << t << std::endl;
       }
     );
