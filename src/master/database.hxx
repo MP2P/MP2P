@@ -36,21 +36,21 @@ namespace Database
                                    std::to_string(result.cas()));
   }
 
-//  inline
-//  FileItem::FileItem(network::fid_type id, const network::fname_type& name,
-//                     network::fsize_type file_size,
-//                     network::rdcy_type redundancy,
-//                     network::rdcy_type current_redundancy,
-//                     network::sha1_ptr_type hash, bool uploaded)
-//      : id_{id}, name_{name}, file_size_{file_size}, redundancy_{redundancy},
-//        current_redundancy_{current_redundancy}, uploaded_{uploaded};
-//  {
-//    memcpy((void*)hash, hash_, network::sha1_type_size);
-//  }
+  inline
+  FileItem::FileItem(network::fid_type id, const network::fname_type& name,
+                     network::fsize_type file_size,
+                     network::rdcy_type redundancy,
+                     network::rdcy_type current_redundancy,
+                     std::string hash, bool uploaded)
+      : id_{id}, name_{name}, file_size_{file_size}, redundancy_{redundancy},
+        current_redundancy_{current_redundancy}, uploaded_{uploaded}
+  {
+    for (size_t j = 0; j < network::sha1_type_size; ++j)
+      hash_[j] = hash.c_str()[j];
+  }
 
   inline
-  PartItem::PartItem(const network::PARTID& partid,
-                     std::string& hash,
+  PartItem::PartItem(const network::PARTID& partid, std::string& hash,
                      const std::vector<network::stid_type>& locations)
       : partid_{partid.fid, partid.partnum}, locations_{locations}
   {

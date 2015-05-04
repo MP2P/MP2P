@@ -67,19 +67,10 @@ namespace Database
     bool uploaded_ = false;
 
   public:
-//    FileItem(fid_type
-//    id_,
-//    const fname_type& name_, fsize_type
-//    file_size_,
-//    rdcy_type redundancy_, rdcy_type
-//    current_redundancy_,
-//    const unsigned char* hash_,
-//    bool uploaded_
-//    ):
-
-//    id_(id_), name_(name_), file_size_(file_size_), redundancy_(
-//        redundancy_), current_redundancy_(current_redundancy_), hash_(
-//        hash_), uploaded_(uploaded_) { }
+    FileItem(network::fid_type id, const network::fname_type& name,
+             network::fsize_type file_size, network::rdcy_type redundancy,
+             network::rdcy_type current_redundancy, std::string hash,
+             bool uploaded);
 
     network::fsize_type file_size_get() const;
 
