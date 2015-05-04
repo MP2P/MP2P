@@ -137,6 +137,10 @@ namespace Database
 
   class StorageItem : public Item
   {
+  public:
+    StorageItem(network::stid_type id, const std::string& host_addr,
+                network::avspace_type available_space);
+
   private:
     network::stid_type id_;
     std::string host_addr_;

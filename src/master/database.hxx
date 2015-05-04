@@ -63,6 +63,12 @@ namespace Database
   MasterItem::MasterItem(network::mtid_type id, const std::string& host_addr)
       : id_{id}, host_addr_{host_addr} {};
 
+  inline
+  StorageItem::StorageItem(network::stid_type id, const std::string& host_addr,
+                           network::avspace_type available_space)
+      : id_{id}, host_addr_{host_addr}, available_space_{available_space} {};
+
+
   inline std::string
   FileItem::serialize() const
   {
