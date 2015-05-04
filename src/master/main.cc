@@ -3,10 +3,20 @@
 #include "master.hh"
 #include "database.hh"
 
+#include <string.h>
+
 static Database::Database* db = nullptr;
 
 int main()
 {
+  network::PARTID partid = {1, 3};
+  std::cout << partid.fid << " | " << partid.partnum << std::endl;
+  std::string hash = "azertyuiopmlkjhgfdsq";
+  std::vector<network::stid_type> vect = {3, 4, 5, 6};
+
+  Database::PartItem pi = Database::PartItem(partid, hash, vect);
+  std::cout << pi.serialize() << std::endl;
+
   try
   {
     // Throws if anything goes bad
@@ -34,4 +44,4 @@ int main()
     delete db;
 
   return 0;
-}
+};

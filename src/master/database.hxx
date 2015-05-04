@@ -50,12 +50,12 @@ namespace Database
 
   inline
   PartItem::PartItem(const network::PARTID& partid,
-                     network::sha1_ptr_type hash,
+                     std::string& hash,
                      const std::vector<network::stid_type>& locations)
-      : locations_{locations}
+      : partid_{partid.fid, partid.partnum}, locations_{locations}
   {
-    memcpy((void*)&partid, &partid_, sizeof(network::PARTID));
-    memcpy((void*)hash, hash_, network::sha1_type_size);
+    for (size_t j = 0; j < network::sha1_type_size; ++j)
+      hash_[j] = hash.c_str()[j];
   }
 
   inline std::string
@@ -82,12 +82,12 @@ namespace Database
   {
     std::stringstream ss;
     ss << "{"
-          << "\"partid\": {"
+          << "\"partid\":{"
                           << network::string_from(partid_.fid) << ','
                           << network::string_from(partid_.partnum)
                           << "},"
           << "\"hash\":" << network::string_from(hash_, network::sha1_type_size) << ','
-          << "\"locations\": [" << utils::misc::separate(locations_, ",") << "]"
+          << "\"locations\":[" << utils::misc::separate(locations_, ",") << "]"
     << "}";
     return ss.str();
   }

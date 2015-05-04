@@ -107,7 +107,7 @@ namespace Database
     network::sha1_type hash_;
     std::vector<network::stid_type> locations_;
   public:
-    PartItem(const network::PARTID& partid, network::sha1_ptr_type hash,
+    PartItem(const network::PARTID& partid, std::string& hash,
              const std::vector<network::stid_type>& locations);
 
 
