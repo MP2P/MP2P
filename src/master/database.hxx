@@ -36,6 +36,7 @@ namespace Database
                                    std::to_string(result.cas()));
   }
 
+  // Item's constructors
   inline
   FileItem::FileItem(network::fid_type id, const network::fname_type& name,
                      network::fsize_type file_size,
@@ -57,6 +58,10 @@ namespace Database
     for (size_t j = 0; j < network::sha1_type_size; ++j)
       hash_[j] = hash.c_str()[j];
   }
+
+  inline
+  MasterItem::MasterItem(network::mtid_type id, const std::string& host_addr)
+      : id_{id}, host_addr_{host_addr} {};
 
   inline std::string
   FileItem::serialize() const

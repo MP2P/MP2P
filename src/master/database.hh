@@ -121,6 +121,8 @@ namespace Database
     network::mtid_type id_;
     std::string host_addr_;
   public:
+    MasterItem(network::mtid_type id, const std::string& host_addr);
+
     MasterItem()
         : Item() { };
 
