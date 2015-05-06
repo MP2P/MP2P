@@ -1,14 +1,12 @@
-file(GLOB_RECURSE SERVERSOURCES *.cc)
-
 #The degug target
-add_executable(storage-debug ${SERVERSOURCES})
+add_executable(storage-debug ${STORAGESOURCES})
 add_dependencies(debug storage-debug)
 target_link_libraries(storage-debug LINK_PUBLIC libtools-debug)
 target_include_directories(storage-debug PUBLIC include)
 set_target_properties(storage-debug PROPERTIES COMPILE_FLAGS "-ggdb3 ${SHARED_FLAGS}")
 
 #The release target
-add_executable(storage-release ${SERVERSOURCES})
+add_executable(storage-release ${STORAGESOURCES})
 add_dependencies(release storage-release)
 target_link_libraries(storage-release LINK_PUBLIC libtools-release)
 target_include_directories(storage-release PUBLIC include)

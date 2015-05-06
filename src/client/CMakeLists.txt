@@ -1,5 +1,3 @@
-file(GLOB_RECURSE CLIENTSOURCES *.cc)
-
 #The debug version
 add_executable(client-debug ${CLIENTSOURCES})
 add_dependencies(debug client-debug)

@@ -80,15 +80,28 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 
 add_custom_target(release)
 add_custom_target(debug)
+add_custom_target(test-suite)
 
 # ********[05][d01-02-03-04] SOURCE FILES ******** #
+file(GLOB_RECURSE LIBSOURCES *.cc)
 add_subdirectory(${SOURCE_DIR}/libtools) # The tools library
+
+file(GLOB_RECURSE CLIENTSOURCES ${SOURCE_DIR}/client/*.cc)
 add_subdirectory(${SOURCE_DIR}/client)   # The client
+
+file(GLOB_RECURSE MASTERSOURCES ${SOURCE_DIR}/master/*.cc)
 add_subdirectory(${SOURCE_DIR}/master)   # The master server
+
+file(GLOB_RECURSE STORAGESOURCES ${SOURCE_DIR}/storage/*.cc)
 add_subdirectory(${SOURCE_DIR}/storage)   # The master server
-add_subdirectory(${SOURCE_DIR}/logger-tests)    # The "tests" target
+
+#file(GLOB_RECURSE LOGGERTESTSSOURCES ${SOURCE_DIR}/logger-tests/*.cc)
+#add_subdirectory(${SOURCE_DIR}/logger-tests)    # The "tests" target
+
 add_subdirectory(${SOURCE_DIR}/tests/client)    # The "tests" target
+
 add_subdirectory(${SOURCE_DIR}/tests/master)    # The "tests" target
+
 add_subdirectory(${SOURCE_DIR}/tests/storage)    # The "tests" target
 
 
