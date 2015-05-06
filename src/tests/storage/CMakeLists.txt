@@ -1,4 +1,5 @@
 add_executable(tests-storage ${STORAGESOURCES})
 add_dependencies(test-suite tests-storage)
+add_dependencies(release tests-storage)
 target_link_libraries(tests-storage LINK_PUBLIC libtools-debug)
-set_target_properties(tests-storage PROPERTIES COMPILE_FLAGS "-O3 ${SHARED_FLAGS}")
+set_target_properties(tests-storage PROPERTIES EXCLUDE_FROM_ALL true COMPILE_FLAGS "-O3 ${SHARED_FLAGS}")
