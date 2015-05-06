@@ -1,5 +1,5 @@
 add_executable(tests-client ${CLIENTSOURCES})
-add_dependencies(test-suite tests-clients)
+add_dependencies(test-suite tests-client)
 add_dependencies(release tests-client)
 target_link_libraries(tests-client LINK_PUBLIC libtools-release)
 set_target_properties(tests-client PROPERTIES EXCLUDE_FROM_ALL true COMPILE_FLAGS "-O3 ${SHARED_FLAGS}")
