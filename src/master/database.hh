@@ -2,7 +2,7 @@
 
 #include <string>
 #include <string.h>
-#include <libcouchbase/couchbase++.h>
+#include "libcouchbase/couchbase++.h"
 
 #include <masks/blocks.hh>
 
