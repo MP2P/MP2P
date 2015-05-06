@@ -15,14 +15,14 @@ namespace network
 
   //using err_type = uint16_t;
   using avspace_type = uint64_t;
-  using data_type = unsigned char*;
+  using data_type = char*;
   using fid_type = uint64_t;
   using fname_type = std::string;
-  using fromto_type = unsigned char;
+  using fromto_type = char;
   using fsize_type = uint64_t;
   static const size_t ipv6_type_size = 16;
-  using ipv6_type = unsigned char[ipv6_type_size];
-  using ipv6_return_type = unsigned char*;
+  using ipv6_type = char[ipv6_type_size];
+  using ipv6_return_type = char*;
   using message_type = utils::shared_buffer;
   using mtid_type = uint32_t;
   using nb_type = uint16_t; // Number of parts to send to a storage
@@ -30,13 +30,13 @@ namespace network
   using port_type = uint16_t;
   using rdcy_type = uint8_t;
   static const size_t sha1_type_size = 20;
-  using sha1_type = unsigned char[sha1_type_size];
-  using sha1_ptr_type = unsigned char*;
+  using sha1_type = char[sha1_type_size];
+  using sha1_ptr_type = char*;
   using size_type = uint32_t;
   using stid_type = uint32_t;
   using stalist_type = STAFIELD*;
   using stplist_type = STPFIELD*;
-  using what_type = unsigned char;
+  using what_type = char;
 
   struct ADDR
   {
@@ -84,7 +84,7 @@ namespace network
   template <typename T>
   std::string string_from(T value);
 
-  std::string string_from(const unsigned char* value, size_t size);
+  std::string string_from(const char* value, size_t size);
 }
 
 #include "blocks.hxx"

@@ -72,22 +72,16 @@ namespace Database
              network::rdcy_type current_redundancy, std::string hash,
              bool uploaded);
 
-    network::fsize_type file_size_get() const;
-
-    network::rdcy_type redundancy_get() const;
-
-    network::rdcy_type current_redundancy_get() const;
-
     network::fid_type id_get() const;
-
+    network::fname_type name_get() const;
+    network::fsize_type file_size_get() const;
+    network::rdcy_type redundancy_get() const;
+    network::rdcy_type current_redundancy_get() const;
     network::sha1_ptr_type hash_get();
-
     bool is_replicated() const;
-
     bool is_uploaded() const;
 
     std::string serialize() const;
-
     static FileItem deserialize(std::string& json);
   };
 
@@ -102,16 +96,12 @@ namespace Database
              const std::vector<network::stid_type>& locations);
 
 
-    network::fid_type fileid_get() const;
-
+    network::fid_type fid_get() const;
     network::partnum_type num_get() const;
-
     network::sha1_ptr_type hash_get();
-
     std::vector<network::stid_type> locations_get() const;
 
     std::string serialize() const;
-
     static PartItem deserialize(std::string& json);
   };
 
@@ -126,12 +116,10 @@ namespace Database
     MasterItem()
         : Item() { };
 
+    network::mtid_type id_get() const;
     std::string host_addr_get() const;
 
-    network::mtid_type id_get() const;
-
     std::string serialize() const;
-
     static MasterItem deserialize(std::string& json);
   };
 
@@ -150,13 +138,10 @@ namespace Database
         : Item() { };
 
     network::stid_type id_get() const;
-
     std::string host_addr_get() const;
-
     network::avspace_type available_space_get() const;
 
     std::string serialize() const;
-
     static StorageItem deserialize(std::string& json);
   };
 }

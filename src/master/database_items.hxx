@@ -23,6 +23,10 @@ namespace Database
   {
     return id_;
   }
+  inline fname_type FileItem::name_get() const
+  {
+    return name_;
+  }
 
   inline sha1_ptr_type FileItem::hash_get()
   {
@@ -39,7 +43,7 @@ namespace Database
     return uploaded_;
   }
 
-  inline fid_type PartItem::fileid_get() const
+  inline fid_type PartItem::fid_get() const
   {
     return partid_.fid;
   }

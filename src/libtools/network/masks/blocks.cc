@@ -12,8 +12,8 @@ namespace network
     return "\"" + value + "\"";
   }
 
-  std::string string_from(const unsigned char* value, size_t size)
+  std::string string_from(const char* value, size_t size)
   {
-    return "\"" + std::string((char*)value, size) + "\"";
+    return "\"" + std::string(value, size) + "\"";
   }
 }

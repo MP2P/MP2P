@@ -7,28 +7,6 @@ static Database::Database* db = nullptr;
 
 int main()
 {
-  /* TODO: put in test folder with catch framework */
-//  network::PARTID partid = {1, 3};
-//  std::string hash = "azertyuiopmlkjhgfdsq";
-//  std::vector<network::stid_type> vect = {3, 4, 5, 6};
-//
-//  Database::PartItem pi = Database::PartItem(partid, hash, vect);
-//  std::string spi = pi.serialize();
-//
-//  std::cout << spi << std::endl;
-//
-//  Database::FileItem fi = Database::FileItem(1, "filename.txt", 15000, 3, 1,
-//                                             hash, true);
-//
-//  std::string sfi = fi.serialize();
-//  std::cout << sfi<< std::endl;
-//
-//  Database::PartItem dfi = Database::PartItem::deserialize(spi);
-//  std::cout << utils::misc::separate(dfi.locations_get(), "|") << std::endl;
-
-  /* ENDTODO */
-
-
   std::string host;
   std::string password;
   std::string bucket;
