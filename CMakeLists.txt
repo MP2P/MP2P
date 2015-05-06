@@ -37,6 +37,7 @@ endif (OPENSSL_INCLUDE_DIR AND OPENSSL_LIBRARY)
 #MESSAGE( STATUS "OPENSSL_FOUND:          " ${OPENSSL_FOUND} )
 
 set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
+set(TESTS_DIR ${PROJECT_SOURCE_DIR}/test)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 
@@ -85,7 +86,10 @@ add_subdirectory(${SOURCE_DIR}/libtools) # The tools library
 add_subdirectory(${SOURCE_DIR}/client)   # The client
 add_subdirectory(${SOURCE_DIR}/master)   # The master server
 add_subdirectory(${SOURCE_DIR}/storage)   # The master server
-add_subdirectory(${SOURCE_DIR}/tests)    # The "tests" target
+add_subdirectory(${SOURCE_DIR}/logger-tests)    # The "tests" target
+add_subdirectory(${SOURCE_DIR}/tests/client)    # The "tests" target
+add_subdirectory(${SOURCE_DIR}/tests/master)    # The "tests" target
+add_subdirectory(${SOURCE_DIR}/tests/storage)    # The "tests" target
 
 
 

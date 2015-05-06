@@ -88,7 +88,7 @@ namespace Database
 
     std::string serialize() const;
 
-    static Item deserialize(std::string& json);
+    static FileItem deserialize(std::string& json);
   };
 
   class PartItem : public Item
@@ -112,7 +112,7 @@ namespace Database
 
     std::string serialize() const;
 
-    static Item deserialize(std::string& json);
+    static PartItem deserialize(std::string& json);
   };
 
   class MasterItem : public Item
@@ -132,7 +132,7 @@ namespace Database
 
     std::string serialize() const;
 
-    static Item deserialize(std::string& json);
+    static MasterItem deserialize(std::string& json);
   };
 
   class StorageItem : public Item
@@ -157,7 +157,7 @@ namespace Database
 
     std::string serialize() const;
 
-    static Item deserialize(std::string& json);
+    static StorageItem deserialize(std::string& json);
   };
 }
 
