@@ -14,7 +14,7 @@
 #include <iostream>
 #include <functional>
 #include <memory>
-#include <libcouchbase/couchbase++/forward.h>
+#include "couchbase++/forward.h"
 
 namespace Couchbase {
 
@@ -774,9 +774,9 @@ private:
 };
 } // namespace Couchbase
 
-#include <libcouchbase/couchbase++/mctx.inl.h>
-#include <libcouchbase/couchbase++/endure.h>
-#include <libcouchbase/couchbase++/client.inl.h>
-#include <libcouchbase/couchbase++/batch.inl.h>
+#include "couchbase++/mctx.inl.h"
+#include "couchbase++/endure.h"
+#include "couchbase++/client.inl.h"
+#include "couchbase++/batch.inl.h"
 
 #endif
