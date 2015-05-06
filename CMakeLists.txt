@@ -83,7 +83,7 @@ add_custom_target(debug)
 add_custom_target(test-suite)
 
 # ********[05][d01-02-03-04] SOURCE FILES ******** #
-file(GLOB_RECURSE LIBSOURCES *.cc)
+file(GLOB_RECURSE LIBSOURCES ${SOURCE_DIR}/libtools/*.cc)
 add_subdirectory(${SOURCE_DIR}/libtools) # The tools library
 
 file(GLOB_RECURSE CLIENTSOURCES ${SOURCE_DIR}/client/*.cc)
