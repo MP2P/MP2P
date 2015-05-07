@@ -23,6 +23,7 @@ namespace Database
   {
     return id_;
   }
+
   inline fname_type FileItem::name_get() const
   {
     return name_;
@@ -58,7 +59,7 @@ namespace Database
     return &hash_[0];
   }
 
-  inline std::vector<network::stid_type> PartItem::locations_get() const
+  inline std::vector<stid_type> PartItem::locations_get() const
   {
     return locations_;
   }

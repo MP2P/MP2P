@@ -60,7 +60,7 @@ namespace network
 
   std::ostream &operator<<(std::ostream &output, const Packet &packet)
   {
-    output << string_from(packet.size_get()) << "|"
+    output << utils::misc::string_from(packet.size_get()) << "|"
     << (int)packet.fromto_get() << "|"
     << (int)packet.what_get();
     return output;

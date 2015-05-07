@@ -142,6 +142,10 @@ namespace utils
     template <class C, typename S>
     inline std::ostream&
     operator<<(std::ostream& o, const Separator<C, S>& s);
+
+    template <typename T>
+    std::string string_from(T value);
+    std::string string_from(const char* value, size_t size);
   }
 }
 

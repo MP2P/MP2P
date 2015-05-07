@@ -16,6 +16,9 @@
 #include <utils.hh>
 #include <files.hh>
 
+using namespace network::masks;
+
+
 namespace network
 {
   enum FromTo

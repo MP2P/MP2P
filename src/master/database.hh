@@ -6,6 +6,8 @@
 
 #include <masks/blocks.hh>
 
+using namespace network::masks;
+
 namespace Database
 {
   // Abstract class
@@ -58,26 +60,26 @@ namespace Database
   class FileItem : public Item
   {
   private:
-    network::fid_type id_;
-    network::fname_type name_;
-    network::fsize_type file_size_ = 0;
-    network::rdcy_type redundancy_ = 0;
-    network::rdcy_type current_redundancy_ = 0;
-    network::sha1_type hash_;
+    fid_type id_;
+    fname_type name_;
+    fsize_type file_size_ = 0;
+    rdcy_type redundancy_ = 0;
+    rdcy_type current_redundancy_ = 0;
+    sha1_type hash_;
     bool uploaded_ = false;
 
   public:
-    FileItem(network::fid_type id, const network::fname_type& name,
-             network::fsize_type file_size, network::rdcy_type redundancy,
-             network::rdcy_type current_redundancy, std::string hash,
+    FileItem(fid_type id, const fname_type& name,
+             fsize_type file_size, rdcy_type redundancy,
+             rdcy_type current_redundancy, std::string hash,
              bool uploaded);
 
-    network::fid_type id_get() const;
-    network::fname_type name_get() const;
-    network::fsize_type file_size_get() const;
-    network::rdcy_type redundancy_get() const;
-    network::rdcy_type current_redundancy_get() const;
-    network::sha1_ptr_type hash_get();
+    fid_type id_get() const;
+    fname_type name_get() const;
+    fsize_type file_size_get() const;
+    rdcy_type redundancy_get() const;
+    rdcy_type current_redundancy_get() const;
+    sha1_ptr_type hash_get();
     bool is_replicated() const;
     bool is_uploaded() const;
 
@@ -88,18 +90,18 @@ namespace Database
   class PartItem : public Item
   {
   private:
-    network::PARTID partid_;
-    network::sha1_type hash_;
-    std::vector<network::stid_type> locations_;
+    PARTID partid_;
+    sha1_type hash_;
+    std::vector<stid_type> locations_;
   public:
-    PartItem(const network::PARTID& partid, std::string& hash,
-             const std::vector<network::stid_type>& locations);
+    PartItem(const PARTID& partid, std::string& hash,
+             const std::vector<stid_type>& locations);
 
 
-    network::fid_type fid_get() const;
-    network::partnum_type num_get() const;
-    network::sha1_ptr_type hash_get();
-    std::vector<network::stid_type> locations_get() const;
+    fid_type fid_get() const;
+    partnum_type num_get() const;
+    sha1_ptr_type hash_get();
+    std::vector<stid_type> locations_get() const;
 
     std::string serialize() const override;
     static PartItem deserialize(std::string& json);
@@ -108,15 +110,15 @@ namespace Database
   class MasterItem : public Item
   {
   private:
-    network::mtid_type id_;
+    mtid_type id_;
     std::string host_addr_;
   public:
-    MasterItem(network::mtid_type id, const std::string& host_addr);
+    MasterItem(mtid_type id, const std::string& host_addr);
 
     MasterItem()
         : Item() { };
 
-    network::mtid_type id_get() const;
+    mtid_type id_get() const;
     std::string host_addr_get() const;
 
     std::string serialize() const override;
@@ -126,20 +128,20 @@ namespace Database
   class StorageItem : public Item
   {
   public:
-    StorageItem(network::stid_type id, const std::string& host_addr,
-                network::avspace_type available_space);
+    StorageItem(stid_type id, const std::string& host_addr,
+                avspace_type available_space);
 
   private:
-    network::stid_type id_;
+    stid_type id_;
     std::string host_addr_;
-    network::avspace_type available_space_;
+    avspace_type available_space_;
   public:
     StorageItem()
         : Item() { };
 
-    network::stid_type id_get() const;
+    stid_type id_get() const;
     std::string host_addr_get() const;
-    network::avspace_type available_space_get() const;
+    avspace_type available_space_get() const;
 
     std::string serialize() const override;
     static StorageItem deserialize(std::string& json);
