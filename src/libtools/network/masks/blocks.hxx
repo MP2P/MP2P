@@ -2,6 +2,7 @@
 
 namespace network
 {
+
   template <typename T>
   std::string string_from(T value)
   {

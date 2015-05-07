@@ -116,7 +116,7 @@ namespace Database
     std::stringstream ss;
     ss << "{"
           << "\"id\":" << network::string_from(id_) << ','
-          << "\"host_addr\":" << network::string_from(host_addr_) << ','
+          << "\"host_addr\":" << network::string_from(host_addr_)
     << "}";
     return ss.str();
   }

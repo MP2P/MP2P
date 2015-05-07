@@ -81,7 +81,7 @@ namespace Database
     bool is_replicated() const;
     bool is_uploaded() const;
 
-    std::string serialize() const;
+    std::string serialize() const override;
     static FileItem deserialize(std::string& json);
   };
 
@@ -101,7 +101,7 @@ namespace Database
     network::sha1_ptr_type hash_get();
     std::vector<network::stid_type> locations_get() const;
 
-    std::string serialize() const;
+    std::string serialize() const override;
     static PartItem deserialize(std::string& json);
   };
 
@@ -119,7 +119,7 @@ namespace Database
     network::mtid_type id_get() const;
     std::string host_addr_get() const;
 
-    std::string serialize() const;
+    std::string serialize() const override;
     static MasterItem deserialize(std::string& json);
   };
 
@@ -141,7 +141,7 @@ namespace Database
     std::string host_addr_get() const;
     network::avspace_type available_space_get() const;
 
-    std::string serialize() const;
+    std::string serialize() const override;
     static StorageItem deserialize(std::string& json);
   };
 }
