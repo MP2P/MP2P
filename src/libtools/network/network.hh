@@ -147,8 +147,8 @@ namespace network
     boost::asio::ip::tcp::socket socket_;
     boost::asio::streambuf buff_; // FIXME : Is this a good choice?
     size_t length_;
-    std::function<error_code(Packet, Session&)> handler_;
-    std::function<void(Session&)> delete_handler_;
+    std::function<error_code(Packet, Session&)> dispatcher_;
+    std::function<void(Session&)> delete_dispatcher_;
     const size_t id_;
 
     void receive_header(std::function<void(size_t, Packet)> callback);
@@ -157,16 +157,16 @@ namespace network
   public:
     // Create a session
     Session(boost::asio::ip::tcp::socket&& socket,
-            std::function<error_code(Packet,Session&)> handler,
-            std::function<void(Session&)> delete_handler,
+            std::function<error_code(Packet,Session&)> dispatcher,
+            std::function<void(Session&)> delete_dispatcher,
             size_t id = unique_id());
 
     // Create a session and connect to the host:port
     Session(boost::asio::io_service& io_service,
             const std::string& host,
             const std::string& port,
-            std::function<error_code(Packet,Session&)> handler,
-            std::function<void(Session&)> delete_handler,
+            std::function<error_code(Packet,Session&)> dispatcher,
+            std::function<void(Session&)> delete_dispatcher,
             size_t id = unique_id());
 
     // Custom move constructor. Since buff_ doesn't have a move constructor
@@ -191,7 +191,7 @@ namespace network
 
     void send(const Packet& packet);
 
-    void delete_handler(Session& session);
+    void delete_dispatcher(Session& session);
 
     static size_t unique_id();
   };
@@ -206,12 +206,12 @@ namespace network
   private:
     boost::asio::ip::tcp::acceptor acceptor_;
     boost::asio::ip::tcp::socket socket_;
-    std::function<error_code(Packet,Session&)> handler_;
+    std::function<error_code(Packet,Session&)> dispatcher_;
     std::unordered_map<size_t, Session> sessions_;
 
   public:
     Server(boost::asio::io_service& io_service,
-           std::function<error_code(Packet,Session&)> handler);
+           std::function<error_code(Packet,Session&)> dispatcher);
 
     ~Server();
 
@@ -220,7 +220,7 @@ namespace network
 
     bool is_running();
 
-    void delete_handler(Session& session);
+    void delete_dispatcher(Session& session);
   };
 
   std::ostream& operator<<(std::ostream& o, const Error& e);

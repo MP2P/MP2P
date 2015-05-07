@@ -48,7 +48,7 @@ namespace utils
     void operator=(Conf const& ) = delete;
 
     std::string host_;
-    unsigned port_;
+    unsigned short port_;
     unsigned concurrent_threads_;
     boost::posix_time::time_duration timeout_;
     std::string DBhost_;
@@ -63,7 +63,7 @@ namespace utils
     bool initialize(const std::string& config_path);
 
     std::string host_get() const;
-    unsigned port_get() const;
+    unsigned short port_get() const;
     unsigned concurrency_get() const;
     boost::posix_time::time_duration timeout_get() const;
     std::string DBhost_get() const;

@@ -11,7 +11,7 @@ namespace utils
   }
 
   // getting the port number to bind
-  inline unsigned Conf::port_get() const
+  inline unsigned short Conf::port_get() const
   {
     return port_;
   }

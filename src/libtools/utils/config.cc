@@ -40,10 +40,13 @@ namespace utils
       host_ = "localhost";
 
     // Getting port value - Default = 3727
-    cfg.lookupValue("server.port", port_);
-    if (port_ == 0)
-      port_ = 3727; // 3727=mp2p
 
+    unsigned tmp_port;
+    cfg.lookupValue("server.port", tmp_port);
+    if (tmp_port == 0)
+      tmp_port = 3727; // 3727=mp2p
+
+    port_ = (unsigned short)tmp_port;
 
     // Getting concurency level - Default = 1
     cfg.lookupValue("server.concurency", concurrent_threads_);

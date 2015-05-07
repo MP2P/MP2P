@@ -7,12 +7,12 @@ namespace network
 {
 
   Session::Session(ip::tcp::socket&& socket,
-                   std::function<error_code(Packet,Session&)> handler,
-                   std::function<void(Session&)> delete_handler,
+                   std::function<error_code(Packet,Session&)> dispatcher,
+                   std::function<void(Session&)> delete_dispatcher,
                    size_t id)
       : socket_{std::forward<ip::tcp::socket>(socket)},
-        handler_{std::move(handler)},
-        delete_handler_{std::move(delete_handler)},
+        dispatcher_{std::move(dispatcher)},
+        delete_dispatcher_{std::move(delete_dispatcher)},
         id_{id}
   {
   }
@@ -20,12 +20,12 @@ namespace network
   Session::Session(io_service& io_service,
                    const std::string& host,
                    const std::string& port,
-                   std::function<error_code(Packet,Session&)> handler,
-                   std::function<void(Session&)> delete_handler,
+                   std::function<error_code(Packet,Session&)> dispatcher,
+                   std::function<void(Session&)> delete_dispatcher,
                    size_t id)
     : socket_{io_service},
-      handler_{std::move(handler)},
-      delete_handler_{std::move(delete_handler)},
+      dispatcher_{std::move(dispatcher)},
+      delete_dispatcher_{std::move(delete_dispatcher)},
       id_{id}
   {
     ip::tcp::resolver resolver{io_service}; // Resolve the host
@@ -46,8 +46,8 @@ namespace network
   Session::Session(Session&& other)
       : socket_{std::move(other.socket_)},
         length_{other.length_},
-        handler_{std::move(other.handler_)},
-        delete_handler_{std::move(other.delete_handler_)},
+        dispatcher_{std::move(other.dispatcher_)},
+        delete_dispatcher_{std::move(other.delete_dispatcher_)},
         id_{other.id_}
   {
   }
@@ -114,7 +114,7 @@ namespace network
                  if (!ec)
                  {
                    length_ = length;
-                   auto error = handler_(p, *this);
+                   auto error = dispatcher_(p, *this);
                    length_ = 0;
 
                    if (error == 100)
@@ -149,7 +149,7 @@ namespace network
     auto seq = packet.message_seq_get();
     seq.insert(seq.begin(), packet.serialize_header());
     write(socket_, seq);
-    auto error = handler_(packet, *this);
+    auto error = dispatcher_(packet, *this);
     if (error == 1)
       socket_.close();
   }
@@ -164,6 +164,6 @@ namespace network
   {
     utils::Logger::cout() << "Closed session";
     socket_.close(); // Close the socket
-    delete_handler_(*this); // Ask the owner to delete
+    delete_dispatcher_(*this); // Ask the owner to delete
   }
 }

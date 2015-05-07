@@ -1,5 +1,4 @@
 #include <network.hh>
-#include <masks/messages.hh>
 
 namespace network
 {

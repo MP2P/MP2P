@@ -8,15 +8,15 @@ using namespace boost::asio;
 namespace network
 {
   Server::Server(io_service &io_service,
-      std::function<error_code(Packet, Session &)> handler)
+      std::function<error_code(Packet, Session &)> dispatcher)
       : acceptor_{io_service},
         socket_{io_service},
-        handler_{std::move(handler)}
+        dispatcher_{std::move(dispatcher)}
   {
     // Use of ipv6 by default, with IPV6_V6ONLY disabled, it will listen to
     // both ipv4 & ipv6.
     // ipv4 addresses will be mapped to ipv6 like this: `::ffff:192.168.0.'
-    unsigned port = utils::Conf::get_instance().port_get();
+    unsigned short port = utils::Conf::get_instance().port_get();
     ip::tcp::endpoint endpoint(ip::tcp::v6(), port);
 
     acceptor_.open(endpoint.protocol());
@@ -66,8 +66,8 @@ namespace network
 
             size_t id = Session::unique_id();
             sessions_.emplace(id,
-              Session{std::move(socket_), handler_,
-                std::bind(&Server::delete_handler, this, std::placeholders::_1),
+              Session{std::move(socket_), dispatcher_,
+                std::bind(&Server::delete_dispatcher, this, std::placeholders::_1),
                 id
               }
             );
@@ -82,7 +82,7 @@ namespace network
     );
   }
 
-  void Server::delete_handler(Session& session)
+  void Server::delete_dispatcher(Session& session)
   {
     sessions_.erase(session.id_get());
   }
