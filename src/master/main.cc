@@ -22,6 +22,7 @@ int main()
   catch (std::exception& e)
   {
     utils::Logger::cerr() << "Master exception: " + std::string(e.what());
+    return 1;
   }
 
   try

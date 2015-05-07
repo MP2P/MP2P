@@ -46,6 +46,13 @@ namespace utils
     if (tmp_port == 0)
       tmp_port = 3727; // 3727=mp2p
 
+    if (tmp_port > 65535)
+    {
+      utils::Logger::cerr() << "Configuration exception: Port value must be "
+                               "between 1 <= port <= 65535.";
+      return false;
+    }
+
     port_ = (unsigned short)tmp_port;
 
     // Getting concurency level - Default = 1
