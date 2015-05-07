@@ -69,7 +69,7 @@ It listens both for ipv4 & ipv6 connections
 
 ## Tests
 
-We ~~are~~ will be using the [Catch Unit](https://github.com/philsquared/Catch)
+We are using the [Catch Unit](https://github.com/philsquared/Catch)
 test framework.
 
 ## How to configure .vimrc with Syntastic so that it detects header locations?

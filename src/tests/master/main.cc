@@ -4,12 +4,15 @@
 #include "../../master/database.hh"
 #include "../catch.hh"
 
+using namespace network::masks;
+
+
 TEST_CASE("Items can be serialized & deserialized", "[db-items]" )
 {
   // Initializing requirements
   std::string hash = "azertyuiopmlkjhgfdsq";
-  network::PARTID partid = {1, 3};
-  std::vector <network::stid_type> vect = {3, 4, 5, 6};
+  PARTID partid = {1, 3};
+  std::vector <stid_type> vect = {3, 4, 5, 6};
   std::string host_addr = "master.mp2p.mydomain.com";
   std::string res_has;
 
@@ -41,7 +44,7 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]" )
     REQUIRE(part_item.num_get() == 3);
     res_has = std::string(part_item.hash_get());
     REQUIRE(res_has.compare(hash));
-    std::vector <network::stid_type> v = part_item.locations_get();
+    std::vector <stid_type> v = part_item.locations_get();
     REQUIRE(std::accumulate(v.rbegin(), v.rend(), 0) == (3 + 4 + 5 + 6));
   }
 

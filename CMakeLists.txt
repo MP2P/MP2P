@@ -95,27 +95,9 @@ add_subdirectory(${SOURCE_DIR}/master)   # The master server
 file(GLOB_RECURSE STORAGESOURCES ${SOURCE_DIR}/storage/*.cc)
 add_subdirectory(${SOURCE_DIR}/storage)   # The master server
 
-#file(GLOB_RECURSE LOGGERTESTSSOURCES ${SOURCE_DIR}/logger-tests/*.cc)
-#add_subdirectory(${SOURCE_DIR}/logger-tests)    # The "tests" target
+file(GLOB_RECURSE LOGGERTESTSSOURCES ${SOURCE_DIR}/logger-tests/*.cc)
+add_subdirectory(${SOURCE_DIR}/logger-tests)    # The "tests" target
 
 add_subdirectory(${SOURCE_DIR}/tests/client)    # The "tests" target
-
 add_subdirectory(${SOURCE_DIR}/tests/master)    # The "tests" target
-
 add_subdirectory(${SOURCE_DIR}/tests/storage)    # The "tests" target
-
-
-
-
-#add_executable(${PROJECT_NAME} ${SOURCES})
-#set_target_properties(td42 PROPERTIES COMPILE_FLAGS "${CXX_FLAGS} -O3")
-#target_link_libraries(${PROJECT_NAME} ${SFML_LIBRARIES})
-
-#target_link_libraries(42sh ${CMAKE_THREAD_LIBS_INIT})
-
-# The debug target
-#add_executable(debug EXCLUDE_FROM_ALL ${SOURCES})
-#set_target_properties(debug PROPERTIES COMPILE_FLAGS "${CXX_FLAGS} -ggdb3")
-#target_link_libraries(debug ${SFML_LIBRARIES})
-
-#target_link_libraries(debug ${CMAKE_THREAD_LIBS_INIT})

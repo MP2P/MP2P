@@ -9,7 +9,8 @@ using namespace boost::posix_time;
 
 Master::Master()
     : server_{io_service_,
-              std::bind(&Master::handle, this, std::placeholders::_1, std::placeholders::_2)}
+              std::bind(&Master::dispatcher, this, std::placeholders::_1,
+                        std::placeholders::_2)}
 {
   unsigned concurrency = utils::Conf::get_instance().concurrency_get();
   unsigned port = utils::Conf::get_instance().port_get();
@@ -100,11 +101,11 @@ void Master::catch_stop()
 
 // Handle the session after filling the buffer
 // Errors are defined in the ressources/errors file.
-error_code Master::handle(Packet packet, Session& session)
+error_code Master::dispatcher(Packet packet, Session& session)
 {
   std::ostringstream s;
   s << std::this_thread::get_id();
-  utils::Logger::cout() << "Master handle (tid=" + s.str() + ").";
+  utils::Logger::cout() << "Master dispatcher (tid=" + s.str() + ").";
 
   // Create and get the Packet object from the session (buff_ & length_)
   if (packet.size_get() < 1)

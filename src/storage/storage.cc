@@ -9,7 +9,8 @@ using namespace boost::posix_time;
 
 Storage::Storage()
     : server_{io_service_,
-              std::bind(&Storage::handle, this, std::placeholders::_1, std::placeholders::_2)}
+              std::bind(&Storage::dispatcher, this, std::placeholders::_1,
+                        std::placeholders::_2)}
 {
   unsigned concurrency = utils::Conf::get_instance().concurrency_get();
   unsigned port = utils::Conf::get_instance().port_get();
@@ -96,12 +97,12 @@ void Storage::catch_stop()
 
 // Handle the session after filling the buffer
 // Errors are defined in the ressources/errors file.
-error_code Storage::handle(Packet packet, Session& session)
+error_code Storage::dispatcher(Packet packet, Session& session)
 {
   (void) session;
   std::ostringstream s;
   s << std::this_thread::get_id();
-  utils::Logger::cout() << "Storage handle (tid=" + s.str() + ").";
+  utils::Logger::cout() << "Storage dispatcher (tid=" + s.str() + ").";
 
   // Create and get the Packet object from the session (buff_ & length_)
   if (packet.size_get() < 1)
@@ -129,7 +130,7 @@ error_code Storage::handle(Packet packet, Session& session)
 
   switch (packet.fromto_get())
   {
-    // FIXME : handle storage
+    // FIXME : dispatcher storage
     default:
       return 100; // Error
   }

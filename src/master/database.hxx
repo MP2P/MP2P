@@ -174,7 +174,7 @@ namespace Database
     BOOST_FOREACH(const boost::property_tree::ptree::value_type &v,
                   pt.get_child("locations"))
     {
-      locations.push_back(std::stoi(v.second.data()));
+      locations.push_back((const unsigned int&) std::stoi(v.second.data()));
     }
 
     return PartItem(partid, hash, locations);
