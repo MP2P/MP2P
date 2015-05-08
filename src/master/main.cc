@@ -18,6 +18,9 @@ int main()
     return 1;
   }
 
+  // Test
+  std::cout << Database::tools::number_of_parts(2199023255551) << std::endl;
+
   try
   {
     // Throws if anything goes bad
