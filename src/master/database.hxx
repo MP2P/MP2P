@@ -14,7 +14,41 @@ namespace Database
           + std::string(status) + ").");
   }
 
+  // Connector
+  Database& Connector::get_instance()
+  {
+    if (database.get() == 0)
+    {
+      std::string host;
+      std::string pass;
+      std::string bucket;
+      try
+      {
+        // Throws if anything goes bad
+        host = utils::Conf::get_instance().DBhost_get();
+        pass = utils::Conf::get_instance().DBpassword_get();
+        bucket = utils::Conf::get_instance().DBbucket_get();
+      }
+      catch (std::exception& e)
+      {
+        utils::Logger::cerr() << "Database exception: " + std::string(e.what());
+      }
 
+      try
+      {
+        // Throws if anything goes bad
+        database.reset(new CouchbaseDb(host, pass, bucket));
+        utils::Logger::cout() << "Successfully connected to database.";
+      }
+      catch (Couchbase::Status& s)
+      {
+        utils::Logger::cerr() << "Master exception: Invalid database "
+                                     "configuration (couchbase://" + host + "/"
+                                 + bucket + ").";
+      }
+    }
+    return *database;
+  }
 
   // Database commands
   inline std::string

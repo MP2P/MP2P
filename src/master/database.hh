@@ -37,6 +37,20 @@ namespace Database
     virtual void cmd_put(const std::string& key, const std::string& value) = 0;
   };
 
+  // Singleton
+  class Connector
+  {
+  private:
+    Connector() = default;
+    Connector(Connector const& ) = delete;
+    void operator=(Connector const& ) = delete;
+  public:
+    static std::unique_ptr<Database> database;
+    static Database& get_instance();
+  };
+  std::unique_ptr<Database> Connector::database;
+
+
   class CouchbaseDb : public Database
   {
   private:

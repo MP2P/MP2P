@@ -2,10 +2,8 @@ using namespace network;
 using namespace boost::asio;
 using namespace boost::posix_time;
 
-
 inline
-Master::Master(const std::string& host, const std::string& pass,
-               const std::string& bucket)
+Master::Master()
     : server_{io_service_,
               std::bind(&Master::dispatcher, this, std::placeholders::_1,
                         std::placeholders::_2)}
@@ -15,19 +13,6 @@ Master::Master(const std::string& host, const std::string& pass,
 
   utils::Logger::cout() << "Concurency level = " + std::to_string(concurrency);
   utils::Logger::cout() << "Bind port = " + std::to_string(port);
-
-  try
-  {
-    // Throws if anything goes bad
-    db_ = new Database::CouchbaseDb(host, pass, bucket);
-    utils::Logger::cout() << "Successfully connected to database.";
-  }
-  catch (Couchbase::Status& s)
-  {
-    utils::Logger::cerr() << "Master exception: Invalid database configuration"
-                                 "(couchbase://" + host + "/" + bucket + ").";
-    throw std::logic_error("Could not connect to database.");
-  }
 }
 
 inline
@@ -35,8 +20,6 @@ Master::~Master()
 {
   if (!threads_.empty())
     stop();
-  if (db_ != nullptr)
-    delete db_;
 }
 
 // Creates threads & make them bind the same port defined in the config.
@@ -111,7 +94,6 @@ Master::catch_stop()
 
   stop();
 
-  //std::cout << "Master: Bye bye!" << std::endl;
   utils::Logger::cout() << "Master: Bye bye!";
 }
 

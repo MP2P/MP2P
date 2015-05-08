@@ -13,7 +13,6 @@
 class Master
 {
 private:
-  Database::Database* db_ = nullptr;
   boost::asio::io_service io_service_; // Does not need instantiation
   network::Server server_;
   std::forward_list<std::thread> threads_;
@@ -24,8 +23,7 @@ private:
   void stop();
 
 public:
-  Master(const std::string& host, const std::string& pass,
-         const std::string& bucket);
+  Master();
   ~Master();
 
   // Creates threads & make them bind the same port defined in config.

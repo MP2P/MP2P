@@ -6,17 +6,11 @@
 
 int main()
 {
-  std::string host;
-  std::string pass;
-  std::string bucket;
   try
   {
     // Throws if anything goes bad
     utils::init();
-
-    host = utils::Conf::get_instance().DBhost_get();
-    pass = utils::Conf::get_instance().DBpassword_get();
-    bucket = utils::Conf::get_instance().DBbucket_get();
+    Database::Connector::get_instance(); // Initialize connexion
   }
   catch (std::exception& e)
   {
@@ -27,7 +21,7 @@ int main()
   try
   {
     // Throws if anything goes bad
-    Master master(host, pass, bucket);
+    Master master{};
     if (master.run())
       master.catch_stop();
   }
@@ -37,9 +31,5 @@ int main()
   }
 
   utils::Logger::cout() << "Exiting...";
-
-//  if (db_instance != nullptr)
-//    delete db_instance;
-
   return 0;
 };
