@@ -1,12 +1,3 @@
-#include <utils.hh>
-#include <typeinfo>
-#include <sstream>
-#include <map>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/foreach.hpp>
-
-
 namespace Database
 {
   inline
@@ -138,7 +129,7 @@ namespace Database
   using boost::property_tree::write_json;
 
   // Item's deserializers
-  FileItem
+  inline FileItem
   FileItem::deserialize(std::string& json)
   {
     boost::property_tree::ptree pt;
@@ -156,7 +147,7 @@ namespace Database
                     uploaded);
   }
 
-  PartItem
+  inline PartItem
   PartItem::deserialize(std::string& json)
   {
     boost::property_tree::ptree pt;
@@ -180,7 +171,7 @@ namespace Database
     return PartItem(partid, hash, locations);
   }
 
-  MasterItem
+  inline MasterItem
   MasterItem::deserialize(std::string& json)
   {
     boost::property_tree::ptree pt;
@@ -193,7 +184,7 @@ namespace Database
     return MasterItem(id, host_addr);
   }
 
-  StorageItem
+  inline StorageItem
   StorageItem::deserialize(std::string& json)
   {
     boost::property_tree::ptree pt;

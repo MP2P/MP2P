@@ -1,5 +1,3 @@
-#include <masks/blocks.hh>
-
 namespace Database
 {
   using namespace network;

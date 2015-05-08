@@ -1,14 +1,13 @@
 #include <ostream>
+
 #include <utils.hh>
 #include "master.hh"
-#include "database.hh"
 
-static Database::Database* db = nullptr;
 
 int main()
 {
   std::string host;
-  std::string password;
+  std::string pass;
   std::string bucket;
   try
   {
@@ -16,7 +15,7 @@ int main()
     utils::init();
 
     host = utils::Conf::get_instance().DBhost_get();
-    password = utils::Conf::get_instance().DBpassword_get();
+    pass = utils::Conf::get_instance().DBpassword_get();
     bucket = utils::Conf::get_instance().DBbucket_get();
   }
   catch (std::exception& e)
@@ -28,17 +27,9 @@ int main()
   try
   {
     // Throws if anything goes bad
-    db = new Database::CouchbaseDb(host, password, bucket);
-    utils::Logger::cout() << "Successfully connected to database.";
-
-    Master master;
+    Master master(host, pass, bucket);
     if (master.run())
       master.catch_stop();
-  }
-  catch (Couchbase::Status& s)
-  {
-    utils::Logger::cerr() << "Master exception: Invalid database configuration"
-                            "(couchbase://" + host + "/" + bucket + ").";
   }
   catch (std::exception &e)
   {
@@ -46,8 +37,9 @@ int main()
   }
 
   utils::Logger::cout() << "Exiting...";
-  if (db != nullptr)
-    delete db;
+
+//  if (db_instance != nullptr)
+//    delete db_instance;
 
   return 0;
 };

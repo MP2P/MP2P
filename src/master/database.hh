@@ -2,8 +2,15 @@
 
 #include <string>
 #include <string.h>
+#include <typeinfo>
+#include <sstream>
+#include <map>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
 #include "libcouchbase/couchbase++.h"
 
+#include <utils.hh>
 #include <masks/blocks.hh>
 
 using namespace network::masks;
@@ -13,7 +20,7 @@ namespace Database
   // Abstract class
   class Database
   {
-  protected:
+  protected: // FIXME
   public:
     Database() = default;
 
@@ -146,7 +153,13 @@ namespace Database
     std::string serialize() const override;
     static StorageItem deserialize(std::string& json);
   };
+
+  namespace tools
+  {
+    uint32_t number_of_parts(std::string& json, fsize_type file_size);
+  }
 }
 
 #include "database.hxx"
 #include "database_items.hxx"
+#include "database_tools.hxx"

@@ -1,10 +1,8 @@
-#include "master.hh"
-#include <masks/messages.hh>
-
-using namespace network;
+using namespace network::masks;
 
 // May I upload a file?
-error_code cm_up_req(Packet& packet, Session& session)
+inline error_code
+cm_up_req(Packet& packet, Session& session)
 {
   //TODO: Check if the packet was correct, and send m_c_error if it was not.
   //packet.size_get();
@@ -30,25 +28,29 @@ error_code cm_up_req(Packet& packet, Session& session)
 }
 
 // May I download this file?
-error_code cm_down_req(Packet& packet, Session& session)
+inline error_code
+cm_down_req(Packet& packet, Session& session)
 {
   return (packet.size_get() && session.length_get());
 }
 
 // Can you delete this file?
-error_code cm_del_req(Packet& packet, Session& session)
+inline error_code
+cm_del_req(Packet& packet, Session& session)
 {
   return (packet.size_get() && session.length_get());
 }
 
 // Part deletetion succedeed!
-error_code sm_del_ack(Packet& packet, Session& session)
+inline error_code
+sm_del_ack(Packet& packet, Session& session)
 {
   return (packet.size_get() && session.length_get());
 }
 
 // Part successfully received!
-error_code sm_part_ack(Packet& packet, Session& session)
+inline error_code
+sm_part_ack(Packet& packet, Session& session)
 {
   return (packet.size_get() && session.length_get());
 }

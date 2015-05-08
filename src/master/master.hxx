@@ -1,13 +1,11 @@
-#include <iostream>
-
-#include <utils.hh>
-#include "master.hh"
-
 using namespace network;
 using namespace boost::asio;
 using namespace boost::posix_time;
 
-Master::Master()
+
+inline
+Master::Master(const std::string& host, const std::string& pass,
+               const std::string& bucket)
     : server_{io_service_,
               std::bind(&Master::dispatcher, this, std::placeholders::_1,
                         std::placeholders::_2)}
@@ -17,16 +15,33 @@ Master::Master()
 
   utils::Logger::cout() << "Concurency level = " + std::to_string(concurrency);
   utils::Logger::cout() << "Bind port = " + std::to_string(port);
+
+  try
+  {
+    // Throws if anything goes bad
+    db_ = new Database::CouchbaseDb(host, pass, bucket);
+    utils::Logger::cout() << "Successfully connected to database.";
+  }
+  catch (Couchbase::Status& s)
+  {
+    utils::Logger::cerr() << "Master exception: Invalid database configuration"
+                                 "(couchbase://" + host + "/" + bucket + ").";
+    throw std::logic_error("Could not connect to database.");
+  }
 }
 
+inline
 Master::~Master()
 {
   if (!threads_.empty())
     stop();
+  if (db_ != nullptr)
+    delete db_;
 }
 
 // Creates threads & make them bind the same port defined in the config.
-bool Master::run() // Throws
+inline bool
+Master::run() // Throws
 {
   if (!server_.is_running())
   {
@@ -52,7 +67,8 @@ bool Master::run() // Throws
 }
 
 // Causes the server to stop it's running threads if any.
-void Master::stop()
+inline void
+Master::stop()
 {
   //std::cout << "The server is going to stop..." << std::endl;
   utils::Logger::cout() << "The server is going to stop...";
@@ -77,7 +93,8 @@ void Master::stop()
 }
 
 // When CTRL+C is typed, we call master::stop();
-void Master::catch_stop()
+inline void
+Master::catch_stop()
 {
   struct sigaction sigIntHandler;
 
@@ -98,11 +115,12 @@ void Master::catch_stop()
   utils::Logger::cout() << "Master: Bye bye!";
 }
 
-
 // Handle the session after filling the buffer
 // Errors are defined in the ressources/errors file.
-error_code Master::dispatcher(Packet packet, Session& session)
+inline error_code
+Master::dispatcher(Packet packet, Session& session)
 {
+  (void)session;
   std::ostringstream s;
   s << std::this_thread::get_id();
   utils::Logger::cout() << "Master dispatcher (tid=" + s.str() + ").";
