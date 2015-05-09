@@ -1,8 +1,6 @@
 #include <utils.hh>
 #include "client.hh"
 
-#include <iostream>
-
 int main(int argc, const char *argv[])
 {
   try

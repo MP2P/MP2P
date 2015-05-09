@@ -9,7 +9,7 @@ int main()
   {
     utils::init(); // Throws if anything goes bad
 
-    Storage storage;
+    Storage storage{};
 
     if (storage.run())
       storage.catch_stop();

@@ -53,7 +53,6 @@ Master::run() // Throws
 inline void
 Master::stop()
 {
-  //std::cout << "The server is going to stop..." << std::endl;
   utils::Logger::cout() << "The server is going to stop...";
   server_.stop();
 
@@ -65,7 +64,6 @@ Master::stop()
         id << t.get_id();
         utils::Logger::cout() << "Stopping thread " + id.str() + "...";;
         t.join();
-        //std::cout << " Done!" << std::endl;
         utils::Logger::cout() << "Done stopping thread " + id.str() + "!";
       }
   );

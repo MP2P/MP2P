@@ -44,7 +44,6 @@ namespace network
       errors.emplace(i, msg);
     }
 
-    //std::cout << "Done!" << std::endl;
     utils::Logger::cout() << "Done!";
     return true;
   }
