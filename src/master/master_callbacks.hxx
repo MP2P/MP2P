@@ -10,7 +10,7 @@ cm_up_req(Packet& packet, Session& session)
   //FDETAILS fdetails;
   //TODO: Assign the fdetails.fid using the database (get the next available id).
   //Compute the number of parts.
-  uint32_t nb_parts = Database::tools::number_of_parts(515151);
+  uint32_t nb_parts = DB::tools::number_of_parts(515151);
   if (nb_parts == 0)
     return 1;
   //Get a list of Storages.

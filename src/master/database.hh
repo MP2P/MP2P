@@ -15,7 +15,7 @@
 
 using namespace network::masks;
 
-namespace Database
+namespace DB
 {
   // Abstract class
   class Database

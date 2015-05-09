@@ -1,4 +1,4 @@
-namespace Database
+namespace DB
 {
   inline
   CouchbaseDb::CouchbaseDb(const std::string& host,
@@ -15,6 +15,7 @@ namespace Database
   }
 
   // Connector
+  inline
   Database& Connector::get_instance()
   {
     if (database.get() == 0)
@@ -196,12 +197,12 @@ namespace Database
     partid.partnum = pt.get<partnum_type>("partid_partnum");
     hash = pt.get<std::string>("hash");
 
-    BOOST_FOREACH(const boost::property_tree::ptree::value_type &v,
-                  pt.get_child("locations"))
-    {
-      locations.push_back((const unsigned int&) std::stoi(v.second.data()));
-    }
+    boost::property_tree::ptree locs_pt = pt.get_child("locations");
 
+    for (auto it = locs_pt.begin(); it != locs_pt.end(); ++it)
+    {
+      locations.push_back((const unsigned int&) std::stoi(it->second.data()));
+    }
     return PartItem(partid, hash, locations);
   }
 
@@ -232,4 +233,4 @@ namespace Database
 
     return StorageItem(id, host_addr, available_space);
   }
-};
+}

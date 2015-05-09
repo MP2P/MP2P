@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 
 #include <network.hh>
-#include "../../master/database.hh"
+#include "../../master/master.hh"
 #include "../catch.hh"
 
 using namespace network::masks;
@@ -17,9 +17,9 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]" )
   std::string res_has;
 
   SECTION("Create, serialize, deserialize a FileItem") {
-    Database::FileItem file_item(1, "filename.txt", 15000, 3, 1, hash, true);
+    DB::FileItem file_item(1, "filename.txt", 15000, 3, 1, hash, true);
     std::string s_file_item = file_item.serialize();
-    file_item = Database::FileItem::deserialize(s_file_item);
+    file_item = DB::FileItem::deserialize(s_file_item);
 
     // Check the resulting FileItem
     REQUIRE(file_item.id_get() == 1);
@@ -35,9 +35,9 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]" )
 
 
   SECTION("Create, serialize, deserialize a PartItem") {
-    Database::PartItem part_item = Database::PartItem(partid, hash, vect);
+    DB::PartItem part_item = DB::PartItem(partid, hash, vect);
     std::string s_part_item = part_item.serialize();
-    part_item = Database::PartItem::deserialize(s_part_item);
+    part_item = DB::PartItem::deserialize(s_part_item);
 
     // Check the resulting PartItem
     REQUIRE(part_item.fid_get() == 1);
@@ -50,9 +50,9 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]" )
 
 
   SECTION("Create, serialize, deserialize a MasterItem") {
-    Database::MasterItem master_item = Database::MasterItem(42, host_addr);
+    DB::MasterItem master_item = DB::MasterItem(42, host_addr);
     std::string s_master_item = master_item.serialize();
-    master_item = Database::MasterItem::deserialize(s_master_item);
+    master_item = DB::MasterItem::deserialize(s_master_item);
 
     // Check the resulting MasterItem
     REQUIRE(master_item.id_get() == 42);
@@ -61,10 +61,10 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]" )
 
 
   SECTION("Create, serialize, deserialize a StorageItem") {
-    Database::StorageItem storage_item = Database::StorageItem(4242, host_addr,
+    DB::StorageItem storage_item = DB::StorageItem(4242, host_addr,
                                                                10000000042);
     std::string s_storage_item = storage_item.serialize();
-    storage_item = Database::StorageItem::deserialize(s_storage_item);
+    storage_item = DB::StorageItem::deserialize(s_storage_item);
 
     // Check the resulting MasterItem
     REQUIRE(storage_item.id_get() == 4242);

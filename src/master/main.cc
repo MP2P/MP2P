@@ -10,16 +10,13 @@ int main()
   {
     // Throws if anything goes bad
     utils::init();
-    Database::Connector::get_instance(); // Initialize connexion
+    DB::Connector::get_instance(); // Initialize connexion
   }
   catch (std::exception& e)
   {
     utils::Logger::cerr() << "Master exception: " + std::string(e.what());
     return 1;
   }
-
-  // Test
-  std::cout << Database::tools::number_of_parts(2199023255551) << std::endl;
 
   try
   {

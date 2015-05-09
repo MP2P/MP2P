@@ -1,4 +1,4 @@
-namespace Database
+namespace DB
 {
   namespace tools
   {
@@ -15,14 +15,15 @@ namespace Database
 
       boost::property_tree::ptree values_pt = pt.get_child("values");
 
-      for (auto it = values_pt.begin(); it != values_pt.end(); ++it) {
+      for (auto it = values_pt.begin(); it != values_pt.end(); ++it)
+      {
         const boost::property_tree::ptree &pt2 = it->second;
         values.push_back(std::pair<fsize_type, partnum_type>(
             pt2.get<fsize_type>("file_size"),
             pt2.get<partnum_type>("nb_part")
         ));
       }
-      
+
       for (auto it = values.begin() ; it != values.end(); ++it)
       {
         if (file_size <= it->first)
