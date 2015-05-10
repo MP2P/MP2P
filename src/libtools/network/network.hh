@@ -12,6 +12,7 @@
 #include <glob.h>
 #include <unordered_set>
 #include <masks/blocks.hh>
+#include <masks/messages.hh>
 
 #include <utils.hh>
 #include <files.hh>
@@ -83,13 +84,6 @@ namespace network
     message_container message_seq_;
 
   public:
-    // Create a packet with necessary header fields
-    // Append messages as shared_buffers
-    template <typename...Messages>
-    Packet(size_type size,
-           fromto_type fromto,
-           what_type what,
-           Messages...messages);
 
     // Create a packet with a pointer to data and a size.
     // The data is copied to a shared_buffer
@@ -98,20 +92,26 @@ namespace network
            what_type what,
            CharT* data);
 
-    Packet(size_type size,
-           fromto_type fromto,
+    Packet(fromto_type fromto,
            what_type what,
            const std::shared_ptr<std::vector<CharT>>& data);
 
     // Create an empty packet without any message.
     // Use add_message to append messages to the packet
     Packet(const PACKET_HEADER& header);
-    Packet(size_type size,
-           fromto_type fromto,
+    Packet(fromto_type fromto,
            what_type what);
+
+    // Create a packet with necessary header fields
+    // Append messages as shared_buffers
+    template <typename...Messages>
+    Packet(fromto_type fromto,
+           what_type what,
+           Messages...messages);
 
     // Add a message to the packet. Usually used for sending
     void add_message(const message_type& message);
+    void add_message(CharT* data, const size_type size);
 
     // Add a message to the packet by copying the internal data
     void copy_message(const message_type& message);

@@ -6,19 +6,28 @@
 namespace network
 {
   template <typename...Messages>
-  Packet::Packet(size_type size,
-                 fromto_type fromto,
+  Packet::Packet(fromto_type fromto,
                  what_type what,
                  Messages...messages)
-    : header_{size, {fromto, what} },
+    : header_{0, {fromto, what} },
       message_seq_{messages...}
   {
+    for(auto message = message_seq_.begin(); message != message_seq_.end();
+      ++message)
+      header_.size += boost::asio::buffer_size(*message);
   }
 
   inline void
   Packet::add_message(const message_type& message)
   {
     message_seq_.push_back(message);
+    header_.size += message.data_get().size();
+  }
+
+  inline void
+  Packet::add_message(CharT* data, const size_type size)
+  {
+    message_seq_.push_back(message_type{data, size, true});
   }
 
   inline size_type

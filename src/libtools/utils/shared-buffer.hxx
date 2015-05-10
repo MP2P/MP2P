@@ -80,6 +80,6 @@ namespace utils
   PointerToPodType buffer_cast(const shared_buffer& b)
   {
     auto& data = *b.data_;
-    return static_cast<PointerToPodType>(&*data.begin());
+    return reinterpret_cast<PointerToPodType>(&*data.begin());
   }
 }

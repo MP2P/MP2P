@@ -2,9 +2,8 @@
 #include <files.hh>
 #include "client.hh"
 
-#include <ostream>
-
 using namespace network;
+using namespace network::masks;
 using namespace utils;
 
 Client::Client(const std::string& host, const std::string& port)
@@ -40,32 +39,33 @@ void Client::run()
 
 void Client::send_file_part(files::File& file, size_t part, size_type part_size)
 {
-  // Query needs the port as a string. Ugly fix.
-  std::ostringstream port;
-  port << Conf::get_instance().port_get();
-  const auto& host = Conf::get_instance().host_get();
-
-  Session session{io_service_, host, port.str(),
-    std::bind(&Client::handle, this, std::placeholders::_1, std::placeholders::_2),
-    std::bind(&Client::remove_handle, this, std::placeholders::_1)};
-
   const char* tmp = file.data() + part * part_size;
   std::string hash = files::hash_buffer(tmp, part_size);
 
   std::ostringstream ss;
   ss << part << "|" << hash;
-  size_type ss_size = ss.str().size();
 
   // Example of a packet construction.
   // Add multiple shared_buffers to create a sequence without merging them
-  Packet p{ss_size + part_size, 0, 1,
+  Packet p{0, 1,
            shared_buffer(ss.str().c_str(), ss.str().size(), true),
            shared_buffer(tmp, part_size, false)};
-  session.send(p);
+  send_packet(p);
 }
 
 void Client::send_file(files::File& file)
 {
+  // c_m_up_req
+  c_m_up_req req = c_m_up_req{
+      file.size_get(),
+      file.filename_get(),
+      3
+  };
+  Packet c_m_up_req_packet = Packet{0, 1};
+  c_m_up_req_packet.add_message((CharT*)&req, sizeof(c_m_up_req));
+
+  send_packet(c_m_up_req_packet);
+
   std::vector<std::thread> threads;
 
   utils::Logger::cout() << "Sending file with SHA1 hash : " + file.hash_get();
@@ -93,4 +93,19 @@ void Client::send_file(files::File& file)
 void Client::stop()
 {
   // FIXME : Stop everything, join threads if needed
+}
+
+void Client::send_packet(Packet& p)
+{
+  // Query needs the port as a string. Ugly fix.
+  std::ostringstream port;
+  port << Conf::get_instance().port_get();
+  const auto& host = Conf::get_instance().host_get();
+
+  Session session{io_service_, host, port.str(),
+                  std::bind(&Client::handle, this, std::placeholders::_1,
+                            std::placeholders::_2),
+                  std::bind(&Client::remove_handle, this,
+                            std::placeholders::_1)};
+  session.send(p);
 }

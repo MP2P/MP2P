@@ -3,7 +3,7 @@
 #include <network.hh>
 #include <utils.hh>
 
-using namespace network:: masks;
+using namespace network::masks;
 
 class Client
 {
@@ -28,4 +28,6 @@ public:
 
   // Send a part of a file to the storage
   void send_file_part(files::File& file, size_t part, size_type part_size);
+
+  void send_packet(network::Packet& p);
 };

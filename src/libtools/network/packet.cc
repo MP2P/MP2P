@@ -14,13 +14,13 @@ namespace network
   {
   }
 
-  Packet::Packet(size_type size,
-                 fromto_type fromto,
+  Packet::Packet(fromto_type fromto,
                  what_type what,
                  const std::shared_ptr<std::vector<CharT>>& data)
-    : header_{size, {fromto, what} },
+    : header_{0, {fromto, what} },
       message_seq_{message_type{data}}
   {
+    header_.size += data->size();
   }
 
   Packet::Packet(const PACKET_HEADER& header)
@@ -28,10 +28,9 @@ namespace network
   {
   }
 
-  Packet::Packet(size_type size,
-                 fromto_type fromto,
+  Packet::Packet(fromto_type fromto,
                  what_type what)
-    : header_{size, {fromto, what}}
+    : header_{0, {fromto, what}}
   {
   }
 
@@ -51,17 +50,17 @@ namespace network
 
   Packet deserialize(const PACKET_HEADER header, const message_type& message)
   {
-    return Packet(buffer_size(message),
-                  header.type.fromto,
+    return Packet(header.type.fromto,
                   header.type.what,
                   message);
   }
 
-  std::ostream &operator<<(std::ostream &output, const Packet &packet)
+  std::ostream &operator<<(std::ostream &output, const Packet &p)
   {
-    output << utils::misc::string_from(packet.size_get()) << "|"
-    << (int)packet.fromto_get() << "|"
-    << (int)packet.what_get();
+    output << "{s: " << utils::misc::string_from(p.size_get())
+    << ", f: " << (int)p.fromto_get()
+    << ", w: " << (int)p.what_get()
+    << "}";
     return output;
   }
 }
