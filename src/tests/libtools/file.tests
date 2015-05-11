@@ -1,0 +1,10 @@
+#include "../../libtools/files/files.hh"
+
+TEST_CASE("Files", "[libtools][files]")
+{
+  using namespace files;
+  SECTION("Construction")
+  {
+    REQUIRE_NOTHROW(File(""));
+  }
+}

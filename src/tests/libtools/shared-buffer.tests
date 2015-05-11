@@ -1,4 +1,6 @@
 #include "../../libtools/utils/shared-buffer.hh"
+#include <memory>
+#include <vector>
 
 TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
 {
