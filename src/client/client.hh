@@ -3,31 +3,34 @@
 #include <network.hh>
 #include <utils.hh>
 
-using namespace network::masks;
-
-class Client
+namespace client
 {
-private:
-  boost::asio::io_service io_service_; // Default constructor is enough
-  network::Session master_session_;
+  class Client
+  {
+  private:
+    boost::asio::io_service io_service_; // Default constructor is enough
+    network::Session master_session_;
 
-  error_code handle(network::Packet, network::Session& session);
-  void remove_handle(network::Session& session);
+    error_code handle(network::Packet, network::Session& session);
+    void remove_handle(network::Session& session);
 
-public:
-  Client(const std::string& host, const std::string& port);
+  public:
+    Client(const std::string& host, const std::string& port);
 
-  // Run the io service
-  void run();
+    // Run the io service
+    void run();
 
-  // Stop the server
-  void stop();
+    // Stop the server
+    void stop();
 
-  // Send a file to the storage
-  void send_file(files::File& file);
+    // Send a file to the storage
+    void send_file(files::File& file);
 
-  // Send a part of a file to the storage
-  void send_file_part(files::File& file, size_t part, size_type part_size);
+    // Send a part of a file to the storage
+    void send_file_part(files::File& file,
+                        size_t part,
+                        network::masks::size_type part_size);
 
-  void send_packet(network::Packet& p);
-};
+    void send_packet(network::Packet& p);
+  };
+}

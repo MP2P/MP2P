@@ -6,6 +6,7 @@
 
 int main()
 {
+  using namespace master; // Use the namespace in the main function only
   try
   {
     // Throws if anything goes bad

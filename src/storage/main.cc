@@ -5,6 +5,7 @@
 
 int main()
 {
+  using namespace storage;
   try
   {
     utils::init(); // Throws if anything goes bad
