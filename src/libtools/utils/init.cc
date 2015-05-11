@@ -1,8 +1,6 @@
 #include <utils.hh>
 #include <network.hh>
 
-#include <sys/socket.h>
-#include <netinet/in.h>
 
 namespace utils
 {

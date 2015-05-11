@@ -1,7 +1,5 @@
 #include <network.hh>
 
-#include <libconfig.h++>
-
 namespace network
 {
 
