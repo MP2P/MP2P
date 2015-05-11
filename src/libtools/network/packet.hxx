@@ -21,12 +21,14 @@ namespace network
   Packet::add_message(const message_type& message)
   {
     message_seq_.push_back(message);
-    header_.size += message.data_get().size();
+    // FIXME :
+    // header_.size += message.data_get().size();
   }
 
   inline void
   Packet::add_message(CharT* data, const size_type size)
   {
+    header_.size += size;
     message_seq_.push_back(message_type{data, size, true});
   }
 

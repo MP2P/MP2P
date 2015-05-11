@@ -66,28 +66,30 @@ void Client::send_file(files::File& file)
 
   send_packet(c_m_up_req_packet);
 
-  std::vector<std::thread> threads;
 
-  utils::Logger::cout() << "Sending file with SHA1 hash : " + file.hash_get();
 
-  auto size = file.size_get();
-  auto parts = files::parts_for_size(size);
-  auto part_size = size / parts;
-  for (size_t i = 0; i < parts; ++i)
-  {
-    threads.emplace_back(
-        [this, &file, i, part_size]()
-        {
-          send_file_part(file, i, part_size);
-        });
-  }
-
-  for (auto& thread : threads)
-  {
-    utils::Logger::cout() << "Joining thread";
-    thread.join();
-  }
-  master_session_.receive();
+//  std::vector<std::thread> threads;
+//
+//  utils::Logger::cout() << "Sending file with SHA1 hash : " + file.hash_get();
+//
+//  auto size = file.size_get();
+//  auto parts = files::parts_for_size(size);
+//  auto part_size = size / parts;
+//  for (size_t i = 0; i < parts; ++i)
+//  {
+//    threads.emplace_back(
+//        [this, &file, i, part_size]()
+//        {
+//          send_file_part(file, i, part_size);
+//        });
+//  }
+//
+//  for (auto& thread : threads)
+//  {
+//    utils::Logger::cout() << "Joining thread";
+//    thread.join();
+//  }
+//  master_session_.receive();
 }
 
 void Client::stop()
@@ -107,5 +109,6 @@ void Client::send_packet(Packet& p)
                             std::placeholders::_2),
                   std::bind(&Client::remove_handle, this,
                             std::placeholders::_1)};
+  std::cout << "sent packet : " << p << std::endl;
   session.send(p);
 }

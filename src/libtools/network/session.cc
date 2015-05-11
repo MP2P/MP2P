@@ -119,8 +119,8 @@ namespace network
 
                    if (error == 100)
                      kill();
-                   else
-                     receive(); // Keep the socket alive
+//                   else
+//                     receive(); // Keep the socket alive
                  }
                  else
                  {

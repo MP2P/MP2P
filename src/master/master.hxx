@@ -105,7 +105,7 @@ Master::dispatcher(Packet packet, Session& session)
   s << std::this_thread::get_id();
   utils::Logger::cout() << "Master dispatcher (tid=" + s.str() + ").";
 
-  std::cout << "packet.fromto_get() = " << packet.fromto_get() << std::endl;
+  std::cout << "received packet : " << packet << std::endl;
 
   // Create and get the Packet object from the session (buff_ & length_)
   if (packet.size_get() < 1)

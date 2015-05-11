@@ -45,7 +45,7 @@ namespace network
   const message_type Packet::serialize_header() const
   {
     const char* p_header = reinterpret_cast<const char*>(&header_);
-    return message_type(p_header, sizeof (header_), true);
+    return message_type(p_header, sizeof(header_), true);
   }
 
   Packet deserialize(const PACKET_HEADER header, const message_type& message)
