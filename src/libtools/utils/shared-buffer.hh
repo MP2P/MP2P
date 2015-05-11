@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <boost/asio/buffer.hpp>
 
 namespace utils
 {
