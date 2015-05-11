@@ -7,7 +7,7 @@
 using namespace network::masks;
 
 
-TEST_CASE("Items can be serialized & deserialized", "[db-items]" )
+TEST_CASE("Items can be serialized & deserialized", "[db-items]")
 {
   // Initializing requirements
   std::string hash = "azertyuiopmlkjhgfdsq";
@@ -16,7 +16,8 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]" )
   std::string host_addr = "master.mp2p.mydomain.com";
   std::string res_has;
 
-  SECTION("Create, serialize, deserialize a FileItem") {
+  SECTION("Create, serialize, deserialize a FileItem")
+  {
     DB::FileItem file_item(1, "filename.txt", 15000, 3, 1, hash, true);
     std::string s_file_item = file_item.serialize();
     file_item = DB::FileItem::deserialize(s_file_item);
@@ -34,7 +35,8 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]" )
   }
 
 
-  SECTION("Create, serialize, deserialize a PartItem") {
+  SECTION("Create, serialize, deserialize a PartItem")
+  {
     DB::PartItem part_item = DB::PartItem(partid, hash, vect);
     std::string s_part_item = part_item.serialize();
     part_item = DB::PartItem::deserialize(s_part_item);
@@ -45,11 +47,12 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]" )
     res_has = std::string(part_item.hash_get());
     REQUIRE(res_has.compare(hash));
     std::vector <stid_type> v = part_item.locations_get();
-    REQUIRE(std::accumulate(v.rbegin(), v.rend(), 0) == (3 + 4 + 5 + 6));
+    REQUIRE(std::accumulate(v.begin(), v.end(), 0) == (3 + 4 + 5 + 6));
   }
 
 
-  SECTION("Create, serialize, deserialize a MasterItem") {
+  SECTION("Create, serialize, deserialize a MasterItem")
+  {
     DB::MasterItem master_item = DB::MasterItem(42, host_addr);
     std::string s_master_item = master_item.serialize();
     master_item = DB::MasterItem::deserialize(s_master_item);
@@ -60,7 +63,8 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]" )
   }
 
 
-  SECTION("Create, serialize, deserialize a StorageItem") {
+  SECTION("Create, serialize, deserialize a StorageItem")
+  {
     DB::StorageItem storage_item = DB::StorageItem(4242, host_addr,
                                                                10000000042);
     std::string s_storage_item = storage_item.serialize();
