@@ -57,7 +57,7 @@ endif(${clangnotavailable} EQUAL 0)
 #message(STATUS "CMAKE_CXX_COMPILER:     " ${CMAKE_CXX_COMPILER})
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -pedantic -Wall -Wextra -Werror -O3 -Wno-error=deprecated-declarations")
-set(SHARED_FLAGS "-std=c++1y -pedantic -Wall -Wextra -Werror -Wno-error=deprecated-declarations")
+set(SHARED_FLAGS "-std=c++1y -pedantic -Wall -Wextra -Werror -Wno-error=deprecated-declarations -Wno-error=sign-compare")
 
 if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
@@ -101,4 +101,5 @@ add_subdirectory(${SOURCE_DIR}/logger-tests)    # The "tests" target
 add_subdirectory(${SOURCE_DIR}/tests)           # The "check" target
 add_subdirectory(${SOURCE_DIR}/tests/client)    # The "tests" target
 add_subdirectory(${SOURCE_DIR}/tests/master)    # The "tests" target
-add_subdirectory(${SOURCE_DIR}/tests/storage)    # The "tests" target
+add_subdirectory(${SOURCE_DIR}/tests/storage)   # The "tests" target
+add_subdirectory(${SOURCE_DIR}/tests/libtools)  # The "tests" target
