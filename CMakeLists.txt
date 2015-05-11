@@ -102,3 +102,4 @@ add_subdirectory(${SOURCE_DIR}/tests)           # The "check" target
 add_subdirectory(${SOURCE_DIR}/tests/client)    # The "tests" target
 add_subdirectory(${SOURCE_DIR}/tests/master)    # The "tests" target
 add_subdirectory(${SOURCE_DIR}/tests/storage)    # The "tests" target
+add_subdirectory(${SOURCE_DIR}/tests/shared-buffer)    # The "tests" target
