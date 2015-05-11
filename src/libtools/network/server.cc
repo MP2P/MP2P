@@ -3,10 +3,11 @@
 
 #include <iostream>
 
-using namespace boost::asio;
 
 namespace network
 {
+  using namespace boost::asio;
+
   Server::Server(io_service &io_service,
       std::function<error_code(Packet, Session &)> dispatcher)
       : acceptor_{io_service},

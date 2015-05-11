@@ -1,10 +1,11 @@
 #include <network.hh>
 #include <shared-buffer.hh>
 
-using namespace boost::asio;
 
 namespace network
 {
+  using namespace boost::asio;
+  using namespace network::masks;
 
   Session::Session(ip::tcp::socket&& socket,
                    std::function<error_code(Packet,Session&)> dispatcher,
@@ -43,46 +44,17 @@ namespace network
     utils::Logger::cout() << "Opened session (tid=" + s.str() + ")";
   }
 
-  Session::Session(Session&& other)
-      : socket_{std::move(other.socket_)},
-        length_{other.length_},
-        dispatcher_{std::move(other.dispatcher_)},
-        delete_dispatcher_{std::move(other.delete_dispatcher_)},
-        id_{other.id_}
-  {
-  }
-
-  // FIXME : Get a generic function to do this
-  std::string Session::get_line()
-  {
-    streambuf::const_buffers_type bufs = buff_.data();
-
-    return std::string(buffers_begin(bufs),
-        buffers_begin(bufs) + length_);
-  }
-
-  Packet Session::get_packet()
-  {
-    // FIXME : Create a real packet from the buffer
-    std::vector<char> v;
-    Packet p{0, 0, 0, message_type{&*v.begin(), 0, true}};
-    return p;
-    //return deserialize(get_line());
-  }
-
   void Session::receive_header(std::function<void(size_t, Packet)> callback)
   {
     async_read(socket_,
-        buff_,
+        boost::asio::buffer(&*buff_.begin(), buff_.size()),
         transfer_exactly(sizeof (PACKET_HEADER)),
         [this, callback](boost::system::error_code ec, std::size_t size_length)
         {
           if (!ec && size_length == sizeof (PACKET_HEADER))
           {
-            const CharT* ch_buff = buffer_cast<const CharT*>(buff_.data());
-
             const auto* header =
-              reinterpret_cast<const PACKET_HEADER*>(ch_buff);
+              reinterpret_cast<const PACKET_HEADER*>(buff_.data());
 
             utils::Logger::cout() << "Receiving a message of size: "
                                      + std::to_string(header->size);
@@ -109,18 +81,15 @@ namespace network
                p.message_seq_get()[0],
                transfer_exactly(msg_size),
                [this, msg_size, p](boost::system::error_code ec,
-                                std::size_t length)
+                                   std::size_t length)
                {
                  if (!ec)
                  {
-                   length_ = length;
                    auto error = dispatcher_(p, *this);
-                   length_ = 0;
-
                    if (error == 100)
                      kill();
-//                   else
-//                     receive(); // Keep the socket alive
+                   if (length != p.size_get()) // FIXME : This should be tested in the dispatcher
+                     receive(); // Keep the socket alive
                  }
                  else
                  {

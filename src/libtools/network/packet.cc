@@ -4,6 +4,7 @@ namespace network
 {
   using namespace boost::asio;
   using namespace utils;
+  using namespace network::masks;
 
   Packet::Packet(size_type size,
                  fromto_type fromto,

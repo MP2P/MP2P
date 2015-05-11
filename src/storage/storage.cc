@@ -4,6 +4,7 @@
 #include "storage.hh"
 
 using namespace network;
+using namespace network::masks;
 using namespace boost::asio;
 using namespace boost::posix_time;
 

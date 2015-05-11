@@ -6,8 +6,8 @@
 namespace network
 {
   template <typename...Messages>
-  Packet::Packet(fromto_type fromto,
-                 what_type what,
+  Packet::Packet(masks::fromto_type fromto,
+                 masks::what_type what,
                  Messages...messages)
     : header_{0, {fromto, what} },
       message_seq_{messages...}
@@ -18,7 +18,7 @@ namespace network
   }
 
   inline void
-  Packet::add_message(const message_type& message)
+  Packet::add_message(const masks::message_type& message)
   {
     message_seq_.push_back(message);
     // FIXME :
@@ -26,25 +26,25 @@ namespace network
   }
 
   inline void
-  Packet::add_message(CharT* data, const size_type size)
+  Packet::add_message(masks::CharT* data, const masks::size_type size)
   {
     header_.size += size;
-    message_seq_.push_back(message_type{data, size, true});
+    message_seq_.push_back(masks::message_type{data, size, true});
   }
 
-  inline size_type
+  inline masks::size_type
   Packet::size_get() const
   {
     return header_.size;
   }
 
-  inline fromto_type
+  inline masks::fromto_type
   Packet::fromto_get() const
   {
     return header_.type.fromto;
   }
 
-  inline what_type
+  inline masks::what_type
   Packet::what_get() const
   {
     return header_.type.what;
@@ -62,8 +62,8 @@ namespace network
     return message_seq_;
   }
 
-  inline message_type
-  empty_message(size_type size)
+  inline masks::message_type
+  empty_message(masks::size_type size)
   {
     return utils::shared_buffer(size);
   }

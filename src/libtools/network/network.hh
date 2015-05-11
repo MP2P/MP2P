@@ -17,9 +17,6 @@
 #include <utils.hh>
 #include <files.hh>
 
-using namespace network::masks;
-
-
 namespace network
 {
   enum FromTo
@@ -78,63 +75,63 @@ namespace network
   `----------*/
   class Packet
   {
-    using message_container = std::vector<message_type>;
+    using message_container = std::vector<masks::message_type>;
   private:
-    PACKET_HEADER header_;
+    masks::PACKET_HEADER header_;
     message_container message_seq_;
 
   public:
 
     // Create a packet with a pointer to data and a size.
     // The data is copied to a shared_buffer
-    Packet(size_type size,
-           fromto_type fromto,
-           what_type what,
-           CharT* data);
+    Packet(masks::size_type size,
+           masks::fromto_type fromto,
+           masks::what_type what,
+           masks::CharT* data);
 
-    Packet(fromto_type fromto,
-           what_type what,
-           const std::shared_ptr<std::vector<CharT>>& data);
+    Packet(masks::fromto_type fromto,
+           masks::what_type what,
+           const std::shared_ptr<std::vector<masks::CharT>>& data);
 
     // Create an empty packet without any message.
     // Use add_message to append messages to the packet
-    Packet(const PACKET_HEADER& header);
-    Packet(fromto_type fromto,
-           what_type what);
+    Packet(const masks::PACKET_HEADER& header);
+    Packet(masks::fromto_type fromto,
+           masks::what_type what);
 
     // Create a packet with necessary header fields
     // Append messages as shared_buffers
     template <typename...Messages>
-    Packet(fromto_type fromto,
-           what_type what,
+    Packet(masks::fromto_type fromto,
+           masks::what_type what,
            Messages...messages);
 
     // Add a message to the packet. Usually used for sending
-    void add_message(const message_type& message);
-    void add_message(CharT* data, const size_type size);
+    void add_message(const masks::message_type& message);
+    void add_message(masks::CharT* data, const masks::size_type size);
 
     // Add a message to the packet by copying the internal data
-    void copy_message(const message_type& message);
+    void copy_message(const masks::message_type& message);
 
     // Accessors
-    size_type size_get() const;
+    masks::size_type size_get() const;
 
-    fromto_type fromto_get() const;
+    masks::fromto_type fromto_get() const;
 
-    what_type what_get() const;
+    masks::what_type what_get() const;
 
     message_container& message_seq_get();
     const message_container& message_seq_get() const;
 
     // Serialize the header of the message to a header to a buffer.
     // It should be added to a sending sequence as well.
-    const message_type serialize_header() const;
+    const masks::message_type serialize_header() const;
   };
 
-  message_type empty_message(size_type size);
+  masks::message_type empty_message(masks::size_type size);
 
-  Packet deserialize(const PACKET_HEADER header,
-                     const message_type& message);
+  Packet deserialize(const masks::PACKET_HEADER header,
+                     const masks::message_type& message);
 
   std::ostream& operator<<(std::ostream& output, const Packet& packet);
 
@@ -146,7 +143,7 @@ namespace network
   {
   private:
     boost::asio::ip::tcp::socket socket_;
-    boost::asio::streambuf buff_; // FIXME : Is this a good choice?
+    std::array<char, sizeof (masks::PACKET_HEADER)> buff_;
     size_t length_;
     std::function<error_code(Packet, Session&)> dispatcher_;
     std::function<void(Session&)> delete_dispatcher_;
@@ -170,23 +167,16 @@ namespace network
             std::function<void(Session&)> delete_dispatcher,
             size_t id = unique_id());
 
-    // Custom move constructor. Since buff_ doesn't have a move constructor
-    Session(Session&& other);
-
     // Kill the session. Close the socket and remove from parent container
     void kill();
 
     boost::asio::ip::tcp::socket& socket_get();
 
-    boost::asio::streambuf& buff_get();
+    std::array<char, sizeof(masks::PACKET_HEADER)>& buff_get();
 
     size_t length_get() const;
 
     size_t id_get() const;
-
-    std::string get_line();
-
-    Packet get_packet();
 
     void receive();
 

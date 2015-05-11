@@ -9,7 +9,7 @@ namespace network
     return socket_;
   }
 
-  inline boost::asio::streambuf& Session::buff_get()
+  inline std::array<char, sizeof (masks::PACKET_HEADER)>& Session::buff_get()
   {
     return buff_;
   }
