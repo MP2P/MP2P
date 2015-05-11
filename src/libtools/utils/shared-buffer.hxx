@@ -78,6 +78,11 @@ namespace utils
     return *data_;
   }
 
+  inline size_t shared_buffer::size() const
+  {
+    return data_->size();
+  }
+
   inline const std::string shared_buffer::string_get() const
   {
     return std::string(data_->begin(), data_->end());

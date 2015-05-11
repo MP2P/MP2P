@@ -53,6 +53,9 @@ namespace utils
       // The underlaying container
       const container_type& data_get() const; // FIXME : Don't make this public
 
+      // The size of the buffer
+      size_t size() const;
+
       // Create a string using the data
       // Testing purpose only
       const std::string string_get() const;
