@@ -4,8 +4,8 @@ using namespace network::masks;
 inline error_code
 cm_up_req(Packet& packet, Session& session)
 {
-  c_m_up_req* req = buffer_cast<c_m_up_req*>
-      (*packet.message_seq_get().begin());
+  c_m_up_req* req = reinterpret_cast<c_m_up_req*>
+      (packet.message_seq_get().front().data());
 
   //Compute the number of parts.
   uint32_t nb_parts = DB::tools::number_of_parts(req->fsize);

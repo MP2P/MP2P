@@ -123,6 +123,7 @@ namespace network
 
     what_type what_get() const;
 
+    message_container& message_seq_get();
     const message_container& message_seq_get() const;
 
     // Serialize the header of the message to a header to a buffer.

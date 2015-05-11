@@ -11,7 +11,11 @@ namespace utils
   class shared_buffer
   {
     public:
-      using container_type = std::vector<char>;
+      // Keep it different from network::masks::CharT.
+      // This may be used elsewhere
+      using CharT = char;
+
+      using container_type = std::vector<CharT>;
 
       // Construct an empty buffer with a preallocated size
       shared_buffer(size_t size);
@@ -30,6 +34,8 @@ namespace utils
 
       // MutableBufferSequence requirements
 
+      // FIXME : Something is not right. The const_iterator is mutable.
+      //a solution involving templates or traits may be possible.
       using value_type = boost::asio::mutable_buffer;
       using const_iterator = const boost::asio::mutable_buffer*;
 
@@ -37,13 +43,22 @@ namespace utils
       const_iterator end() const;
 
       // Accessors
+      // Raw pointer on the data
+      CharT* data();
+      const CharT* data() const;
+
+      // The associated buffer
       const value_type buffer_get() const;
+
+      // The underlaying container
       const container_type& data_get() const; // FIXME : Don't make this public
 
       // Create a string using the data
       // Testing purpose only
       const std::string string_get() const;
 
+      // We need this to act as a const_buffer instead of a mutable_buffer
+      // for sending data.
       operator boost::asio::const_buffer() const;
 
     private:

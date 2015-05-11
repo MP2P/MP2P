@@ -1,5 +1,7 @@
 #pragma once
 
+#include "shared-buffer.hh"
+
 namespace utils
 {
   inline shared_buffer::shared_buffer(size_t size)
@@ -54,6 +56,16 @@ namespace utils
     return &buffer_ + 1;
   }
 
+  inline shared_buffer::CharT* shared_buffer::data()
+  {
+    return &*data_->begin();
+  }
+
+  inline const shared_buffer::CharT* shared_buffer::data() const
+  {
+    return &*data_->begin();
+  }
+
   inline const shared_buffer::value_type
   shared_buffer::buffer_get() const
   {
@@ -80,6 +92,6 @@ namespace utils
   PointerToPodType buffer_cast(const shared_buffer& b)
   {
     auto& data = *b.data_;
-    return reinterpret_cast<PointerToPodType>(&*data.begin());
+    return static_cast<PointerToPodType>(&*data.begin());
   }
 }

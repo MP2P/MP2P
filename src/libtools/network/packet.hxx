@@ -48,6 +48,12 @@ namespace network
     return header_.type.what;
   }
 
+  inline Packet::message_container& Packet::message_seq_get()
+  {
+    return message_seq_;
+  }
+
+
   inline const
   Packet::message_container& Packet::message_seq_get() const
   {
