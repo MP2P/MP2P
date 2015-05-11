@@ -39,7 +39,6 @@ namespace utils
       //a solution involving templates or traits may be possible.
       using value_type = boost::asio::mutable_buffer;
       using const_iterator = const boost::asio::mutable_buffer*;
-
       const_iterator begin() const;
       const_iterator end() const;
 

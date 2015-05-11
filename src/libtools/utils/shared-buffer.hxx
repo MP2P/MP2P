@@ -91,7 +91,7 @@ namespace utils
   inline size_t
   shared_buffer::size() const
   {
-    return data_->size();
+    return boost::asio::buffer_size(buffer_);
   }
 
   inline const std::string
@@ -110,7 +110,6 @@ namespace utils
   PointerToPodType
   buffer_cast(const shared_buffer& b)
   {
-    auto& data = *b.data_;
-    return static_cast<PointerToPodType>(&*data.begin());
+    return buffer_cast<PointerToPodType>(b.buffer_);
   }
 }
