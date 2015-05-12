@@ -1,22 +1,25 @@
 # MP2P
 
-[![TeamCity Build Status](https://img.shields.io/teamcity/http/42portal.com/teamcity/s/Mp2p_Build.svg?style=flat?label=TeamCity)](https://42portal.com/teamcity/viewType.html?buildTypeId=Mp2p_Build)
+[![TeamCity Build Status](https://img.shields.io/teamcity/http/42portal.com/teamcity/s/Mp2p_Build.svg?style=flat?label=TeamCit)yhttps://img.shields.io/teamcity/http/42portal.com/teamcity/s/Mp2p_Build.svg?style=flat?label=TeamCit]y(https://42portal.com/teamcity/viewType.html?buildTypeId=Mp2p_Build)
 [![Join the chat at https://gitter.im/Dubrzr/MP2P](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Dubrzr/MP2P?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 File transfer application using a custom protocol.
 
 # Details
 
-This project is divided into for different parts:
+This project is divided into four different parts:
 
-* The 'Utils' library
 * The 'Storage' application
 * The 'Master' application
 * The 'Client' application
+* The 'Tools' library
+  * Network
+  * Files
+  * Utils
 
-The library implements functions for the MP2P protocol. It is using boost:asio.
+The library implements functions for the MP2P protocol. It is using boost:asio for the networking part.
 
-All the apps are using the 'utils' library for network communications and file
+All the apps are using the 'tools' library for network communications and file
 manipulations.
 
 The project uses Couchbase as a Master-Master replication database system.
@@ -69,8 +72,9 @@ It listens both for ipv4 & ipv6 connections
 
 ## Tests
 
-We are using the [Catch Unit](https://github.com/philsquared/Catch)
-test framework.
+We are using the [Catch](https://github.com/philsquared/Catch) unit test framework.
+
+`make check` will launch the unit tests.
 
 ## How to configure .vimrc with Syntastic so that it detects header locations?
 
