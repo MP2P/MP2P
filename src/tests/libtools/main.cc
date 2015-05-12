@@ -222,7 +222,7 @@ TEST_CASE("Packet", "[libtools][packet]")
     {
       std::string s{"MP2P\n"};
       Packet p{fromto, what};
-      p.add_message(s.c_str(), s.size());
+      p.add_message(s.c_str(), s.size(), copy::No);
       REQUIRE(p.size_get() == s.size());
       p.add_message(message_type{s.c_str(), s.size(), copy::No});
       REQUIRE(p.size_get() == s.size() + s.size());

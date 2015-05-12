@@ -24,9 +24,11 @@ namespace network
   }
 
   inline void
-  Packet::add_message(const masks::CharT* data, const masks::size_type size)
+  Packet::add_message(const masks::CharT* data,
+                      const masks::size_type size,
+                      utils::shared_buffer::copy to_copy)
   {
-    add_message(masks::message_type{data, size, utils::shared_buffer::copy::No});
+    add_message(masks::message_type{data, size, to_copy});
   }
 
   inline masks::size_type
