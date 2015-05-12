@@ -4,6 +4,7 @@
 
 #include "../../libtools/utils/shared-buffer.hh"
 #include "../../libtools/files/files.hh"
+#include "../../libtools/network/network.hh"
 #include <fstream>
 #include <cstdio>
 #include <memory>
@@ -44,7 +45,7 @@ TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
 
       for (size_t i = 0; i < size; ++i)
       {
-        if (text[i] != buffer.data_get()[i])
+        if (text[i] != buffer.data()[i])
           FAIL("Buffer not equal");
       }
     }
@@ -159,4 +160,80 @@ TEST_CASE("Files", "[libtools][files]")
   std::remove(filename.c_str());
 
   // Clean up
+}
+
+TEST_CASE("Packet", "[libtools][packet]")
+{
+  using namespace network;
+  using namespace network::masks;
+
+  fromto_type fromto = 0;
+  what_type what = 0;
+
+  SECTION("Construction")
+  {
+    const CharT* ptr = nullptr;
+    size_type size = 0;
+    REQUIRE_NOTHROW((Packet{size, fromto, what, ptr}));
+
+    const CharT* str = "MP2P\n";
+    REQUIRE_NOTHROW((Packet{5, fromto, what, str}));
+
+    auto vector = std::make_shared<std::vector<masks::CharT>>(5, 'O');
+    REQUIRE_NOTHROW((Packet{fromto, what, vector}));
+
+    SECTION("No message")
+    {
+      PACKET_HEADER header{5, {fromto, what}};
+      REQUIRE_NOTHROW((Packet{header}));
+      REQUIRE_NOTHROW((Packet{fromto, what}));
+    }
+
+    SECTION("Sequence of messages")
+    {
+      REQUIRE_NOTHROW((Packet{fromto, what, vector, message_type(str, 5, false)}));
+      REQUIRE_NOTHROW((Packet{fromto, what, message_type(str, 5, true), message_type(str, 5, false)}));
+    }
+  }
+
+  SECTION("SIZE")
+  {
+    SECTION("From string")
+    {
+      std::string str{"MP2P\n"};
+      Packet p{static_cast<size_type>(str.size()), fromto, what, str.c_str()};
+      REQUIRE(str.size() == p.size_get());
+    }
+
+    SECTION("Empty")
+    {
+      Packet p{fromto, what};
+      PACKET_HEADER header{0, {fromto, what}};
+      Packet p1{header};
+
+      REQUIRE(p.size_get() == 0);
+      REQUIRE(p1.size_get() == 0);
+    }
+
+    SECTION("Empty + add_message")
+    {
+      std::string s{"MP2P\n"};
+      Packet p{fromto, what};
+      p.add_message(s.c_str(), s.size());
+      REQUIRE(p.size_get() == s.size());
+      p.add_message(message_type{s.c_str(), s.size(), false});
+      REQUIRE(p.size_get() == s.size() + s.size());
+    }
+
+    SECTION("Empty + copy_message")
+    {
+      std::string s{"MP2P\n"};
+      message_type message{s.c_str(), s.size(), false};
+      REQUIRE(message.size() == s.size());
+      Packet p{fromto, what};
+      p.copy_message(message);
+      REQUIRE(p.size_get() == s.size());
+    }
+
+  }
 }
