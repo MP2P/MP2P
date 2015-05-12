@@ -2,8 +2,161 @@
 
 #include "../catch.hh"
 
-// utils::shared_buffer
-#include "shared-buffer.tests"
+#include "../../libtools/utils/shared-buffer.hh"
+#include "../../libtools/files/files.hh"
+#include <fstream>
+#include <cstdio>
+#include <memory>
+#include <vector>
+#include <fcntl.h>
 
-// file::File
-#include "file.tests"
+TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
+{
+  SECTION("Construction")
+  {
+    SECTION("Size")
+    {
+      REQUIRE_NOTHROW(utils::shared_buffer{0});
+      REQUIRE_NOTHROW(utils::shared_buffer{9});
+    }
+
+    SECTION("Shared_ptr")
+    {
+      auto vector_ptr = std::make_shared<utils::shared_buffer::container_type>();
+      REQUIRE_NOTHROW(utils::shared_buffer{vector_ptr});
+      REQUIRE_NOTHROW(utils::shared_buffer{nullptr});
+    }
+
+    SECTION("Move container")
+    {
+      std::vector<char> vector;
+      REQUIRE_NOTHROW(utils::shared_buffer{std::move(vector)});
+    }
+
+    SECTION("POD with copy")
+    {
+      char* text = const_cast<char*>("MP2P");
+      size_t size = 4;
+      bool copy = true;
+
+      utils::shared_buffer buffer(text, size, copy);
+      REQUIRE(buffer.size() == size);
+
+      for (size_t i = 0; i < size; ++i)
+      {
+        if (text[i] != buffer.data_get()[i])
+          FAIL("Buffer not equal");
+      }
+    }
+
+    SECTION("POD without copy")
+    {
+      const char* text = "MP2P";
+      size_t size = 4;
+      bool copy = false;
+
+      utils::shared_buffer buffer(text, size, copy);
+      REQUIRE(utils::buffer_cast<char*>(buffer) == text);
+      REQUIRE(buffer.size() == size);
+    }
+  }
+
+  SECTION("Size")
+  {
+    utils::shared_buffer number{42};
+    REQUIRE(number.size() == 42);
+
+    auto vector_ptr =
+      std::make_shared<utils::shared_buffer::container_type>(42, 'A');
+    utils::shared_buffer shared{42};
+    REQUIRE(shared.size() == 42);
+
+    std::vector<char> vector{42, 'A'};
+    utils::shared_buffer moved{42};
+    REQUIRE(moved.size() == 42);
+  }
+
+  SECTION("String")
+  {
+    const char* text = "MP2P";
+    size_t size = 4;
+    bool copy = true;
+
+    utils::shared_buffer buffer(text, size, copy);
+    REQUIRE(buffer.string_get() == "MP2P");
+  }
+}
+
+TEST_CASE("Files", "[libtools][files]")
+{
+  using namespace files;
+
+  // Prepare a file
+  std::string filename{"MP2P.test"};
+  std::string text{"MP2P\n"};
+  int fd = open(filename.c_str(), O_CREAT|O_WRONLY|O_TRUNC, 0777);
+  write(fd, text.c_str(), text.size());
+  close(fd);
+
+  SECTION("Construction")
+  {
+    REQUIRE_THROWS(File{""});
+
+    // FIXME : It becomes a problem when we don't have any file to test
+    REQUIRE_NOTHROW(File{filename});
+  }
+
+  // Init
+  File file{filename};
+
+  SECTION("Filename")
+  {
+    REQUIRE(filename == file.filename_get());
+  }
+
+  SECTION("Size")
+  {
+    REQUIRE(file.size_get() > 0);
+    REQUIRE(file.size_get() == text.size());
+  }
+
+  SECTION("Hash")
+  {
+    REQUIRE(file.hash_get().size() == 40);
+    REQUIRE(file.hash_get() == "cadf513acf5102b344aa0a840805642b13bc71c3");
+  }
+
+  SECTION("Data")
+  {
+    REQUIRE(file.data() != nullptr);
+    REQUIRE(strncmp(file.data(), text.c_str(), text.size()) == 0);
+  }
+
+  SECTION("Empty_file")
+  {
+    std::string empty_fname{"empty"};
+    size_t size = 32;
+    File empty = File::empty_file(empty_fname, size);
+    REQUIRE(empty.size_get() == size);
+    REQUIRE(empty.filename_get() == empty_fname);
+    std::remove(empty_fname.c_str()); // Always clean  up
+    // FIXME : test hash?
+  }
+
+  SECTION("Hash")
+  {
+    std::string hash = hash_buffer(text.c_str(), text.size());
+    REQUIRE(hash == "cadf513acf5102b344aa0a840805642b13bc71c3");
+    std::string file_hash = hash_buffer(file.data(), text.size());
+    REQUIRE(file_hash == "cadf513acf5102b344aa0a840805642b13bc71c3");
+  }
+
+  SECTION("Parts")
+  {
+    // FIXME : Add tests for part calculations
+  }
+
+  std::remove(filename.c_str());
+
+  // Clean up
+}
