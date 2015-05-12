@@ -67,25 +67,19 @@ namespace utils
   inline shared_buffer::CharT*
   shared_buffer::data()
   {
-    return &*data_->begin();
+    return boost::asio::buffer_cast<shared_buffer::CharT*>(buffer_);
   }
 
   inline const shared_buffer::CharT*
   shared_buffer::data() const
   {
-    return &*data_->begin();
+    return boost::asio::buffer_cast<const shared_buffer::CharT*>(buffer_);
   }
 
   inline const shared_buffer::value_type
   shared_buffer::buffer_get() const
   {
     return buffer_;
-  }
-
-  inline const shared_buffer::container_type&
-  shared_buffer::data_get() const
-  {
-    return *data_;
   }
 
   inline size_t
@@ -97,6 +91,7 @@ namespace utils
   inline const std::string
   shared_buffer::string_get() const
   {
+    // FIXME : Segfaults if data is not copied inside the vector
     return std::string(data_->begin(), data_->end());
   }
 

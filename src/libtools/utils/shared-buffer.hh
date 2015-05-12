@@ -50,9 +50,6 @@ namespace utils
       // The associated buffer
       const value_type buffer_get() const;
 
-      // The underlaying container
-      const container_type& data_get() const; // FIXME : Don't make this public
-
       // The size of the buffer
       size_t size() const;
 
