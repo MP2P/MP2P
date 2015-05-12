@@ -10,7 +10,7 @@
 #include <cmath>
 #include <ios>
 
-#include <files.hh>
+#include "files.hh"
 
 namespace files
 {
@@ -30,7 +30,7 @@ namespace files
     : filename_{filename}
   {
     // Create a file on disk
-    int fd = ::open(filename.c_str(), O_WRONLY | O_CREAT | O_EXCL);
+    int fd = ::open(filename.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0644);
     if (fd == -1)
       throw std::logic_error(strerror(errno)); // FIXME : who frees strerror?
 
@@ -97,7 +97,7 @@ namespace files
     // Max authorized file size = 256TB
     // FIXME : Compute the parts relative to the size.
     (void)size;
-    return 4;
+    return size < 16 ? 1 : 4;
   }
 
   size_t part_size_for_size(size_t size, size_t part_id)
