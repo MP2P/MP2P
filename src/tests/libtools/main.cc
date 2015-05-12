@@ -12,8 +12,11 @@
 #include <fcntl.h>
 #include <cstring>
 
+using copy = utils::shared_buffer::copy;
+
 TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
 {
+  using namespace utils;
   SECTION("Construction")
   {
     SECTION("Size")
@@ -26,7 +29,6 @@ TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
     {
       auto vector_ptr = std::make_shared<utils::shared_buffer::container_type>();
       REQUIRE_NOTHROW(utils::shared_buffer{vector_ptr});
-      REQUIRE_NOTHROW(utils::shared_buffer{nullptr});
     }
 
     SECTION("Move container")
@@ -39,7 +41,7 @@ TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
     {
       char* text = const_cast<char*>("MP2P");
       size_t size = 4;
-      bool copy = true;
+      shared_buffer::copy copy = copy::Yes;
 
       utils::shared_buffer buffer(text, size, copy);
       REQUIRE(buffer.size() == size);
@@ -55,7 +57,7 @@ TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
     {
       const char* text = "MP2P";
       size_t size = 4;
-      bool copy = false;
+      shared_buffer::copy copy = copy::No;
 
       utils::shared_buffer buffer(text, size, copy);
       REQUIRE(utils::buffer_cast<char*>(buffer) == text);
@@ -82,7 +84,7 @@ TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
   {
     const char* text = "MP2P";
     size_t size = 4;
-    bool copy = true;
+    shared_buffer::copy copy = copy::Yes;
 
     utils::shared_buffer buffer(text, size, copy);
     REQUIRE(buffer.string_get() == "MP2P");
@@ -192,8 +194,8 @@ TEST_CASE("Packet", "[libtools][packet]")
 
     SECTION("Sequence of messages")
     {
-      REQUIRE_NOTHROW((Packet{fromto, what, vector, message_type(str, 5, false)}));
-      REQUIRE_NOTHROW((Packet{fromto, what, message_type(str, 5, true), message_type(str, 5, false)}));
+      REQUIRE_NOTHROW((Packet{fromto, what, vector, message_type(str, 5, copy::No)}));
+      REQUIRE_NOTHROW((Packet{fromto, what, message_type(str, 5, copy::Yes), message_type(str, 5, copy::No)}));
     }
   }
 
@@ -220,16 +222,16 @@ TEST_CASE("Packet", "[libtools][packet]")
     {
       std::string s{"MP2P\n"};
       Packet p{fromto, what};
-      p.add_message(s.c_str(), s.size());
+      p.add_message(s.c_str(), s.size(), copy::No);
       REQUIRE(p.size_get() == s.size());
-      p.add_message(message_type{s.c_str(), s.size(), false});
+      p.add_message(message_type{s.c_str(), s.size(), copy::No});
       REQUIRE(p.size_get() == s.size() + s.size());
     }
 
     SECTION("Empty + copy_message")
     {
       std::string s{"MP2P\n"};
-      message_type message{s.c_str(), s.size(), false};
+      message_type message{s.c_str(), s.size(), copy::No};
       REQUIRE(message.size() == s.size());
       Packet p{fromto, what};
       p.copy_message(message);
@@ -239,7 +241,7 @@ TEST_CASE("Packet", "[libtools][packet]")
     SECTION("Serialize header")
     {
       std::string s{"MP2P\n"};
-      Packet p{fromto, what, message_type{s.c_str(), s.size(), false}};
+      Packet p{fromto, what, message_type{s.c_str(), s.size(), copy::No}};
 
       PACKET_HEADER header{5, {fromto, what}};
       REQUIRE(std::memcmp(reinterpret_cast<const void*>(&header),

@@ -8,6 +8,7 @@ namespace client
   using namespace network;
   using namespace network::masks;
   using namespace utils;
+  using copy = utils::shared_buffer::copy;
 
   Client::Client(const std::string& host, const std::string& port)
     : master_session_{io_service_, host, port,
@@ -51,8 +52,8 @@ namespace client
     // Example of a packet construction.
     // Add multiple shared_buffers to create a sequence without merging them
     Packet p{0, 1,
-             shared_buffer(ss.str().c_str(), ss.str().size(), true),
-             shared_buffer(tmp, part_size, false)};
+             shared_buffer(ss.str().c_str(), ss.str().size(), copy::Yes),
+             shared_buffer(tmp, part_size, copy::No)};
     send_packet(p);
   }
 
@@ -65,7 +66,7 @@ namespace client
         3
     };
     Packet c_m_up_req_packet = Packet{0, 1};
-    c_m_up_req_packet.add_message((CharT*)&req, sizeof(c_m_up_req));
+    c_m_up_req_packet.add_message((CharT*)&req, sizeof(c_m_up_req), copy::No);
 
     send_packet(c_m_up_req_packet);
 

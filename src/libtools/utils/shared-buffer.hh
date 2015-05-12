@@ -16,24 +16,38 @@ namespace utils
       // This may be used elsewhere
       using CharT = char;
 
+      // The underlaying container type
       using container_type = std::vector<CharT>;
 
-      // Construct an empty buffer with a preallocated size
+      // Enum deciding wether data should be copied or not
+      enum class copy
+      {
+        Yes,
+        No
+      };
+
+      // Construct an empty buffer. It allocates `size` bytes
       shared_buffer(size_t size);
 
-      // Construct a uffer with a preallocated container
+      // Construct a buffer with a preallocated container. No copy occurs
       shared_buffer(const std::shared_ptr<container_type>& data);
 
       // Construct a buffer by moving a container inside the current one
       shared_buffer(container_type&& data);
 
       // Construct a buffer by copying (or not) the data from a pointer to POD
-      shared_buffer(char* data, size_t size, bool copy);
+      // If your data is going to be invalidated, copy::Yes should be used.
+      // If you are sure that your data is going to stay valid,
+      // avoid copying using copy::No
+      shared_buffer(CharT* data, size_t size, copy to_copy);
 
-      // Construct a buffer by copying (or not) the data from a pointer to POD
-      shared_buffer(const char* data, size_t size, bool copy);
+      // Same, but using a const buffer.
+      shared_buffer(const CharT* data, size_t size, copy to_copy);
 
       // MutableBufferSequence requirements
+      // utils::shared_buffer implements the MutableBufferSequence concept
+      // required by boost::asio, in order to be used as a buffer for send/recv
+      // functions.
 
       // FIXME : Something is not right. The const_iterator is mutable.
       //a solution involving templates or traits may be possible.
@@ -44,10 +58,12 @@ namespace utils
 
       // Accessors
       // Raw pointer on the data
+      // The pointer is the one coming from the buffer.
+      // It may be coming from the vector or from an external data source.
       CharT* data();
       const CharT* data() const;
 
-      // The associated buffer
+      // The associated boost::mutable_buffer
       const value_type buffer_get() const;
 
       // The size of the buffer
@@ -62,10 +78,14 @@ namespace utils
       operator boost::asio::const_buffer() const;
 
     private:
+      // The possible underlaying container.
+      // Used if copy is needed, or pre-allocated space
       std::shared_ptr<container_type> data_;
+      // The mutable_buffer used for interaction with boost::asio
       boost::asio::mutable_buffer buffer_;
 
-      void copy_helper(const char* data, size_t size);
+      // Copy the data from the pointer to a new allocated buffer
+      void copy_helper(const CharT* data, size_t size);
 
       // Overload buffer_cast for the shared_buffer
       template <typename PointerToPodType>

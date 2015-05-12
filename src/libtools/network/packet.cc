@@ -6,12 +6,24 @@ namespace network
   using namespace utils;
   using namespace network::masks;
 
+  using copy = utils::shared_buffer::copy;
+
   Packet::Packet(size_type size,
                  fromto_type fromto,
                  what_type what,
                  const CharT* data)
     : header_{size, {fromto, what}},
-      message_seq_{message_type{data, size, true}}
+      message_seq_{message_type{data, size, copy::Yes}}
+  {
+  }
+
+  Packet::Packet(masks::size_type size,
+                 masks::fromto_type fromto,
+                 masks::what_type what,
+                 const masks::CharT* data,
+                 copy to_copy)
+    : header_{size, {fromto, what}},
+      message_seq_{message_type{data, size, to_copy}}
   {
   }
 
@@ -36,20 +48,13 @@ namespace network
 
   void Packet::copy_message(const message_type& message)
   {
-    add_message(message_type{message.data(), message.size(), true});
+    add_message(message.data(), message.size(), copy::Yes);
   }
 
   const message_type Packet::serialize_header() const
   {
     const char* p_header = reinterpret_cast<const char*>(&header_);
-    return message_type(p_header, sizeof(header_), true);
-  }
-
-  Packet deserialize(const PACKET_HEADER header, const message_type& message)
-  {
-    return Packet(header.type.fromto,
-                  header.type.what,
-                  message);
+    return message_type(p_header, sizeof(header_), copy::Yes);
   }
 
   std::ostream &operator<<(std::ostream &output, const Packet &p)
