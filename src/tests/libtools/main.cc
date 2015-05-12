@@ -41,9 +41,9 @@ TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
     {
       char* text = const_cast<char*>("MP2P");
       size_t size = 4;
-      shared_buffer::copy copy = copy::Yes;
+      shared_buffer::copy to_copy = copy::Yes;
 
-      utils::shared_buffer buffer(text, size, copy);
+      utils::shared_buffer buffer(text, size, to_copy);
       REQUIRE(buffer.size() == size);
 
       for (size_t i = 0; i < size; ++i)
@@ -57,9 +57,9 @@ TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
     {
       const char* text = "MP2P";
       size_t size = 4;
-      shared_buffer::copy copy = copy::No;
+      shared_buffer::copy to_copy = copy::No;
 
-      utils::shared_buffer buffer(text, size, copy);
+      utils::shared_buffer buffer(text, size, to_copy);
       REQUIRE(utils::buffer_cast<char*>(buffer) == text);
       REQUIRE(buffer.size() == size);
     }
@@ -84,9 +84,9 @@ TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
   {
     const char* text = "MP2P";
     size_t size = 4;
-    shared_buffer::copy copy = copy::Yes;
+    shared_buffer::copy to_copy = copy::Yes;
 
-    utils::shared_buffer buffer(text, size, copy);
+    utils::shared_buffer buffer(text, size, to_copy);
     REQUIRE(buffer.string_get() == "MP2P");
   }
 }
