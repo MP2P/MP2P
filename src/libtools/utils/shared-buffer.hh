@@ -39,10 +39,10 @@ namespace utils
       // If your data is going to be invalidated, copy::Yes should be used.
       // If you are sure that your data is going to stay valid,
       // avoid copying using copy::No
-      shared_buffer(char* data, size_t size, copy to_copy);
+      shared_buffer(CharT* data, size_t size, copy to_copy);
 
       // Same, but using a const buffer.
-      shared_buffer(const char* data, size_t size, copy to_copy);
+      shared_buffer(const CharT* data, size_t size, copy to_copy);
 
       // MutableBufferSequence requirements
       // utils::shared_buffer implements the MutableBufferSequence concept
@@ -85,7 +85,7 @@ namespace utils
       boost::asio::mutable_buffer buffer_;
 
       // Copy the data from the pointer to a new allocated buffer
-      void copy_helper(const char* data, size_t size);
+      void copy_helper(const CharT* data, size_t size);
 
       // Overload buffer_cast for the shared_buffer
       template <typename PointerToPodType>

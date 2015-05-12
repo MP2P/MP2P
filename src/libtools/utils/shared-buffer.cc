@@ -21,7 +21,7 @@ namespace utils
   {
   }
 
-  shared_buffer::shared_buffer(char* data, size_t size, copy to_copy)
+  shared_buffer::shared_buffer(CharT* data, size_t size, copy to_copy)
     : data_{nullptr},
       buffer_{data, size}
   {
@@ -29,16 +29,16 @@ namespace utils
       copy_helper(data, size);
   }
 
- shared_buffer::shared_buffer(const char* data, size_t size, copy to_copy)
+ shared_buffer::shared_buffer(const CharT* data, size_t size, copy to_copy)
     : data_{nullptr},
-      buffer_{const_cast<char*>(data), size}
+      buffer_{const_cast<CharT*>(data), size}
   {
     if (to_copy == copy::Yes)
       copy_helper(data, size);
   }
 
   void
-  shared_buffer::copy_helper(const char* data, size_t size)
+  shared_buffer::copy_helper(const CharT* data, size_t size)
   {
     data_ = std::make_shared<container_type>(size, '\0');
     memcpy(&*data_->begin(), data, size);
