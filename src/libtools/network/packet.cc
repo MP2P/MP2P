@@ -9,7 +9,7 @@ namespace network
   Packet::Packet(size_type size,
                  fromto_type fromto,
                  what_type what,
-                 CharT* data)
+                 const CharT* data)
     : header_{size, {fromto, what}},
       message_seq_{message_type{data, size, true}}
   {
@@ -36,10 +36,7 @@ namespace network
 
   void Packet::copy_message(const message_type& message)
   {
-    auto& other_data = message.data_get();
-    auto ptr = std::make_shared<std::vector<char>>(other_data.begin(),
-                                                   other_data.end());
-    add_message(utils::shared_buffer(ptr));
+    add_message(message_type{message.data(), message.size(), true});
   }
 
   const message_type Packet::serialize_header() const

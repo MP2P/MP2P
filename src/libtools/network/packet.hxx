@@ -12,24 +12,22 @@ namespace network
     : header_{0, {fromto, what} },
       message_seq_{messages...}
   {
-    for(auto message = message_seq_.begin(); message != message_seq_.end();
-      ++message)
-      header_.size += boost::asio::buffer_size(*message);
+    for(auto message : message_seq_)
+      header_.size += message.size();
   }
 
   inline void
   Packet::add_message(const masks::message_type& message)
   {
     message_seq_.push_back(message);
-    // FIXME :
-    // header_.size += message.data_get().size();
+    header_.size += message.size();
   }
 
   inline void
-  Packet::add_message(masks::CharT* data, const masks::size_type size)
+  Packet::add_message(const masks::CharT* data, const masks::size_type size)
   {
-    header_.size += size;
-    message_seq_.push_back(masks::message_type{data, size, true});
+    // FIXME : Should we copy?
+    add_message(masks::message_type{data, size, false});
   }
 
   inline masks::size_type

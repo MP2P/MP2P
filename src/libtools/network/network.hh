@@ -87,7 +87,7 @@ namespace network
     Packet(masks::size_type size,
            masks::fromto_type fromto,
            masks::what_type what,
-           masks::CharT* data);
+           const masks::CharT* data);
 
     Packet(masks::fromto_type fromto,
            masks::what_type what,
@@ -108,7 +108,7 @@ namespace network
 
     // Add a message to the packet. Usually used for sending
     void add_message(const masks::message_type& message);
-    void add_message(masks::CharT* data, const masks::size_type size);
+    void add_message(const masks::CharT* data, const masks::size_type size);
 
     // Add a message to the packet by copying the internal data
     void copy_message(const masks::message_type& message);
