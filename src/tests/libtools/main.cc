@@ -10,6 +10,7 @@
 #include <memory>
 #include <vector>
 #include <fcntl.h>
+#include <cstring>
 
 TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
 {
@@ -235,5 +236,21 @@ TEST_CASE("Packet", "[libtools][packet]")
       REQUIRE(p.size_get() == s.size());
     }
 
+    SECTION("Serialize header")
+    {
+      std::string s{"MP2P\n"};
+      Packet p{fromto, what, message_type{s.c_str(), s.size(), false}};
+
+      PACKET_HEADER header{5, {fromto, what}};
+      REQUIRE(std::memcmp(reinterpret_cast<const void*>(&header),
+                     reinterpret_cast<const void*>(p.serialize_header().data()),
+                     sizeof (PACKET_HEADER)) == 0);
+
+      PACKET_HEADER header_big{999, {fromto, what}};
+      Packet p_big{header_big};
+      REQUIRE(std::memcmp(reinterpret_cast<const void*>(&header_big),
+                     reinterpret_cast<const void*>(p_big.serialize_header().data()),
+                     sizeof (PACKET_HEADER)) == 0);
+    }
   }
 }
