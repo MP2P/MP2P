@@ -12,10 +12,11 @@
 #include <fcntl.h>
 #include <cstring>
 
+using copy = utils::shared_buffer::copy;
+
 TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
 {
   using namespace utils;
-  using utils::shared_buffer;
   SECTION("Construction")
   {
     SECTION("Size")
@@ -28,7 +29,6 @@ TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
     {
       auto vector_ptr = std::make_shared<utils::shared_buffer::container_type>();
       REQUIRE_NOTHROW(utils::shared_buffer{vector_ptr});
-      REQUIRE_NOTHROW(utils::shared_buffer{nullptr});
     }
 
     SECTION("Move container")
