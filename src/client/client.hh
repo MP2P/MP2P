@@ -31,6 +31,6 @@ namespace client
                         size_t part,
                         network::masks::size_type part_size);
 
-    void send_packet(network::Packet& p);
+    void send_packet(const network::Packet& p);
   };
 }

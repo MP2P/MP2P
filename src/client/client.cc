@@ -100,7 +100,7 @@ namespace client
     // FIXME : Stop everything, join threads if needed
   }
 
-  void Client::send_packet(Packet& p)
+  void Client::send_packet(const Packet& p)
   {
     // Query needs the port as a string. Ugly fix.
     std::ostringstream port;
