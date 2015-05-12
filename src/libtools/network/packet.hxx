@@ -26,8 +26,7 @@ namespace network
   inline void
   Packet::add_message(const masks::CharT* data, const masks::size_type size)
   {
-    // FIXME : Should we copy?
-    add_message(masks::message_type{data, size, false});
+    add_message(masks::message_type{data, size, utils::shared_buffer::copy::No});
   }
 
   inline masks::size_type

@@ -27,20 +27,20 @@ namespace utils
   }
 
   inline
-  shared_buffer::shared_buffer(char* data, size_t size, bool copy)
+  shared_buffer::shared_buffer(char* data, size_t size, copy to_copy)
     : data_{nullptr},
       buffer_{data, size}
   {
-    if (copy)
+    if (to_copy == copy::Yes)
       copy_helper(data, size);
   }
 
  inline
- shared_buffer::shared_buffer(const char* data, size_t size, bool copy)
+ shared_buffer::shared_buffer(const char* data, size_t size, copy to_copy)
     : data_{nullptr},
       buffer_{const_cast<char*>(data), size}
   {
-    if (copy)
+    if (to_copy == copy::Yes)
       copy_helper(data, size);
   }
 

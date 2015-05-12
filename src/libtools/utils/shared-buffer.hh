@@ -18,6 +18,13 @@ namespace utils
 
       using container_type = std::vector<CharT>;
 
+      // Enum saying wether data should be copied or not
+      enum class copy
+      {
+        Yes,
+        No
+      };
+
       // Construct an empty buffer with a preallocated size
       shared_buffer(size_t size);
 
@@ -28,10 +35,10 @@ namespace utils
       shared_buffer(container_type&& data);
 
       // Construct a buffer by copying (or not) the data from a pointer to POD
-      shared_buffer(char* data, size_t size, bool copy);
+      shared_buffer(char* data, size_t size, copy to_copy);
 
       // Construct a buffer by copying (or not) the data from a pointer to POD
-      shared_buffer(const char* data, size_t size, bool copy);
+      shared_buffer(const char* data, size_t size, copy to_copy);
 
       // MutableBufferSequence requirements
 
