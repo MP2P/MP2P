@@ -18,7 +18,7 @@ namespace network
   Packet::Packet(fromto_type fromto,
                  what_type what,
                  const std::shared_ptr<std::vector<CharT>>& data)
-    : header_{data->size(), {fromto, what} },
+    : header_{static_cast<size_type>(data->size()), {fromto, what} },
       message_seq_{message_type{data}}
   {
   }
