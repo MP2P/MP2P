@@ -1,6 +1,6 @@
 # MP2P
 
-[![TeamCity Build Status](https://img.shields.io/teamcity/http/42portal.com/teamcity/s/Mp2p_Build.svg?style=flat?label=TeamCity)https://img.shields.io/teamcity/http/42portal.com/teamcity/s/Mp2p_Build.svg?style=flat?label=TeamCit]y(https://42portal.com/teamcity/viewType.html?buildTypeId=Mp2p_Build)
+[![TeamCity Build Status](https://img.shields.io/teamcity/http/42portal.com/teamcity/s/Mp2p_Build.svg?style=flat?label=TeamCity)](https://42portal.com/teamcity/viewType.html?buildTypeId=Mp2p_Build)
 [![Join the chat at https://gitter.im/Dubrzr/MP2P](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Dubrzr/MP2P?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 File transfer application using a custom protocol.
