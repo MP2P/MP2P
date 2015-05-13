@@ -190,6 +190,9 @@ namespace network
     // Get the buffer containing the header
     std::array<char, sizeof(masks::PACKET_HEADER)>& buff_get();
 
+    // Get the length of the last message
+    size_t length_get() const;
+
     // The unique session id
     size_t id_get() const;
 
@@ -210,6 +213,9 @@ namespace network
 
     // The array containing the header of the packet
     std::array<char, sizeof (masks::PACKET_HEADER)> buff_;
+
+    // The length of the last received message
+    size_t length_;
 
     // The dispatcher to call right after a complete recieve
     std::function<error_code(Packet, Session&)> dispatcher_;

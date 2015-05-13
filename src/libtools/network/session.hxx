@@ -19,6 +19,11 @@ namespace network
     return id_;
   }
 
+  inline size_t Session::length_get() const
+  {
+    return length_;
+  }
+
   inline bool operator==(const Session& lhs, const Session& rhs)
   {
     return lhs.id_get() == rhs.id_get();

@@ -90,7 +90,9 @@ namespace network
                {
                  if (!ec)
                  {
+                   length_ = length;
                    auto error = dispatcher_(p, *this);
+                   length_ = 0;
                    if (error == 100)
                      kill();
                    if (length != p.size_get()) // FIXME : This should be tested in the dispatcher
