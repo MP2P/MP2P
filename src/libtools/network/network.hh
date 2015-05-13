@@ -162,25 +162,18 @@ namespace network
   `-----------*/
   class Session
   {
-  private:
-    boost::asio::ip::tcp::socket socket_;
-    std::array<char, sizeof (masks::PACKET_HEADER)> buff_;
-    size_t length_;
-    std::function<error_code(Packet, Session&)> dispatcher_;
-    std::function<void(Session&)> delete_dispatcher_;
-    const size_t id_;
-
-    void receive_header(std::function<void(size_t, Packet)> callback);
-    void receive_message(size_t msg_size, const Packet& p);
-
   public:
-    // Create a session
+    // Create a session from an actual socket.
+    // The dispatcher is called when a packet is transferred.
+    // The delete_handler is removing the actual session
+    // from the container containing it.
     Session(boost::asio::ip::tcp::socket&& socket,
             std::function<error_code(Packet,Session&)> dispatcher,
             std::function<void(Session&)> delete_dispatcher,
             size_t id = unique_id());
 
-    // Create a session and connect to the host:port
+    // Same with the previous one.
+    // The socket parameters are explicitly speciied
     Session(boost::asio::io_service& io_service,
             const std::string& host,
             const std::string& port,
@@ -191,23 +184,51 @@ namespace network
     // Kill the session. Close the socket and remove from parent container
     void kill();
 
+    // Get the corresponding socket
     boost::asio::ip::tcp::socket& socket_get();
 
+    // Get the buffer containing the header
     std::array<char, sizeof(masks::PACKET_HEADER)>& buff_get();
 
-    size_t length_get() const;
-
+    // The unique session id
     size_t id_get() const;
 
+    // Recieve a header, then the data according to the header
     void receive();
 
+    // Send a packet.
+    // This operation is blocking. It's using a synchronous send
     void send(const Packet& packet);
 
-    void delete_dispatcher(Session& session);
-
+    // Creates an unique id for a socket.
+    // It's using an atomic integer
     static size_t unique_id();
+
+  private:
+    // The socket opened for communication
+    boost::asio::ip::tcp::socket socket_;
+
+    // The array containing the header of the packet
+    std::array<char, sizeof (masks::PACKET_HEADER)> buff_;
+
+    // The dispatcher to call right after a complete recieve
+    std::function<error_code(Packet, Session&)> dispatcher_;
+
+    // The function to call to remove this session from the parent container
+    std::function<void(Session&)> delete_dispatcher_;
+
+    // The unique id of the session
+    const size_t id_;
+
+    // Recieve the header, then call the callback with a packet
+    // and a message size
+    void receive_header(std::function<void(const Packet&)> callback);
+
+    // Recieve the message according to the packet
+    void receive_message(const Packet& p);
   };
 
+  // Compare two Sessions according to their id
   bool operator==(const Session& lhs, const Session& rhs);
 
   /*----------.

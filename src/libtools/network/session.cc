@@ -44,7 +44,7 @@ namespace network
     utils::Logger::cout() << "Opened session (tid=" + s.str() + ")";
   }
 
-  void Session::receive_header(std::function<void(size_t, Packet)> callback)
+  void Session::receive_header(std::function<void(const Packet&)> callback)
   {
     async_read(socket_,
         boost::asio::buffer(&*buff_.begin(), buff_.size()),
@@ -59,28 +59,33 @@ namespace network
             utils::Logger::cout() << "Receiving a message of size: "
                                      + std::to_string(header->size);
 
-            Packet p{*header}; // Create a packet with the read header
+            // We're not using the constructor of packet with the full header
+            // like Packet{*header} because we don't want the size to
+            // be specified inside the header yet.
+            // Adding the empty message is going to update the size
+            Packet p{header->type.fromto, header->type.what};
+
             // Allocate a buffer to read the message into
             p.add_message(empty_message(header->size));
 
-            // Read the whole message + the headers left
-            callback(header->size, p);
+            // Read the whole message
+            callback(p);
           }
-          else if (ec == boost::asio::error::eof)
-            kill();
-          else
+          else if (ec != boost::asio::error::eof)
             utils::Logger::cerr() << "Error while getting size: "
                                   + ec.message();
+          // Kill the session if an error occured
+          kill();
         }
     );
   }
 
-  void Session::receive_message(size_t msg_size, const Packet& p)
+  void Session::receive_message(const Packet& p)
   {
     async_read(socket_,
                p.message_seq_get()[0],
-               transfer_exactly(msg_size),
-               [this, msg_size, p](boost::system::error_code ec,
+               transfer_exactly(p.size_get()),
+               [this, p](boost::system::error_code ec,
                                    std::size_t length)
                {
                  if (!ec)
@@ -108,8 +113,7 @@ namespace network
     utils::Logger::cout() << "Session receiving...(tid=" + s.str() + ")";
     receive_header(std::bind(&Session::receive_message,
                              this,
-                             std::placeholders::_1,
-                             std::placeholders::_2));
+                             std::placeholders::_1));
   }
 
   // Send a packet on the open socket
