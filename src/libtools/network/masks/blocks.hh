@@ -15,7 +15,7 @@ namespace network
 
     using CharT = char;
 
-    //using err_type = uint16_t;
+    using err_type = uint16_t;
     using avspace_type = uint64_t;
     using data_type = char*;
     using fid_type = uint64_t;
@@ -62,7 +62,7 @@ namespace network
     {
       size_type size;
       TYPE type;
-      //char* message; //The message can have a zero size.
+      //char* message; //The message can have a zero size. // FIXME
     } __attribute__ ((packed));
 
     struct PARTID
