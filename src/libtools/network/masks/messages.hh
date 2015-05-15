@@ -13,6 +13,7 @@ namespace network
 
 
       // 0-0 : error ~ Error message <ERR>
+      static const what_type error_w = 0;
       struct error
       {
         err_type err;
@@ -46,10 +47,11 @@ namespace network
     }
     namespace m_c
     {
-      static const fromto_type from_to = 1;
+      static const fromto_type fromto = 1;
 
 
       // 1-0 : error ~ Error message <ERR>
+      static const what_type error_w = 0;
       struct error
       {
         err_type err;
@@ -57,6 +59,7 @@ namespace network
 
 
       // 1-1 : stg_table ~ A list of storage's IP <<STID|<IPV6|PORT>>,...>
+      static const what_type stg_table_w = 1;
       struct stg_table
       {
         // FIXME (list of STAFIELD)
@@ -64,6 +67,7 @@ namespace network
 
 
       // 1-2 : pieces_loc ~ The pieces locations <FID<<STID|UINT16>,...>,...>
+      static const what_type pieces_loc_w = 2;
       struct pieces_loc
       {
         // FIXME (list of FDETAILS)
@@ -71,14 +75,16 @@ namespace network
 
 
       // 1-3 : part_ack ~ Successfully received part acknowledgment <PARTID>
+      static const what_type part_ack_w = 3;
       using part_ack = PARTID;
     }
     namespace c_s
     {
-      static const fromto_type from_to = 2;
+      static const fromto_type fromto = 2;
 
 
       // 2-0 : error ~ Error message <ERR>
+      static const what_type error_w = 0;
       struct error
       {
         err_type err;
@@ -86,6 +92,7 @@ namespace network
 
 
       // 2-1 : up_act ~ The client sends a piece <PARTID|SHA1|DATA>
+      static const what_type up_act_w = 1;
       struct up_act
       {
         PARTID partid;
@@ -95,6 +102,7 @@ namespace network
 
 
       // 2-2 down_act ~ The client wants a piece <PARTID>
+      static const what_type down_act_w = 2;
       struct down_act
       {
         PARTID partid;
@@ -106,11 +114,23 @@ namespace network
 
 
       // 3-0 : error ~ Error message <ERR>
+      static const what_type error_w = 0;
       struct error
       {
         err_type err;
       } __attribute__ ((packed));
 
+
+      // 3-1 : fail_sha1 ~ Upload failed <PARTID>
+      static const what_type fail_sha1_w = 1;
+      struct fail_sha1
+      {
+        PARTID partid;
+      } __attribute__ ((packed));
+
+
+      // 3-2 : up_act ~ The storage sends a piece <PARTID|SHA1|DATA>
+      static const what_type up_act_w = 2;
       struct up_act
       {
         PARTID partid;
@@ -124,10 +144,37 @@ namespace network
 
 
       // 4-0 : error ~ Error message <ERR>
+      static const what_type error_w = 0;
       struct error
       {
         err_type err;
       } __attribute__ ((packed));
+
+
+      // 4-1 del_act : The Master deletes a piece <PARTID>
+      static const what_type del_act_w = 1;
+      struct del_act
+      {
+        PARTID partid;
+      } __attribute__((packed));
+
+
+      // 4-2 part_ack : Successfully received part acknowledgment <PARTID>
+      static const what_type part_ack_w = 2;
+      struct part_ack
+      {
+        PARTID partid;
+      } __attribute__((packed));
+
+
+      // 4-3 part_loc : Send this part to this storage <PARTID|SHA1|DATA>
+      static const what_type part_loc_w = 3;
+      struct part_loc
+      {
+        PARTID partid;
+        stid_type stid;
+        ADDR addr;
+      } __attribute__((packed));
     }
     namespace s_m
     {
@@ -135,10 +182,23 @@ namespace network
 
 
       // 5-0 : error ~ Error message <ERR>
+      static const what_type error_w = 0;
       struct error
       {
         err_type err;
       } __attribute__ ((packed));
+
+
+      // 5-1 : del_ack ~ Successfully delete part <PARTID>
+      static const what_type del_ack_w = 1;
+      struct del_ack
+      {
+        PARTID partid;
+      } __attribute((packed));
+
+
+      // 5-2 : part_ack ~ Successfully received part <PARTID|AVSPACE>
+      static const what_type part_ack_w = 2;
       struct part_ack
       {
         PARTID partid;
@@ -152,6 +212,7 @@ namespace network
 
 
       // 6-0 : error ~ Error message <ERR>
+      static const what_type error_w = 0;
       struct error
       {
         err_type err;
@@ -163,6 +224,7 @@ namespace network
 
 
       // 7-0 : error ~ Error message <ERR>
+      static const what_type error_w = 0;
       struct error
       {
         err_type err;
