@@ -47,4 +47,4 @@ namespace files
   size_t part_size_for_size(size_t size, size_t part_id);
 }
 
-#include "files.hxx"
+#include "file.hxx"

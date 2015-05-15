@@ -35,9 +35,9 @@ namespace files
       throw std::logic_error(strerror(errno)); // FIXME : who frees strerror?
 
     // Ask the fs to allocate some space
-    int did_fallocate = fallocate(fd, FALLOC_FL_KEEP_SIZE, 0, size);
-    if (did_fallocate != 0)
-      throw std::logic_error(strerror(errno)); // FIXME : who frees strerror?
+    //int did_fallocate = fallocate(fd, FALLOC_FL_KEEP_SIZE, 0, size);
+    //if (did_fallocate != 0)
+    //  throw std::logic_error(strerror(errno)); // FIXME : who frees strerror?
 
     // Close the file descriptor.
     close(fd);
