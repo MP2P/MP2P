@@ -12,6 +12,12 @@
 
 using error_code = uint16_t;
 
+namespace infos
+{
+  extern std::string version;
+  extern std::string copyright;
+}
+
 namespace utils
 {
   /*--------.

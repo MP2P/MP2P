@@ -4,7 +4,7 @@ namespace master
   inline error_code
   cm_up_req(Packet& packet, Session& session)
   {
-    c_m_up_req* req = reinterpret_cast<c_m_up_req*>
+    c_m::up_req* req = reinterpret_cast<c_m::up_req*>
         (packet.message_seq_get().front().data());
 
     //Compute the number of parts.

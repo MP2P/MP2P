@@ -59,14 +59,13 @@ namespace client
 
   void Client::send_file(files::File& file, masks::rdcy_type redundancy)
   {
-    // c_m_up_req
-    c_m_up_req req = c_m_up_req{
+    c_m::up_req req = c_m::up_req{
         file.size_get(),
         file.filename_get(),
         redundancy
     };
     Packet c_m_up_req_packet = Packet{0, 1};
-    c_m_up_req_packet.add_message((CharT*)&req, sizeof(c_m_up_req), copy::No);
+    c_m_up_req_packet.add_message((CharT*)&req, sizeof(c_m::up_req), copy::No);
 
     send_packet(c_m_up_req_packet);
 

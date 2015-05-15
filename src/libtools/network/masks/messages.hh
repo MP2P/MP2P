@@ -6,34 +6,45 @@ namespace network
 {
   namespace masks
   {
-    using c_m_down_req = fname_type;
-
-    struct c_m_up_req
+    namespace c_m
     {
-      fsize_type fsize;
-      fname_type fname;
-      rdcy_type rdcy;
-    } __attribute__ ((packed));
+//      extern from_to;
+//      from_to = 0;
+      using down_req = fname_type;
 
-    struct c_s_up_act
+      struct up_req
+      {
+        fsize_type fsize;
+        fname_type fname;
+        rdcy_type rdcy;
+      } __attribute__ ((packed));
+    }
+    namespace c_s
     {
-      PARTID partid;
-      sha1_type sha1;
-      data_type data;
-    } __attribute__ ((packed));
-
-    struct s_c_up_act
+      struct up_act
+      {
+        PARTID partid;
+        sha1_type sha1;
+        data_type data;
+      } __attribute__ ((packed));
+    }
+    namespace s_c
     {
-      PARTID partid;
-      sha1_type sha1;
-      data_type data;
-    } __attribute__ ((packed));
-
-    struct s_m_part_ack
+      struct up_act
+      {
+        PARTID partid;
+        sha1_type sha1;
+        data_type data;
+      } __attribute__ ((packed));
+    }
+    namespace s_m
     {
-      PARTID partid;
-      ipv6_type ip;
-      avspace_type avspace;
-    } __attribute__ ((packed));
+      struct part_ack
+      {
+        PARTID partid;
+        ipv6_type ip;
+        avspace_type avspace;
+      } __attribute__ ((packed));
+    }
   }
 }
