@@ -66,7 +66,7 @@ endif(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 # ********[03] ADDING BOOST LIBRARY ******** #
 set(BOOST_ROOT /opt/boost)
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS system iostreams REQUIRED)
+find_package(Boost COMPONENTS system iostreams program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 

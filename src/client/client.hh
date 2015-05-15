@@ -24,7 +24,7 @@ namespace client
     void stop();
 
     // Send a file to the storage
-    void send_file(files::File& file);
+    void send_file(files::File& file, network::masks::rdcy_type redundancy);
 
     // Send a part of a file to the storage
     void send_file_part(files::File& file,
