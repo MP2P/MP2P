@@ -8,16 +8,34 @@ namespace network
   {
     namespace c_m
     {
-//      extern from_to;
-//      from_to = 0;
-      using down_req = fname_type;
+      static const fromto_type fromto = 0;
 
+      // 0-1 : up_req ~ Upload request <FSIZE|FNAME|RDCY>
+      static const what_type up_req_w = 1;
       struct up_req
       {
         fsize_type fsize;
         fname_type fname;
         rdcy_type rdcy;
       } __attribute__ ((packed));
+
+      // 0-2 : down_req ~ Download request <FNAME>
+      static const what_type down_req_w = 2;
+      struct down_req
+      {
+        fname_type fname;
+      } __attribute__ ((packed));
+
+      // 0-3 : del_req ~ Delete request <FNAME>
+      static const what_type del_req_w = 2;
+      struct del_req
+      {
+        fname_type fname;
+      } __attribute__ ((packed));
+    }
+    namespace m_c
+    {
+      static const fromto_type from_to = 1;
     }
     namespace c_s
     {

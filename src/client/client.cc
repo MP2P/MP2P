@@ -64,7 +64,7 @@ namespace client
         file.filename_get(),
         redundancy
     };
-    Packet c_m_up_req_packet = Packet{0, 1};
+    Packet c_m_up_req_packet = Packet{network::masks::c_m::fromto, 1};
     c_m_up_req_packet.add_message((CharT*)&req, sizeof(c_m::up_req), copy::No);
 
     send_packet(c_m_up_req_packet);
