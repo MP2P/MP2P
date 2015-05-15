@@ -72,10 +72,12 @@ namespace network
             callback(p);
           }
           else if (ec != boost::asio::error::eof)
+          {
             utils::Logger::cerr() << "Error while getting size: "
                                   + ec.message();
-          // Kill the session if an error occured
-          kill();
+            // Kill the session if an error occured
+            kill();
+          }
         }
     );
   }
