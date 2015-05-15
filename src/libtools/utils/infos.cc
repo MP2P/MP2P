@@ -3,8 +3,8 @@
 
 namespace infos
 {
-  std::string version = "V0.5";
-  std::string copyright = "Copyright (C) 2015 - 2015  MP2P\n"
+  const std::string version = "V0.5";
+  const std::string copyright = "Copyright (C) 2015 - 2015  MP2P\n"
       "\n"
       "This program comes with NO WARRANTY, to the extent permitted by law.\n"
       "You may redistribute copies of this program under the terms of\n"

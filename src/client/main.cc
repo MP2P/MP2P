@@ -53,16 +53,16 @@ int main(int argc, const char *argv[])
                  << std::endl;
         return 1;
       }
-      std::cout << "Trying to upload file: "
-      << vm["upload"].as<std::string>() << " (redundancy="
-      << vm["redundancy"].as<int>() << ")." << std::endl;
-
+      utils::Logger::cout() << "Trying to upload file: "
+                               + vm["upload"].as<std::string>()
+                               + " (redundancy=" + utils::misc::string_from(
+                                 vm["redundancy"].as<int>()) + ").";
       upload = true;
     }
     else if (vm.count("download"))
     {
-      std::cout << "Trying to download file: "
-      << vm["download"].as<std::string>() << "." << std::endl;
+      utils::Logger::cout() << "Trying to download file: "
+      + vm["download"].as<std::string>() + ".";
     }
 
     utils::init();
@@ -83,13 +83,13 @@ int main(int argc, const char *argv[])
       // Prepare file
       files::File file(vm["upload"].as<std::string>());
 
-      client.send_file(file, vm["redundancy"].as<int>());
+      client.send_file(file, vm["redundancy"].as<network::masks::rdcy_type>());
     }
 
     client.stop();
   }
   catch (std::exception &e)
   {
-    std::cerr << "Client failed : " << e.what() << std::endl;
+    utils::Logger::cerr() << "Client failed : " + std::string(e.what());
   }
 }

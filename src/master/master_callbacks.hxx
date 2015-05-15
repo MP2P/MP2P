@@ -25,7 +25,6 @@ namespace master
     }*/
     //Packet n(1, 2, fdetails, nb_storage * 6 + 8);
     //session.send(n);
-
     return (packet.size_get() && session.length_get());
   }
 

@@ -14,8 +14,9 @@ using error_code = uint16_t;
 
 namespace infos
 {
-  extern std::string version;
-  extern std::string copyright;
+  // Global variables defined in infos.cc
+  extern const std::string version;
+  extern const std::string copyright;
 }
 
 namespace utils
