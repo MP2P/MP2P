@@ -83,7 +83,7 @@ int main(int argc, const char *argv[])
       // Prepare file
       files::File file(vm["upload"].as<std::string>());
 
-      client.send_file(file, vm["redundancy"].as<network::masks::rdcy_type>());
+      client.send_file(file, 1);
     }
 
     client.stop();

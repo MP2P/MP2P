@@ -112,23 +112,15 @@ namespace storage
       return 1;
 
     auto& buf = packet.message_seq_get()[0];
-
-    std::istringstream input;
-    input.rdbuf()->pubsetbuf(buffer_cast<CharT*>(buf), buffer_size(buf));
-
-    std::string item;
-
-    std::getline(input, item, '|');
-    std::string part(item);
-    char hash_c[41] = { 0 };
-    input.read(hash_c, 40);
-    std::string hash(hash_c);
-    std::getline(input, item, '|');
-    std::string msg(item);
+    const auto* buff = buf.data();
 
     {
-      std::ofstream f1(part);
-      f1.write(&*msg.begin(), msg.size());
+      char c_pt = reinterpret_cast<char>(*buff);
+      int pt = c_pt;
+      std::ostringstream pts;
+      pts << pt;
+      std::ofstream f1(pts.str());
+      f1.write(buff + 1, buf.size() - 1);
     }
 
     switch (packet.fromto_get())

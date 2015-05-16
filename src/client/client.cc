@@ -44,55 +44,44 @@ namespace client
   void Client::send_file_part(files::File& file, size_t part, size_type part_size)
   {
     const char* tmp = file.data() + part * part_size;
-    std::string hash = files::hash_buffer(tmp, part_size);
+    /*std::string hash = files::hash_buffer(tmp, part_size);
 
     std::ostringstream ss;
     ss << part << "|" << hash;
+    */
+
+    char pt = part;
 
     // Example of a packet construction.
     // Add multiple shared_buffers to create a sequence without merging them
-    Packet p{0, 1,
-             shared_buffer(ss.str().c_str(), ss.str().size(), copy::Yes),
+    Packet p{2, 1,
+             shared_buffer(&pt, sizeof (pt), copy::Yes),
              shared_buffer(tmp, part_size, copy::No)};
     send_packet(p);
   }
 
   void Client::send_file(files::File& file, masks::rdcy_type redundancy)
   {
-    c_m::up_req req = c_m::up_req{
-        file.size_get(),
-        file.filename_get(),
-        redundancy
-    };
-    Packet c_m_up_req_packet = Packet{network::masks::c_m::fromto, 1};
-    c_m_up_req_packet.add_message((CharT*)&req, sizeof(c_m::up_req), copy::No);
+    (void)redundancy;
+    std::vector<std::thread> threads;
 
-    send_packet(c_m_up_req_packet);
+    auto size = file.size_get();
+    size_t parts = 4;
+    auto part_size = size / parts;
+    for (size_t i = 0; i < parts; ++i)
+    {
+      threads.emplace_back(
+          [this, &file, i, part_size]()
+          {
+            send_file_part(file, i, part_size);
+          });
+    }
 
-
-
-  //  std::vector<std::thread> threads;
-  //
-  //  utils::Logger::cout() << "Sending file with SHA1 hash : " + file.hash_get();
-  //
-  //  auto size = file.size_get();
-  //  auto parts = files::parts_for_size(size);
-  //  auto part_size = size / parts;
-  //  for (size_t i = 0; i < parts; ++i)
-  //  {
-  //    threads.emplace_back(
-  //        [this, &file, i, part_size]()
-  //        {
-  //          send_file_part(file, i, part_size);
-  //        });
-  //  }
-  //
-  //  for (auto& thread : threads)
-  //  {
-  //    utils::Logger::cout() << "Joining thread";
-  //    thread.join();
-  //  }
-  //  master_session_.receive();
+    for (auto& thread : threads)
+    {
+      utils::Logger::cout() << "Joining thread";
+      thread.join();
+    }
   }
 
   void Client::stop()
@@ -112,7 +101,6 @@ namespace client
                               std::placeholders::_2),
                     std::bind(&Client::remove_handle, this,
                               std::placeholders::_1)};
-    std::cout << "sent packet : " << p << std::endl;
     session.send(p);
   }
 }
