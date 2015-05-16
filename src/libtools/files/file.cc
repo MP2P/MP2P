@@ -15,6 +15,35 @@
 
 namespace files
 {
+  namespace // Anonymous namespace
+  {
+    // Get the number of parts for hashing a file
+    size_t parts_for_hashing_size(size_t size)
+    {
+      const size_t mb = 1000000; // 1 MB
+      if (size < mb)
+        return 1;
+      return size / mb;
+    }
+
+    // Get the size of a part when hashing a file.
+    // Be careful for the last part which might be smaller than the others
+    size_t part_size_for_hashing_size(size_t size, size_t part_id)
+    {
+      size_t parts = parts_for_hashing_size(size);
+      assert(part_id < parts);
+
+      size_t part_size = std::ceil((float)size / parts);
+      if (part_id == (parts - 1))
+      {
+        size_t offset = part_id * part_size;
+        if ((offset + part_size) > size)
+          part_size -= offset + part_size - size;
+      }
+      return part_size;
+    }
+  }
+
   using namespace boost::filesystem;
 
   File::File(const std::string& filename)
@@ -54,7 +83,7 @@ namespace files
   // SHA-1 hash a buffer of bytes
   std::string hash_buffer(const char* sbuff, size_t size)
   {
-    size_t parts = parts_for_size(size);
+    size_t parts = parts_for_hashing_size(size);
     size_t part_size = std::ceil((float)size / parts);
     const unsigned char* buff = reinterpret_cast<const unsigned char*>(sbuff);
     unsigned char hash[20];
@@ -68,7 +97,7 @@ namespace files
     for (size_t i = 0; i < parts; ++i)
     {
       // hash a part, update the final one
-      size_t hash_size = part_size_for_size(size, i);
+      size_t hash_size = part_size_for_hashing_size(size, i);
       size_t offset = i * part_size;
       SHA1_Update(&context, buff + offset, hash_size);
     }
@@ -96,26 +125,4 @@ namespace files
     return st.st_size;
   }
 
-  size_t parts_for_size(size_t size)
-  {
-    // Max authorized file size = 256TB
-    // FIXME : Compute the parts relative to the size.
-    (void)size;
-    return size < 16 ? 1 : 4;
-  }
-
-  size_t part_size_for_size(size_t size, size_t part_id)
-  {
-    size_t parts = parts_for_size(size);
-    assert(part_id < parts);
-
-    size_t part_size = std::ceil((float)size / parts);
-    if (part_id == (parts - 1))
-    {
-      size_t offset = part_id * part_size;
-      if ((offset + part_size) > size)
-        part_size -= offset + part_size - size;
-    }
-    return part_size;
-  }
 }
