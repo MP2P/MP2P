@@ -9,11 +9,14 @@
 #include <unistd.h>
 #include <cmath>
 #include <ios>
+#include <boost/filesystem.hpp>
 
 #include "files.hh"
 
 namespace files
 {
+  using namespace boost::filesystem;
+
   File::File(const std::string& filename)
     : filename_{filename}
   {
@@ -23,7 +26,6 @@ namespace files
                                           | std::ios_base::in
                                           | std::ios_base::out,
                                           size};
-    hash_ = hash_buffer(file_.data(), size_get());
   }
 
   File::File(const std::string& filename, size_t size)
@@ -33,21 +35,18 @@ namespace files
     int fd = ::open(filename.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0644);
     if (fd == -1)
       throw std::logic_error(strerror(errno)); // FIXME : who frees strerror?
-
-    // Ask the fs to allocate some space
-    //int did_fallocate = fallocate(fd, FALLOC_FL_KEEP_SIZE, 0, size);
-    //if (did_fallocate != 0)
-    //  throw std::logic_error(strerror(errno)); // FIXME : who frees strerror?
-
-    // Close the file descriptor.
     close(fd);
 
+    // Resize the file
+    boost::filesystem::resize_file(filename, size);
+
+    // Map the file
     file_ = boost::iostreams::mapped_file{filename_,
                                           std::ios_base::binary,
                                           size};
   }
 
-  File File::empty_file(const std::string& filename, size_t size)
+  File File::create_empty_file(const std::string& filename, size_t size)
   {
     return File{filename, size};
   }
@@ -83,6 +82,11 @@ namespace files
       result << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
 
     return result.str();
+  }
+
+  std::string hash_file(const File& file)
+  {
+    return hash_buffer(file.data(), boost::filesystem::file_size(file.filename_get()));
   }
 
   size_t filesize_get(const std::string& filename)

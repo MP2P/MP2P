@@ -17,24 +17,31 @@ namespace files
 
       // Accessors
       const std::string& filename_get() const;
-      size_t size_get() const;
-      const std::string& hash_get() const;
-      char* data();
 
-      static File empty_file(const std::string& filename, size_t size);
+      // Wrapper calling boost::file_size
+      size_t size_get() const;
+
+      // Get a raw pointer on the mapped file data
+      char* data();
+      const char* data() const;
+
+      // Create an empty file with filename and a size
+      static File create_empty_file(const std::string& filename, size_t size);
 
     private:
       const std::string filename_;
       boost::iostreams::mapped_file file_;
-      std::string hash_;
 
       // Private constructor for an empty file.
-      // Should be used only for empty_file
+      // Should be used only for create_empty_file
       File(const std::string& filename, size_t size);
   };
 
   // Hash a buffer of chars and return the SHA1 hash as a string
   std::string hash_buffer(const char* buff, size_t size);
+
+  // Hash a file. Calling hash_buffer on the mapped area
+  std::string hash_file(const File& file);
 
   // Get the size of the file
   size_t filesize_get(const std::string& filename);

@@ -14,13 +14,14 @@ namespace files
     return file_.size();
   }
 
-  inline const std::string& File::hash_get() const
-  {
-    return hash_;
-  }
-
   inline char* File::data()
   {
     return file_.data();
   }
+
+  inline const char* File::data() const
+  {
+    return file_.data();
+  }
+
 }
