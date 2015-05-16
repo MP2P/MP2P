@@ -126,8 +126,9 @@ TEST_CASE("Files", "[libtools][files]")
 
   SECTION("Hash")
   {
-    REQUIRE(file.hash_get().size() == 40);
-    REQUIRE(file.hash_get() == "cadf513acf5102b344aa0a840805642b13bc71c3");
+    auto hash = hash_file(file);
+    REQUIRE(hash.size() == 40);
+    REQUIRE(hash == "cadf513acf5102b344aa0a840805642b13bc71c3");
   }
 
   SECTION("Data")
@@ -140,7 +141,7 @@ TEST_CASE("Files", "[libtools][files]")
   {
     std::string empty_fname{"empty"};
     size_t size = 32;
-    File empty = File::empty_file(empty_fname, size);
+    File empty = File::create_empty_file(empty_fname, size);
     REQUIRE(empty.size_get() == size);
     REQUIRE(empty.filename_get() == empty_fname);
     std::remove(empty_fname.c_str()); // Always clean  up
