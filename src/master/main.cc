@@ -9,8 +9,9 @@ int main()
   using namespace master; // Use the namespace in the main function only
   try
   {
+    std::string config_path("../config/server.conf");
     // Throws if anything goes bad
-    utils::init();
+    utils::init(config_path);
     DB::Connector::get_instance(); // Initialize connexion
   }
   catch (std::exception& e)

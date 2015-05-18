@@ -16,6 +16,7 @@ int main(int argc, const char *argv[])
         ("help", "display this help and exit")
         ("version,v", "displays version of the client")
         ("log,l", "activates verbose")
+        ("config,c",  po::value<std::string>(), "path to the configuration file")
         ("upload,u",  po::value<std::string>(), "upload the input file")
         ("download,d",  po::value<std::string>(), "download the input file")
         ("redundancy,r", po::value<int>(), "redundancy level when uploading")
@@ -25,7 +26,6 @@ int main(int argc, const char *argv[])
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
     po::notify(vm);
-
 
     if (vm.count("help"))
     {
@@ -38,6 +38,12 @@ int main(int argc, const char *argv[])
       std::cout << "Client " << infos::version << std::endl << std::endl
                 << infos::copyright << std::endl;
       return 0;
+    }
+
+    std::string config_path("../config/server.conf");
+    if (vm.count("config"))
+    {
+      config_path = vm["config"].as<std::string>();
     }
 
     if (!vm.count("upload") && !vm.count("download"))
@@ -65,7 +71,7 @@ int main(int argc, const char *argv[])
       + vm["download"].as<std::string>() + ".";
     }
 
-    utils::init();
+    utils::init(config_path);
 
     // Prepare socket
     std::ostringstream port;

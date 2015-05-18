@@ -26,7 +26,7 @@ namespace utils
   `--------*/
   // Functions throwing exceptions if something goes bad
   void check_system();
-  void init();
+  void init(std::string& config_path);
 
 
   /*---------.
@@ -34,13 +34,13 @@ namespace utils
   `---------*/
   namespace color
   {
-    std::ostream &w(std::ostream &o = std::cout);
-    std::ostream &r(std::ostream &o = std::cout);
-    std::ostream &b(std::ostream &o = std::cout);
-    std::ostream &c(std::ostream &o = std::cout);
-    std::ostream &g(std::ostream &o = std::cout);
-    std::ostream &y(std::ostream &o = std::cout);
-    std::ostream &p(std::ostream &o = std::cout);
+    std::ostream& w(std::ostream& o = std::cout);
+    std::ostream& r(std::ostream& o = std::cout);
+    std::ostream& b(std::ostream& o = std::cout);
+    std::ostream& c(std::ostream& o = std::cout);
+    std::ostream& g(std::ostream& o = std::cout);
+    std::ostream& y(std::ostream& o = std::cout);
+    std::ostream& p(std::ostream& o = std::cout);
   }
 
 

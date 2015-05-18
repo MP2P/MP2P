@@ -14,13 +14,13 @@ namespace utils
       throw std::logic_error("Fatal error: IPV6_V6ONLY must be false.");
   }
 
-  void init()
+  void init(std::string& config_path)
   {
     utils::Logger::cout() << "Initialization...";
     check_system();
 
     utils::Conf& cfg = utils::Conf::get_instance();
-    if (!cfg.initialize("../config/server.conf"))
+    if (!cfg.initialize(config_path))
       throw std::logic_error("Config file failed to init");
 
     if (!network::Error::initialize("../ressources/errors"))

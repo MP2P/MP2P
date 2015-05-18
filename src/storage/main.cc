@@ -8,7 +8,9 @@ int main()
   using namespace storage;
   try
   {
-    utils::init(); // Throws if anything goes bad
+    std::string config_path("../config/server.conf");
+    // Throws if anything goes bad
+    utils::init(config_path);
 
     Storage storage{};
 
