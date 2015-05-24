@@ -44,12 +44,15 @@ namespace network
     utils::Logger::cout() << "Opened session (tid=" + s.str() + ")";
   }
 
-  void Session::receive_header(std::function<void(const Packet&)> callback)
+  void Session::receive_header(std::function<void(const Packet&,
+                                                  dispatcher_type)> receive_body,
+                               dispatcher_type callback)
   {
     async_read(socket_,
         boost::asio::buffer(&*buff_.begin(), buff_.size()),
         transfer_exactly(sizeof (PACKET_HEADER)),
-        [this, callback](boost::system::error_code ec, std::size_t size_length)
+        [this, callback, receive_body](boost::system::error_code ec,
+                                       std::size_t size_length)
         {
           if (!ec && size_length == sizeof (PACKET_HEADER))
           {
@@ -69,7 +72,7 @@ namespace network
             p.add_message(empty_message(header->size));
 
             // Read the whole message
-            callback(p);
+            receive_body(p, callback);
           }
           else if (ec != boost::asio::error::eof)
           {
@@ -82,18 +85,19 @@ namespace network
     );
   }
 
-  void Session::receive_message(const Packet& p)
+  void Session::receive_message(const Packet& p,
+                                dispatcher_type callback)
   {
     async_read(socket_,
                p.message_seq_get()[0],
                transfer_exactly(p.size_get()),
-               [this, p](boost::system::error_code ec,
+               [this, p, callback](boost::system::error_code ec,
                                    std::size_t length)
                {
                  if (!ec)
                  {
                    length_ = length;
-                   auto error = dispatcher_(p, *this);
+                   auto error = callback(p, *this);
                    length_ = 0;
                    if (error == 100)
                      kill();
@@ -109,15 +113,23 @@ namespace network
     );
   }
 
-  // Read on the open socket
+
   void Session::receive()
+  {
+    receive(dispatcher_);
+  }
+
+  void Session::receive(dispatcher_type callback)
   {
     std::ostringstream s;
     s << std::this_thread::get_id();
     utils::Logger::cout() << "Session receiving...(tid=" + s.str() + ")";
     receive_header(std::bind(&Session::receive_message,
                              this,
-                             std::placeholders::_1));
+                             std::placeholders::_1,
+                             std::placeholders::_2),
+                   callback
+                  );
   }
 
   // Send a packet on the open socket

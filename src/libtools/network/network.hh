@@ -160,13 +160,15 @@ namespace network
   `-----------*/
   class Session
   {
+    using dispatcher_type = std::function<error_code(Packet, Session&)>;
+
   public:
     // Create a session from an actual socket.
     // The dispatcher is called when a packet is transferred.
     // The delete_handler is removing the actual session
     // from the container containing it.
     Session(boost::asio::ip::tcp::socket&& socket,
-            std::function<error_code(Packet,Session&)> dispatcher,
+            dispatcher_type dispatcher,
             std::function<void(Session&)> delete_dispatcher,
             size_t id = unique_id());
 
@@ -175,7 +177,7 @@ namespace network
     Session(boost::asio::io_service& io_service,
             const std::string& host,
             const std::string& port,
-            std::function<error_code(Packet,Session&)> dispatcher,
+            dispatcher_type dispatcher,
             std::function<void(Session&)> delete_dispatcher,
             size_t id = unique_id());
 
@@ -196,6 +198,9 @@ namespace network
 
     // Recieve a header, then the data according to the header
     void receive();
+
+    // Receive a header, treat the packet inside a lambda function
+    void receive(dispatcher_type callback);
 
     // Send a packet.
     // This operation is blocking. It's using a synchronous send
@@ -224,12 +229,15 @@ namespace network
     // The unique id of the session
     const size_t id_;
 
+
     // Recieve the header, then call the callback with a packet
     // and a message size
-    void receive_header(std::function<void(const Packet&)> callback);
+    void receive_header(std::function<void(const Packet&,
+                                           dispatcher_type)> receive_body,
+                        dispatcher_type callback);
 
     // Recieve the message according to the packet
-    void receive_message(const Packet& p);
+    void receive_message(const Packet& p, dispatcher_type dispatcher);
   };
 
   // Compare two Sessions according to their id
