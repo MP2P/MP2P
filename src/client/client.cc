@@ -55,8 +55,8 @@ namespace client
     // Example of a packet construction.
     // Add multiple shared_buffers to create a sequence without merging them
     Packet p{2, 1};
-    shared_buffer(&pt, sizeof (pt), copy::Yes);
-    shared_buffer(tmp, part_size, copy::No);
+    p.add_message(shared_buffer(&pt, sizeof (pt), copy::Yes));
+    p.add_message(shared_buffer(tmp, part_size, copy::No));
     send_packet(p);
   }
 
