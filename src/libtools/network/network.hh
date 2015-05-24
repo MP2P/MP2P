@@ -97,6 +97,11 @@ namespace network
            const masks::CharT* data,
            utils::shared_buffer::copy to_copy);
 
+    // Create a packet with a message contained inside a shared_buffer
+    Packet(masks::fromto_type fromto,
+           masks::what_type what,
+           const utils::shared_buffer& message);
+
     // Create a packet with a message contained inside a shared pointer.
     // The shared_ptr is going to be passed to a shared_buffer.
     Packet(masks::fromto_type fromto,
@@ -108,13 +113,6 @@ namespace network
     Packet(const masks::PACKET_HEADER& header);
     Packet(masks::fromto_type fromto,
            masks::what_type what);
-
-    // Create a packet with necessary header fields
-    // Append messages as shared_buffers
-    template <typename...Messages>
-    Packet(masks::fromto_type fromto,
-           masks::what_type what,
-           Messages...messages);
 
     // Add a message to the packet. Usually used for sending
     void add_message(const masks::message_type& message);

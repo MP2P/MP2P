@@ -27,6 +27,15 @@ namespace network
   {
   }
 
+
+  Packet::Packet(masks::fromto_type fromto,
+                 masks::what_type what,
+                 const utils::shared_buffer& message)
+    : header_{static_cast<size_type>(message.size()), {fromto, what}},
+      message_seq_{message}
+  {
+  }
+
   Packet::Packet(fromto_type fromto,
                  what_type what,
                  const std::shared_ptr<std::vector<CharT>>& data)

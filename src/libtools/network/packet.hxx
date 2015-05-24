@@ -5,17 +5,6 @@
 
 namespace network
 {
-  template <typename...Messages>
-  Packet::Packet(masks::fromto_type fromto,
-                 masks::what_type what,
-                 Messages...messages)
-    : header_{0, {fromto, what} },
-      message_seq_{messages...}
-  {
-    for(auto message : message_seq_)
-      header_.size += message.size();
-  }
-
   inline void
   Packet::add_message(const masks::message_type& message)
   {

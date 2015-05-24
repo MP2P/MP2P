@@ -192,12 +192,6 @@ TEST_CASE("Packet", "[libtools][packet]")
       REQUIRE_NOTHROW((Packet{header}));
       REQUIRE_NOTHROW((Packet{fromto, what}));
     }
-
-    SECTION("Sequence of messages")
-    {
-      REQUIRE_NOTHROW((Packet{fromto, what, vector, message_type(str, 5, copy::No)}));
-      REQUIRE_NOTHROW((Packet{fromto, what, message_type(str, 5, copy::Yes), message_type(str, 5, copy::No)}));
-    }
   }
 
   SECTION("SIZE")
