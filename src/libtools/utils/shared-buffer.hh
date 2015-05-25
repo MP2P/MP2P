@@ -27,22 +27,22 @@ namespace utils
       };
 
       // Construct an empty buffer. It allocates `size` bytes
-      shared_buffer(size_t size);
+      explicit shared_buffer(size_t size);
 
       // Construct a buffer with a preallocated container. No copy occurs
-      shared_buffer(const std::shared_ptr<container_type>& data);
+      explicit shared_buffer(const std::shared_ptr<container_type>& data);
 
       // Construct a buffer by moving a container inside the current one
-      shared_buffer(container_type&& data);
+      explicit shared_buffer(container_type&& data);
 
       // Construct a buffer by copying (or not) the data from a pointer to POD
       // If your data is going to be invalidated, copy::Yes should be used.
       // If you are sure that your data is going to stay valid,
       // avoid copying using copy::No
-      shared_buffer(CharT* data, size_t size, copy to_copy);
+      explicit shared_buffer(CharT* data, size_t size, copy to_copy);
 
       // Same, but using a const buffer.
-      shared_buffer(const CharT* data, size_t size, copy to_copy);
+      explicit shared_buffer(const CharT* data, size_t size, copy to_copy);
 
       // MutableBufferSequence requirements
       // utils::shared_buffer implements the MutableBufferSequence concept
