@@ -144,7 +144,7 @@ namespace network
     utils::Logger::cout() << "Session receiving...(tid=" + s.str() + ")";
 
     std::array<char, sizeof(masks::PACKET_HEADER)> packet_buff;
-    socket_.receive(boost::asio::buffer(packet_buff));
+    socket_.receive(boost::asio::buffer(&*packet_buff.begin(), packet_buff.size()));
 
     const auto* header =
         reinterpret_cast<const PACKET_HEADER*>(packet_buff.data());
