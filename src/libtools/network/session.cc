@@ -132,6 +132,30 @@ namespace network
                   );
   }
 
+  void Session::blocking_receive()
+  {
+    blocking_receive(dispatcher_);
+  }
+
+  void Session::blocking_receive(dispatcher_type callback)
+  {
+    std::ostringstream s;
+    s << std::this_thread::get_id();
+    utils::Logger::cout() << "Session receiving...(tid=" + s.str() + ")";
+
+    std::array<char, sizeof(masks::PACKET_HEADER)> packet_buff;
+    socket_.receive(boost::asio::buffer(packet_buff));
+
+    const auto* header =
+        reinterpret_cast<const PACKET_HEADER*>(packet_buff.data());
+    utils::Logger::cout() << "Receiving a message of size: "
+                             + std::to_string(header->size);
+    Packet p{header->type.fromto, header->type.what,
+             empty_message(header->size)};
+    socket_.receive(p.message_seq_get()[0]);
+    callback(p, *this);
+  }
+
   // Send a packet on the open socket
   void Session::send(const Packet& packet)
   {

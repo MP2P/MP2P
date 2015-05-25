@@ -202,6 +202,12 @@ namespace network
     // Receive a header, treat the packet inside a lambda function
     void receive(dispatcher_type callback);
 
+    // Same as receive, but blocking
+    void blocking_receive();
+
+    // Same as receive, but blocking
+    void blocking_receive(dispatcher_type callback);
+
     // Send a packet.
     // This operation is blocking. It's using a synchronous send
     void send(const Packet& packet);
