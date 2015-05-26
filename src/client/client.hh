@@ -11,7 +11,8 @@ namespace client
     boost::asio::io_service io_service_; // Default constructor is enough
     network::Session master_session_;
 
-    network::error_code handle(network::Packet, network::Session& session);
+    network::error_code recv_handle(network::Packet, network::Session& session);
+    network::error_code send_handle(network::Packet, network::Session& session);
     void remove_handle(network::Session& session);
 
   public:

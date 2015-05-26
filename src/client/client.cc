@@ -12,7 +12,8 @@ namespace client
 
   Client::Client(const std::string& host, const std::string& port)
     : master_session_{io_service_, host, port,
-        std::bind(&Client::handle, this, std::placeholders::_1, std::placeholders::_2),
+        std::bind(&Client::recv_handle, this, std::placeholders::_1, std::placeholders::_2),
+        std::bind(&Client::send_handle, this, std::placeholders::_1, std::placeholders::_2),
         std::bind(&Client::remove_handle, this, std::placeholders::_1)}
   {
   }
@@ -22,12 +23,22 @@ namespace client
     (void) session;
   }
 
-  error_code Client::handle(Packet packet, Session& session)
+  error_code Client::recv_handle(Packet packet, Session& session)
   {
     (void) session;
     (void) packet;
 
-    Logger::cout() << "Client handling";
+    Logger::cout() << "Client recv handling";
+
+    return 0;
+  }
+
+  error_code Client::send_handle(Packet packet, Session& session)
+  {
+    (void) session;
+    (void) packet;
+
+    Logger::cout() << "Client send handling";
 
     return 0;
   }
@@ -132,7 +143,9 @@ namespace client
     const auto& host = Conf::get_instance().host_get();
 
     Session session{io_service_, host, port.str(),
-                    std::bind(&Client::handle, this, std::placeholders::_1,
+                    std::bind(&Client::recv_handle, this, std::placeholders::_1,
+                              std::placeholders::_2),
+                    std::bind(&Client::send_handle, this, std::placeholders::_1,
                               std::placeholders::_2),
                     std::bind(&Client::remove_handle, this,
                               std::placeholders::_1)};

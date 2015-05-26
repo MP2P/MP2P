@@ -153,13 +153,15 @@ namespace network
   // Print a packet's header on an output stream
   std::ostream& operator<<(std::ostream& output, const Packet& packet);
 
+  class Session;
+
+  using dispatcher_type = std::function<error_code(Packet, Session&)>;
 
   /*-----------.
   | session.cc |
   `-----------*/
   class Session
   {
-    using dispatcher_type = std::function<error_code(Packet, Session&)>;
 
   public:
     // Create a session from an actual socket.
@@ -167,7 +169,8 @@ namespace network
     // The delete_handler is removing the actual session
     // from the container containing it.
     Session(boost::asio::ip::tcp::socket&& socket,
-            dispatcher_type dispatcher,
+            dispatcher_type recv_dispatcher,
+            dispatcher_type send_dispatcher,
             std::function<void(Session&)> delete_dispatcher,
             size_t id = unique_id());
 
@@ -176,7 +179,8 @@ namespace network
     Session(boost::asio::io_service& io_service,
             const std::string& host,
             const std::string& port,
-            dispatcher_type dispatcher,
+            dispatcher_type recv_dispatcher,
+            dispatcher_type send_dispatcher,
             std::function<void(Session&)> delete_dispatcher,
             size_t id = unique_id());
 
@@ -211,6 +215,9 @@ namespace network
     // This operation is blocking. It's using a synchronous send
     void send(const Packet& packet);
 
+    // Send a packet using a custom dispatcher
+    void send(const Packet& packet, dispatcher_type callback);
+
     // Creates an unique id for a socket.
     // It's using an atomic integer
     static size_t unique_id();
@@ -226,7 +233,10 @@ namespace network
     size_t length_;
 
     // The dispatcher to call right after a complete recieve
-    std::function<error_code(Packet, Session&)> dispatcher_;
+    dispatcher_type recv_dispatcher_;
+
+    // The dispatcher to call right after a complete send
+    dispatcher_type send_dispatcher_;
 
     // The function to call to remove this session from the parent container
     std::function<void(Session&)> delete_dispatcher_;
@@ -256,12 +266,14 @@ namespace network
   private:
     boost::asio::ip::tcp::acceptor acceptor_;
     boost::asio::ip::tcp::socket socket_;
-    std::function<error_code(Packet,Session&)> dispatcher_;
+    dispatcher_type recv_dispatcher_;
+    dispatcher_type send_dispatcher_;
     std::unordered_map<size_t, Session> sessions_;
 
   public:
     Server(boost::asio::io_service& io_service,
-           std::function<error_code(Packet,Session&)> dispatcher);
+           dispatcher_type recv_dispatcher,
+           dispatcher_type send_dispatcher);
 
     ~Server();
 

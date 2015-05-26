@@ -12,8 +12,8 @@ namespace storage
 
   Storage::Storage()
       : server_{io_service_,
-                std::bind(&Storage::dispatcher, this, std::placeholders::_1,
-                          std::placeholders::_2)}
+                std::bind(&Storage::recv_dispatcher, this, std::placeholders::_1, std::placeholders::_2),
+                std::bind(&Storage::send_dispatcher, this, std::placeholders::_1, std::placeholders::_2)}
   {
     unsigned concurrency = utils::Conf::get_instance().concurrency_get();
     unsigned port = utils::Conf::get_instance().port_get();
@@ -96,7 +96,7 @@ namespace storage
 
   // Handle the session after filling the buffer
   // Errors are defined in the ressources/errors file.
-  error_code Storage::dispatcher(Packet packet, Session& session)
+  error_code Storage::recv_dispatcher(Packet packet, Session& session)
   {
     (void) session;
     std::ostringstream s;
@@ -125,5 +125,12 @@ namespace storage
       default:
         return 100; // Error
     }
+  }
+
+  error_code Storage::send_dispatcher(Packet packet, Session& session)
+  {
+    (void)packet;
+    (void)session;
+    return 0;
   }
 }

@@ -15,7 +15,8 @@ namespace storage
     network::Server server_;
     std::vector<std::thread> threads_;
 
-    network::error_code dispatcher(network::Packet packet, network::Session& session);
+    network::error_code recv_dispatcher(network::Packet packet, network::Session& session);
+    network::error_code send_dispatcher(network::Packet packet, network::Session& session);
 
     // Causes the server to stop its running threads if any.
     void stop();

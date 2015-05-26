@@ -1,19 +1,20 @@
 #include <network.hh>
 #include <shared-buffer.hh>
 
-
 namespace network
 {
   using namespace boost::asio;
   using namespace network::masks;
 
   Session::Session(ip::tcp::socket&& socket,
-                   std::function<error_code(Packet,Session&)> dispatcher,
+                   dispatcher_type recv_dispatcher,
+                   dispatcher_type send_dispatcher,
                    std::function<void(Session&)> delete_dispatcher,
                    size_t id)
       : socket_{std::forward<ip::tcp::socket>(socket)},
-        dispatcher_{std::move(dispatcher)},
-        delete_dispatcher_{std::move(delete_dispatcher)},
+        recv_dispatcher_{recv_dispatcher},
+        send_dispatcher_{send_dispatcher},
+        delete_dispatcher_{delete_dispatcher},
         id_{id}
   {
   }
@@ -21,12 +22,14 @@ namespace network
   Session::Session(io_service& io_service,
                    const std::string& host,
                    const std::string& port,
-                   std::function<error_code(Packet,Session&)> dispatcher,
+                   dispatcher_type recv_dispatcher,
+                   dispatcher_type send_dispatcher,
                    std::function<void(Session&)> delete_dispatcher,
                    size_t id)
     : socket_{io_service},
-      dispatcher_{std::move(dispatcher)},
-      delete_dispatcher_{std::move(delete_dispatcher)},
+      recv_dispatcher_{recv_dispatcher},
+      send_dispatcher_{send_dispatcher},
+      delete_dispatcher_{delete_dispatcher},
       id_{id}
   {
     ip::tcp::resolver resolver{io_service}; // Resolve the host
@@ -113,10 +116,9 @@ namespace network
     );
   }
 
-
   void Session::receive()
   {
-    receive(dispatcher_);
+    receive(recv_dispatcher_);
   }
 
   void Session::receive(dispatcher_type callback)
@@ -134,7 +136,7 @@ namespace network
 
   void Session::blocking_receive()
   {
-    blocking_receive(dispatcher_);
+    blocking_receive(recv_dispatcher_);
   }
 
   void Session::blocking_receive(dispatcher_type callback)
@@ -156,13 +158,22 @@ namespace network
     callback(p, *this);
   }
 
-  // Send a packet on the open socket
   void Session::send(const Packet& packet)
   {
     auto seq = packet.message_seq_get();
     seq.insert(seq.begin(), packet.serialize_header());
     write(socket_, seq);
-    auto error = dispatcher_(packet, *this);
+    auto error = send_dispatcher_(packet, *this);
+    if (error == 1)
+      socket_.close();
+  }
+
+  void Session::send(const Packet& packet, dispatcher_type callback)
+  {
+    auto seq = packet.message_seq_get();
+    seq.insert(seq.begin(), packet.serialize_header());
+    write(socket_, seq);
+    auto error = callback(packet, *this);
     if (error == 1)
       socket_.close();
   }

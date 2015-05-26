@@ -7,8 +7,8 @@ namespace master
   inline
   Master::Master()
       : server_{io_service_,
-                std::bind(&Master::dispatcher, this, std::placeholders::_1,
-                          std::placeholders::_2)}
+                std::bind(&Master::recv_dispatcher, this, std::placeholders::_1, std::placeholders::_2),
+                std::bind(&Master::send_dispatcher, this, std::placeholders::_1, std::placeholders::_2)}
   {
     unsigned concurrency = utils::Conf::get_instance().concurrency_get();
     unsigned port = utils::Conf::get_instance().port_get();
@@ -96,7 +96,7 @@ namespace master
   // Handle the session after filling the buffer
   // Errors are defined in the ressources/errors file.
   inline error_code
-  Master::dispatcher(Packet packet, Session& session)
+  Master::recv_dispatcher(Packet packet, Session& session)
   {
     (void)session;
     std::ostringstream s;
@@ -142,5 +142,13 @@ namespace master
       default:
         return 1; // Error
     }
+  }
+
+  inline error_code
+  Master::send_dispatcher(Packet packet, Session& session)
+  {
+    (void)packet;
+    (void)session;
+    return 0;
   }
 }

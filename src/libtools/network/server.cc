@@ -9,10 +9,12 @@ namespace network
   using namespace boost::asio;
 
   Server::Server(io_service &io_service,
-      std::function<error_code(Packet, Session &)> dispatcher)
+                 dispatcher_type recv_dispatcher,
+                 dispatcher_type send_dispatcher)
       : acceptor_{io_service},
         socket_{io_service},
-        dispatcher_{std::move(dispatcher)}
+        recv_dispatcher_{recv_dispatcher},
+        send_dispatcher_{send_dispatcher}
   {
     // Use of ipv6 by default, with IPV6_V6ONLY disabled, it will listen to
     // both ipv4 & ipv6.
@@ -67,7 +69,7 @@ namespace network
 
             size_t id = Session::unique_id();
             sessions_.emplace(id,
-              Session{std::move(socket_), dispatcher_,
+              Session{std::move(socket_), recv_dispatcher_, send_dispatcher_,
                 std::bind(&Server::delete_dispatcher, this, std::placeholders::_1),
                 id
               }
