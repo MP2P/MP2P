@@ -18,15 +18,22 @@ namespace master
     // Testing purpose
     nb_parts = 4;
 
-    std::vector<STAFIELD> fields;
+    std::vector<STPFIELD> fields;
     for (stid_type i = 0; i < 4; ++i)
     {
-      STAFIELD field = {i, { "0:0:0:0:0:0:0:1", 3727 }};
+      STPFIELD field = {i, 1};
       fields.push_back(field);
     }
 
-    Packet response{4 * sizeof (STAFIELD), 1, 1,
-                    reinterpret_cast<const CharT*>(&*fields.begin()), copy::No};
+    uint64_t file_id = 1;
+
+    Packet response{1, 1};
+    response.add_message(reinterpret_cast<const CharT*>(&file_id),
+                         sizeof (file_id),
+                         copy::Yes);
+    response.add_message(reinterpret_cast<const CharT*>(&*fields.begin()),
+                         fields.size() * sizeof (STPFIELD),
+                         copy::Yes);
     session.send(response);
 
     //fdetails.stplist = new STPFIELD[nb_storage];

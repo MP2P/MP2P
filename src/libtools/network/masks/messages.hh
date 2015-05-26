@@ -70,8 +70,9 @@ namespace network
       static const what_type pieces_loc_w = 2;
       struct pieces_loc
       {
-        // FIXME (list of FDETAILS)
-      } __attribute__ ((packed));
+        fid_type fid;
+        std::vector<STPFIELD> stps;
+      };
 
 
       // 1-3 : part_ack ~ Successfully received part acknowledgment <PARTID>
