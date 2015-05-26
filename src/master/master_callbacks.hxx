@@ -1,5 +1,7 @@
 namespace master
 {
+  using copy = utils::shared_buffer::copy;
+
   // May I upload a file?
   inline error_code
   cm_up_req(Packet& packet, Session& session)
@@ -13,9 +15,20 @@ namespace master
     if (nb_parts == 0)
       return 1;
 
-    //Get a list of Storages.
-    //
-    //uint32_t nb_storage = /*The number of different Storage goes here.*/;
+    // Testing purpose
+    nb_parts = 4;
+
+    std::vector<STAFIELD> fields;
+    for (stid_type i = 0; i < 4; ++i)
+    {
+      STAFIELD field = {i, { "0:0:0:0:0:0:0:1", 3727 }};
+      fields.push_back(field);
+    }
+
+    Packet response{4 * sizeof (STAFIELD), 1, 1,
+                    reinterpret_cast<const CharT*>(&*fields.begin()), copy::No};
+    session.send(response);
+
     //fdetails.stplist = new STPFIELD[nb_storage];
     //For each Storage, select a number of part to send.
     /*for (uint32_t u = 0; u < nb_storage; u++)
