@@ -18,8 +18,8 @@ namespace files
       // Accessors
       const std::string& filename_get() const;
 
-      // Wrapper calling boost::file_size
-      size_t size_get() const;
+      // Get the size from the mapped_file
+      size_t size() const;
 
       // Get a raw pointer on the mapped file data
       char* data();
@@ -42,9 +42,6 @@ namespace files
 
   // Hash a file. Calling hash_buffer on the mapped area
   std::string hash_file(const File& file);
-
-  // Get the size of the file
-  size_t filesize_get(const std::string& filename);
 }
 
 #include "file.hxx"

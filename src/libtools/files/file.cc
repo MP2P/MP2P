@@ -49,7 +49,7 @@ namespace files
   File::File(const std::string& filename)
     : filename_{filename}
   {
-    auto size = filesize_get(filename);
+    auto size = boost::filesystem::file_size(filename);
     file_ = boost::iostreams::mapped_file{filename_,
                                           std::ios_base::binary
                                           | std::ios_base::in
@@ -116,13 +116,6 @@ namespace files
   std::string hash_file(const File& file)
   {
     return hash_buffer(file.data(), boost::filesystem::file_size(file.filename_get()));
-  }
-
-  size_t filesize_get(const std::string& filename)
-  {
-    struct stat st;
-    stat(filename.c_str(), &st);
-    return st.st_size;
   }
 
 }

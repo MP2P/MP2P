@@ -120,8 +120,8 @@ TEST_CASE("Files", "[libtools][files]")
 
   SECTION("Size")
   {
-    REQUIRE(file.size_get() > 0);
-    REQUIRE(file.size_get() == text.size());
+    REQUIRE(file.size() > 0);
+    REQUIRE(file.size() == text.size());
   }
 
   SECTION("Hash")
@@ -142,7 +142,7 @@ TEST_CASE("Files", "[libtools][files]")
     std::string empty_fname{"empty"};
     size_t size = 32;
     File empty = File::create_empty_file(empty_fname, size);
-    REQUIRE(empty.size_get() == size);
+    REQUIRE(empty.size() == size);
     REQUIRE(empty.filename_get() == empty_fname);
     std::remove(empty_fname.c_str()); // Always clean  up
     // FIXME : test hash?

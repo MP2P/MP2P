@@ -9,7 +9,7 @@ namespace files
     return filename_;
   }
 
-  inline size_t File::size_get() const
+  inline size_t File::size() const
   {
     return file_.size();
   }
