@@ -42,12 +42,34 @@ namespace client
     // FIXME : Stop everything, join threads if needed
   }
 
+  m_c::stg_table request_upload(fsize_type fsize,
+                                rdcy_type rdcy,
+                                std::string fname,
+                                Session& session)
+  {
+    c_m::up_req request{fsize, rdcy};
+    Packet req_packet{0, 1};
+    req_packet.add_message(reinterpret_cast<CharT*>(&request), sizeof (request),
+                           copy::No);
+    req_packet.add_message(fname.c_str(), fname.size(), copy::No);
+    session.send(req_packet);
+    session.blocking_receive(
+        [](Packet p, Session& /*recv_session*/) -> error_code
+        {
+          utils::Logger::cout() << p;
+          return 0;
+        });
+    return m_c::stg_table{};
+  }
+
   void Client::send_file(files::File& file, masks::rdcy_type redundancy)
   {
     (void)redundancy;
-    std::vector<std::thread> threads;
+    request_upload(file.size(), redundancy, file.filename_get(), master_session_);
 
-    auto size = file.size_get();
+    /*std::vector<std::thread> threads;
+
+    auto size = file.size();
     size_t parts = 4;
     auto part_size = size / parts;
     for (size_t i = 0; i < parts; ++i)
@@ -64,6 +86,7 @@ namespace client
       utils::Logger::cout() << "Joining thread";
       thread.join();
     }
+    */
   }
 
   void Client::send_file_part(files::File& file, size_t part, size_type part_size)
