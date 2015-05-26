@@ -82,7 +82,7 @@ namespace DB
   {
   private:
     fid_type id_;
-    fname_type name_;
+    std::string name_;
     fsize_type file_size_ = 0;
     rdcy_type redundancy_ = 0;
     rdcy_type current_redundancy_ = 0;
@@ -90,13 +90,13 @@ namespace DB
     bool uploaded_ = false;
 
   public:
-    FileItem(fid_type id, const fname_type& name,
+    FileItem(fid_type id, const std::string& name,
              fsize_type file_size, rdcy_type redundancy,
              rdcy_type current_redundancy, std::string hash,
              bool uploaded);
 
     fid_type id_get() const;
-    fname_type name_get() const;
+    std::string name_get() const;
     fsize_type file_size_get() const;
     rdcy_type redundancy_get() const;
     rdcy_type current_redundancy_get() const;

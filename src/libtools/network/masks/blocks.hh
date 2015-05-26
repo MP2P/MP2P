@@ -17,9 +17,9 @@ namespace network
 
     using err_type = uint16_t;
     using avspace_type = uint64_t;
-    using data_type = char*;
+    using data_type = CharT*;
     using fid_type = uint64_t;
-    using fname_type = std::string;
+    using fname_type = const CharT*;
     using fromto_type = char;
     using fsize_type = uint64_t;
     static const size_t ipv6_type_size = 16;

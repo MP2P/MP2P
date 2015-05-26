@@ -25,8 +25,8 @@ namespace network
       struct up_req
       {
         fsize_type fsize;
-        fname_type fname;
         rdcy_type rdcy;
+        fname_type fname;
       } __attribute__ ((packed));
 
 

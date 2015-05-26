@@ -74,7 +74,7 @@ namespace DB
 
   // Item's constructors
   inline
-  FileItem::FileItem(fid_type id, const fname_type& name,
+  FileItem::FileItem(fid_type id, const std::string& name,
                      fsize_type file_size,
                      rdcy_type redundancy,
                      rdcy_type current_redundancy,
@@ -171,7 +171,7 @@ namespace DB
     std::istringstream is(json);
     boost::property_tree::read_json(is, pt);
     fid_type id = pt.get<fid_type>("id");
-    fname_type name = pt.get<fname_type>("name");
+    std::string name = pt.get<std::string>("name");
     fsize_type file_size = pt.get<fsize_type>("file_size");
     rdcy_type redundancy = pt.get<rdcy_type>("redundancy");
     rdcy_type current_redundancy = pt.get<rdcy_type>("current_redundancy");
