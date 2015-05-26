@@ -26,7 +26,7 @@ namespace network
       {
         fsize_type fsize;
         rdcy_type rdcy;
-        fname_type fname;
+        //fname_type fname;
       } __attribute__ ((packed));
 
 
