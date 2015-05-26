@@ -18,7 +18,7 @@ namespace master
     network::Server server_;
     std::forward_list<std::thread> threads_;
 
-    error_code dispatcher(network::Packet packet, network::Session &session);
+    network::error_code dispatcher(network::Packet packet, network::Session &session);
 
     // Causes the server to stop its running threads if any.
     void stop();
@@ -34,11 +34,11 @@ namespace master
     void catch_stop();
   };
 
-  error_code cm_up_req(network::Packet& packet, network::Session& session);
-  error_code cm_down_req(network::Packet& packet, network::Session& session);
-  error_code cm_del_req(network::Packet& packet, network::Session& session);
-  error_code sm_del_ack(network::Packet& packet, network::Session& session);
-  error_code sm_part_ack(network::Packet& packet, network::Session& session);
+  network::error_code cm_up_req(network::Packet& packet, network::Session& session);
+  network::error_code cm_down_req(network::Packet& packet, network::Session& session);
+  network::error_code cm_del_req(network::Packet& packet, network::Session& session);
+  network::error_code sm_del_ack(network::Packet& packet, network::Session& session);
+  network::error_code sm_part_ack(network::Packet& packet, network::Session& session);
 }
 
 #include "master.hxx"

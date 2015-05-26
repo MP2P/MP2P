@@ -15,7 +15,7 @@ namespace storage
     network::Server server_;
     std::forward_list<std::thread> threads_;
 
-    error_code dispatcher(network::Packet packet, network::Session& session);
+    network::error_code dispatcher(network::Packet packet, network::Session& session);
 
     // Causes the server to stop its running threads if any.
     void stop();
@@ -31,9 +31,9 @@ namespace storage
     void catch_stop();
   };
 
-  error_code CM_callback_may_i_upload_a_file(network::Packet& packet, network::Session& session);
-  error_code CM_callback_may_i_download_this_file(network::Packet& packet, network::Session& session);
-  error_code CM_callback_can_you_delete_this_file(network::Packet& packet, network::Session& session);
-  error_code SM_callback_part_deletion_succeded(network::Packet& packet, network::Session& session);
-  error_code SM_callback_part_received(network::Packet& packet, network::Session& session);
+  network::error_code CM_callback_may_i_upload_a_file(network::Packet& packet, network::Session& session);
+  network::error_code CM_callback_may_i_download_this_file(network::Packet& packet, network::Session& session);
+  network::error_code CM_callback_can_you_delete_this_file(network::Packet& packet, network::Session& session);
+  network::error_code SM_callback_part_deletion_succeded(network::Packet& packet, network::Session& session);
+  network::error_code SM_callback_part_received(network::Packet& packet, network::Session& session);
 }

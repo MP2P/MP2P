@@ -11,9 +11,9 @@
 #include <boost/bind.hpp>
 #include <glob.h>
 #include <unordered_set>
+
 #include <masks/blocks.hh>
 #include <masks/messages.hh>
-
 #include <utils.hh>
 #include <files.hh>
 
@@ -31,6 +31,8 @@ namespace network
     S_to_S = 7
   };
 
+
+  using error_code = uint16_t;
 
   /*---------.
   | error.cc |

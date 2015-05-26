@@ -10,8 +10,6 @@
 
 //#define DEBUG true
 
-using error_code = uint16_t;
-
 namespace infos
 {
   // Global variables defined in infos.cc

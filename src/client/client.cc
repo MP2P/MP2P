@@ -29,10 +29,6 @@ namespace client
 
     Logger::cout() << "Client handling";
 
-    // FIXME : Actually, we should listen after every send.
-    // For now, we listen after all the sends, since it's communicating with only
-    // one master
-
     return 0;
   }
 
@@ -41,23 +37,9 @@ namespace client
     io_service_.run();
   }
 
-  void Client::send_file_part(files::File& file, size_t part, size_type part_size)
+  void Client::stop()
   {
-    const char* tmp = file.data() + part * part_size;
-    /*std::string hash = files::hash_buffer(tmp, part_size);
-
-    std::ostringstream ss;
-    ss << part << "|" << hash;
-    */
-
-    char pt = part;
-
-    // Example of a packet construction.
-    // Add multiple shared_buffers to create a sequence without merging them
-    Packet p{2, 1};
-    p.add_message(shared_buffer(&pt, sizeof (pt), copy::Yes));
-    p.add_message(shared_buffer(tmp, part_size, copy::No));
-    send_packet(p);
+    // FIXME : Stop everything, join threads if needed
   }
 
   void Client::send_file(files::File& file, masks::rdcy_type redundancy)
@@ -84,9 +66,18 @@ namespace client
     }
   }
 
-  void Client::stop()
+  void Client::send_file_part(files::File& file, size_t part, size_type part_size)
   {
-    // FIXME : Stop everything, join threads if needed
+    const char* tmp = file.data() + part * part_size;
+
+    char pt = part;
+
+    // Example of a packet construction.
+    // Add multiple shared_buffers to create a sequence without merging them
+    Packet p{2, 1};
+    p.add_message(shared_buffer(&pt, sizeof (pt), copy::Yes));
+    p.add_message(shared_buffer(tmp, part_size, copy::No));
+    send_packet(p);
   }
 
   void Client::send_packet(const Packet& p)
