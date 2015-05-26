@@ -1,7 +1,7 @@
 #pragma once
 
-#include <forward_list>
 #include <thread>
+#include <vector>
 #include <boost/asio.hpp>
 
 #include <network.hh>
@@ -13,7 +13,7 @@ namespace storage
   private:
     boost::asio::io_service io_service_; // Does not need instantiation
     network::Server server_;
-    std::forward_list<std::thread> threads_;
+    std::vector<std::thread> threads_;
 
     network::error_code dispatcher(network::Packet packet, network::Session& session);
 

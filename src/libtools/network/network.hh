@@ -2,15 +2,12 @@
 
 #include <memory>
 #include <atomic>
-#include <forward_list>
 #include <unordered_map>
 #include <iostream>
 #include <thread>
-#include <mutex>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <glob.h>
-#include <unordered_set>
 
 #include <masks/blocks.hh>
 #include <masks/messages.hh>
