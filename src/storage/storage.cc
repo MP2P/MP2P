@@ -40,7 +40,7 @@ namespace storage
     unsigned concurrency = utils::Conf::get_instance().concurrency_get();
     for (unsigned i = 0; i < concurrency; ++i)
     {
-      threads_.emplace_front(
+      threads_.emplace_back(
           std::thread([i, this]()
           {
             std::ostringstream s;
@@ -71,10 +71,6 @@ namespace storage
           utils::Logger::cout() << "Done stopping thread " + id.str() + "!";
         }
     );
-
-    // Delete all threads
-    while (!threads_.empty())
-      threads_.pop_front();
   }
 
   // When CTRL+C is typed, we call storage::stop();
