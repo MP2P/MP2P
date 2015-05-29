@@ -21,13 +21,13 @@ namespace master
     std::vector<STPFIELD> fields;
     for (stid_type i = 0; i < 4; ++i)
     {
-      STPFIELD field = {i, 1};
+      STPFIELD field = { {"0:0:0:0:0:0:0:1", 3727}, 1}; // Send 1 part to localhost
       fields.push_back(field);
     }
 
     uint64_t file_id = 1;
 
-    Packet response{1, 1};
+    Packet response{1, 2};
     response.add_message(reinterpret_cast<const CharT*>(&file_id),
                          sizeof (file_id),
                          copy::Yes);

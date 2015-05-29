@@ -58,8 +58,6 @@ namespace client
                                  std::string fname,
                                  Session& session)
   {
-    m_c::pieces_loc pieces; // The expected result
-
     c_m::up_req request{fsize, rdcy}; // The request message
 
     Packet req_packet{0, 1};
@@ -70,28 +68,29 @@ namespace client
 
     session.send(req_packet);
 
+    m_c::pieces_loc* pieces; // The expected result
+
     session.blocking_receive(
         [&pieces](Packet p, Session& /*recv_session*/) -> error_code
         {
           utils::Logger::cout() << p;
           CharT* data = p.message_seq_get().front().data();
 
-          pieces.fid = *reinterpret_cast<fid_type*>(data);
+          pieces = reinterpret_cast<m_c::pieces_loc*>(data);
 
-          data += sizeof (fid_type);
           size_t list_size = (p.size_get() - sizeof (fid_type)) / sizeof (STPFIELD);
-          stplist_type list = reinterpret_cast<stplist_type>(data);
 
           for (size_t i = 0; i < list_size; ++i)
           {
-            STPFIELD& field = list[i];
-            pieces.stps.push_back(field);
-            std::cout << "Field " << i << " : " << field.stid << " , " << field.nb << std::endl;
+            STPFIELD& field = pieces->stps[i];
+            std::string ipv6{field.addr.ipv6};
+            std::cout << "Field " << i << " : (" << ipv6 << " , "
+                      << field.addr.port << ") , " << field.nb << std::endl;
           }
 
           return 0;
         });
-    return pieces;
+    return *pieces; // FIXME : Deep copy, please
   }
 
   void Client::send_file(files::File& file, masks::rdcy_type redundancy)

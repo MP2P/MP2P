@@ -71,8 +71,8 @@ namespace network
       struct pieces_loc
       {
         fid_type fid;
-        std::vector<STPFIELD> stps;
-      };
+        STPFIELD stps[0];
+      } __attribute__ ((packed));
 
 
       // 1-3 : part_ack ~ Successfully received part acknowledgment <PARTID>

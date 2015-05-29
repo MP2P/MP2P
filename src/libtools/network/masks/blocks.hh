@@ -79,7 +79,7 @@ namespace network
 
     struct STPFIELD
     {
-      stid_type stid;
+      ADDR addr;
       nb_type nb;
     } __attribute__ ((packed));
   }
