@@ -20,7 +20,7 @@ namespace DB
     return id_;
   }
 
-  inline fname_type FileItem::name_get() const
+  inline std::string FileItem::name_get() const
   {
     return name_;
   }
