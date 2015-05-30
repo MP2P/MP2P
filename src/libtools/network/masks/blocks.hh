@@ -31,6 +31,7 @@ namespace network
     using sha1_type = CharT[sha1_type_size];
     using size_type = uint32_t;
     using stid_type = uint32_t;
+    using mtid_type = uint32_t;
     using what_type = uint8_t;
     using data_type = const CharT;
 

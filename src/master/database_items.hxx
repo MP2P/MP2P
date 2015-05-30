@@ -25,7 +25,7 @@ namespace DB
     return name_;
   }
 
-  inline sha1_ptr_type FileItem::hash_get()
+  inline CharT* FileItem::hash_get()
   {
     return &hash_[0];
   }
@@ -50,7 +50,7 @@ namespace DB
     return partid_.partnum;
   }
 
-  inline sha1_ptr_type PartItem::hash_get()
+  inline CharT* PartItem::hash_get()
   {
     return &hash_[0];
   }

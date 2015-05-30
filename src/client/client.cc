@@ -58,7 +58,7 @@ namespace client
                                  std::string fname,
                                  Session& session)
   {
-    c_m::up_req request{fsize, rdcy}; // The request message
+    c_m::up_req request{fsize, rdcy, {}}; // The request message
 
     Packet req_packet{0, 1};
     req_packet.add_message(reinterpret_cast<CharT*>(&request),
@@ -82,7 +82,7 @@ namespace client
 
           for (size_t i = 0; i < list_size; ++i)
           {
-            STPFIELD& field = pieces->stps[i];
+            STPFIELD& field = pieces->fdetails.stplist[i];
             std::string ipv6{field.addr.ipv6};
             Logger::cout() << "Field " + std::to_string(i) + " : (" + ipv6
                            + " , " + std::to_string(field.addr.port) + ") , "
