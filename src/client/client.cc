@@ -53,11 +53,19 @@ namespace client
     // FIXME : Stop everything, join threads if needed
   }
 
-  m_c::pieces_loc request_upload(fsize_type fsize,
-                                 rdcy_type rdcy,
-                                 std::string fname,
-                                 Session& session)
+  void Client::send_file(const files::File& file, masks::rdcy_type redundancy)
   {
+    (void)redundancy;
+    request_upload(file, redundancy, master_session_);
+  }
+
+  bool request_upload(const files::File& file,
+                      rdcy_type rdcy,
+                      Session& session)
+  {
+    fsize_type fsize = file.size();
+    const std::string& fname = file.filename_get();
+
     c_m::up_req request{fsize, rdcy, {}}; // The request message
 
     Packet req_packet{0, 1};
@@ -71,7 +79,7 @@ namespace client
     m_c::pieces_loc* pieces; // The expected result
 
     session.blocking_receive(
-        [&pieces](Packet p, Session& /*recv_session*/) -> error_code
+        [&pieces, &file](Packet p, Session& /*recv_session*/) -> error_code
         {
           utils::Logger::cout() << p;
           CharT* data = p.message_seq_get().front().data();
@@ -80,75 +88,38 @@ namespace client
 
           size_t list_size = (p.size_get() - sizeof (fid_type)) / sizeof (STPFIELD);
 
+          // Get total number of parts
+          size_t parts = 0;
+          for (size_t i = 0; i < list_size; ++i)
+            parts += pieces->fdetails.stplist[i].nb;
+
+          Logger::cout() << "Splitting in " + std::to_string(parts) + " parts";
+
           for (size_t i = 0; i < list_size; ++i)
           {
             STPFIELD& field = pieces->fdetails.stplist[i];
-            std::string ipv6{field.addr.ipv6};
-            Logger::cout() << "Field " + std::to_string(i) + " : (" + ipv6
-                           + " , " + std::to_string(field.addr.port) + ") , "
-                           + std::to_string(field.nb);
+            //std::string ipv6{field.addr.ipv6};
+            //Logger::cout() << "Field " + std::to_string(i) + " : (" + ipv6
+                           //+ " , " + std::to_string(field.addr.port) + ") , "
+                           //+ std::to_string(field.nb);
+            send_parts(file, field.addr, parts - field.nb, parts);
+            parts -= field.nb;
           }
 
           return 0;
         });
-    return *pieces; // FIXME : Deep copy, please
+    return true;
   }
 
-  void Client::send_file(files::File& file, masks::rdcy_type redundancy)
+  void send_parts(const files::File& file,
+                  const ADDR& addr,
+                  size_t begin_id, size_t end_id)
   {
-    (void)redundancy;
-    request_upload(file.size(), redundancy, file.filename_get(), master_session_);
-
-    /*std::vector<std::thread> threads;
-
-    auto size = file.size();
-    size_t parts = 4;
-    auto part_size = size / parts;
-    for (size_t i = 0; i < parts; ++i)
-    {
-      threads.emplace_back(
-          [this, &file, i, part_size]()
-          {
-            send_file_part(file, i, part_size);
-          });
-    }
-
-    for (auto& thread : threads)
-    {
-      utils::Logger::cout() << "Joining thread";
-      thread.join();
-    }
-    */
-  }
-
-  void Client::send_file_part(files::File& file, size_t part, size_type part_size)
-  {
-    const char* tmp = file.data() + part * part_size;
-
-    char pt = part;
-
-    // Example of a packet construction.
-    // Add multiple shared_buffers to create a sequence without merging them
-    Packet p{2, 1};
-    p.add_message(shared_buffer(&pt, sizeof (pt), copy::Yes));
-    p.add_message(shared_buffer(tmp, part_size, copy::No));
-    send_packet(p);
-  }
-
-  void Client::send_packet(const Packet& p)
-  {
-    // Query needs the port as a string. Ugly fix.
-    std::ostringstream port;
-    port << Conf::get_instance().port_get();
-    const auto& host = Conf::get_instance().host_get();
-
-    Session session{io_service_, host, port.str(),
-                    std::bind(&Client::recv_handle, this, std::placeholders::_1,
-                              std::placeholders::_2),
-                    std::bind(&Client::send_handle, this, std::placeholders::_1,
-                              std::placeholders::_2),
-                    std::bind(&Client::remove_handle, this,
-                              std::placeholders::_1)};
-    session.send(p);
+    (void)file;
+    std::string ipv6{addr.ipv6};
+    Logger::cout() << "Sending "
+                   + std::to_string(begin_id) + " - " + std::to_string(end_id)
+                   + " to (" + ipv6
+                   + " , " + std::to_string(addr.port) + ")";
   }
 }
