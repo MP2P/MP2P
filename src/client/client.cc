@@ -84,8 +84,9 @@ namespace client
           {
             STPFIELD& field = pieces->stps[i];
             std::string ipv6{field.addr.ipv6};
-            std::cout << "Field " << i << " : (" << ipv6 << " , "
-                      << field.addr.port << ") , " << field.nb << std::endl;
+            Logger::cout() << "Field " + std::to_string(i) + " : (" + ipv6
+                           + " , " + std::to_string(field.addr.port) + ") , "
+                           + std::to_string(field.nb);
           }
 
           return 0;
