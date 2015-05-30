@@ -30,7 +30,8 @@ namespace client
 
     // Send parts to storages
     // In the range [begin_id, end_id)
-    void send_parts(const files::File& file,
+    void send_parts(network::masks::fid_type fid,
+                    const files::File& file,
                     const network::masks::ADDR& addr,
                     size_t total_parts,
                     size_t begin_id, size_t end_id);

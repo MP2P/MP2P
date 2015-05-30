@@ -114,7 +114,8 @@ namespace client
           for (size_t i = 0; i < list_size; ++i)
           {
             STPFIELD& field = pieces->fdetails.stplist[i];
-            send_parts(file, field.addr,
+            send_parts(pieces->fdetails.fid,
+                       file, field.addr,
                        total_parts,
                        parts - field.nb, parts);
             parts -= field.nb;
@@ -125,18 +126,21 @@ namespace client
     return true;
   }
 
-  void Client::send_parts(const files::File& file,
+  void Client::send_parts(fid_type fid,
+                          const files::File& file,
                           const ADDR& addr,
                           size_t total_parts,
                           size_t begin_id, size_t end_id)
   {
     // Create an unique thread per session
     std::thread sending{
-      [&file, this, &addr, total_parts, begin_id, end_id]() {
+      [&file, this, &addr, total_parts, begin_id, end_id, fid]() {
         // Create the storage session
         Session storage{io_service_, addr.ipv6, std::to_string(addr.port),
-            std::bind(&Client::recv_handle, this, std::placeholders::_1, std::placeholders::_2),
-            std::bind(&Client::send_handle, this, std::placeholders::_1, std::placeholders::_2),
+            std::bind(&Client::recv_handle, this, std::placeholders::_1,
+                      std::placeholders::_2),
+            std::bind(&Client::send_handle, this, std::placeholders::_1,
+                      std::placeholders::_2),
             std::bind(&Client::remove_handle, this, std::placeholders::_1)};
 
         // For each part to send, create a Packet and send it synchronously
@@ -144,10 +148,21 @@ namespace client
         {
           // Get the exact part size depending on the part id
           // This allows us to avoid the last part to be bigger
-          size_t part_size = part_size_for_sending_size(file.size(), i, total_parts);
-          Packet to_send{static_cast<size_type>(part_size), // Explicit cast to fix compile issue
-                         c_s::fromto, c_s::up_act_w,
-                         file.data() + i * part_size, copy::No};
+          size_t part_size = part_size_for_sending_size(file.size(), i,
+                                                        total_parts);
+          partnum_type part_num = i;
+
+          std::string hash{
+            files::hash_buffer(file.data()
+                               + (file.size() / total_parts) * i, part_size)
+          };
+
+          Packet to_send{c_s::fromto, c_s::up_act_w};
+          to_send.add_message(reinterpret_cast<const CharT*>(&fid),
+                              sizeof (fid), copy::Yes);
+          to_send.add_message(reinterpret_cast<const CharT*>(&part_num),
+                              sizeof (part_num), copy::Yes);
+          to_send.add_message(hash.c_str(), hash.size(), copy::Yes);
           storage.send(to_send);
         }
       }
