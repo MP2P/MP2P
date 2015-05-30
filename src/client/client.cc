@@ -150,19 +150,19 @@ namespace client
           // This allows us to avoid the last part to be bigger
           size_t part_size = part_size_for_sending_size(file.size(), i,
                                                         total_parts);
+          auto* part_buffer = file.data() + (file.size() / total_parts) * i;
           partnum_type part_num = i;
 
-          std::string hash{
-            files::hash_buffer(file.data()
-                               + (file.size() / total_parts) * i, part_size)
-          };
+          auto hash = files::hash_buffer_hex(part_buffer, part_size);
 
           Packet to_send{c_s::fromto, c_s::up_act_w};
           to_send.add_message(reinterpret_cast<const CharT*>(&fid),
                               sizeof (fid), copy::Yes);
           to_send.add_message(reinterpret_cast<const CharT*>(&part_num),
                               sizeof (part_num), copy::Yes);
-          to_send.add_message(hash.c_str(), hash.size(), copy::Yes);
+          to_send.add_message(reinterpret_cast<const CharT*>(hash.data()),
+                              hash.size(), copy::Yes);
+          to_send.add_message(part_buffer, part_size, copy::No);
           storage.send(to_send);
         }
       }
