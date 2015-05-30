@@ -26,7 +26,7 @@ namespace network
       {
         fsize_type fsize;
         rdcy_type rdcy;
-        //fname_type fname;
+        fname_type fname[0];
       } __attribute__ ((packed));
 
 
@@ -34,7 +34,7 @@ namespace network
       static const what_type down_req_w = 2;
       struct down_req
       {
-        fname_type fname;
+        fname_type fname[0];
       } __attribute__ ((packed));
 
 
@@ -42,9 +42,17 @@ namespace network
       static const what_type del_req_w = 3;
       struct del_req
       {
-        fname_type fname;
+        fname_type fname[0];
+      } __attribute__ ((packed));
+
+      // 0-4 . file_ack ~ Check if file has been recieved <FNAME>
+      static const what_type file_ack_w = 4;
+      struct file_ack
+      {
+        fname_type fname[0];
       } __attribute__ ((packed));
     }
+
     namespace m_c
     {
       static const fromto_type fromto = 1;
@@ -58,27 +66,14 @@ namespace network
       } __attribute__ ((packed));
 
 
-      // 1-1 : stg_table ~ A list of storage's IP <<STID|<IPV6|PORT>>,...>
-      static const what_type stg_table_w = 1;
-      struct stg_table
-      {
-        // FIXME (list of STAFIELD)
-      } __attribute__ ((packed));
-
-
       // 1-2 : pieces_loc ~ The pieces locations <FID<<STID|UINT16>,...>,...>
       static const what_type pieces_loc_w = 2;
       struct pieces_loc
       {
-        fid_type fid;
-        STPFIELD stps[0];
+        FDETAILS fdetails;
       } __attribute__ ((packed));
-
-
-      // 1-3 : part_ack ~ Successfully received part acknowledgment <PARTID>
-      static const what_type part_ack_w = 3;
-      using part_ack = PARTID;
     }
+
     namespace c_s
     {
       static const fromto_type fromto = 2;
@@ -98,7 +93,7 @@ namespace network
       {
         PARTID partid;
         sha1_type sha1;
-        data_type data;
+        data_type data[0];
       } __attribute__ ((packed));
 
 
@@ -109,6 +104,7 @@ namespace network
         PARTID partid;
       } __attribute__ ((packed));
     }
+
     namespace s_c
     {
       static const fromto_type from_to = 3;
@@ -136,9 +132,10 @@ namespace network
       {
         PARTID partid;
         sha1_type sha1;
-        data_type data;
+        data_type data[0];
       } __attribute__ ((packed));
     }
+
     namespace m_s
     {
       static const fromto_type from_to = 4;
@@ -177,6 +174,7 @@ namespace network
         ADDR addr;
       } __attribute__((packed));
     }
+
     namespace s_m
     {
       static const fromto_type from_to = 5;
@@ -203,10 +201,10 @@ namespace network
       struct part_ack
       {
         PARTID partid;
-        ipv6_type ip;
         avspace_type avspace;
       } __attribute__ ((packed));
     }
+
     namespace m_m
     {
       static const fromto_type from_to = 6;
@@ -219,6 +217,7 @@ namespace network
         err_type err;
       } __attribute__ ((packed));
     }
+
     namespace s_s
     {
       static const fromto_type from_to = 7;
@@ -230,6 +229,17 @@ namespace network
       {
         err_type err;
       } __attribute__ ((packed));
+
+
+      // 7-1 : up_act ~ Storage sends a piece <PARTID|SHA1|DATA>
+      static const what_type up_act_w = 1;
+      struct up_act
+      {
+        PARTID partid;
+        sha1_type sha1;
+        data_type data[0];
+      } __attribute__ ((packed));
     }
+
   }
 }
