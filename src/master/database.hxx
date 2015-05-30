@@ -119,7 +119,7 @@ namespace DB
           << "\"current_redundancy\":" << utils::misc::string_from(current_redundancy_) << ','
           << "\"hash\":" << utils::misc::string_from(hash_, sha1_type_size) << ','
           << "\"uploaded\":" << utils::misc::string_from(uploaded_)
-      << "}";
+    << "}";
     return ss.str();
   }
 

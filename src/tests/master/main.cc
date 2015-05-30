@@ -31,6 +31,7 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]")
     res_has = std::string(file_item.hash_get());
     REQUIRE(res_has.compare(hash));
     REQUIRE(file_item.is_uploaded());
+
     REQUIRE_FALSE(file_item.is_replicated()); // 3 == 1
   }
 

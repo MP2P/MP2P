@@ -4,8 +4,7 @@ namespace DB
   {
     inline uint32_t number_of_parts(fsize_type file_size)
     {
-      std::string json = Connector::get_instance().cmd_get(
-          "storage_sizes");
+      std::string json = Connector::get_instance().cmd_get("storage_sizes");
 
       boost::property_tree::ptree pt;
       std::istringstream is(json);
