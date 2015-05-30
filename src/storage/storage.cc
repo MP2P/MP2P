@@ -121,7 +121,14 @@ namespace storage
 
     switch (packet.fromto_get())
     {
-      // FIXME : dispatcher storage
+      case FromTo::C_to_S:
+        switch (packet.what_get())
+        {
+          case 1:
+            return cs_up_act(packet, session);
+          default:
+            return 1;
+        }
       default:
         return 100; // Error
     }
