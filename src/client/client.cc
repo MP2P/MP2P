@@ -1,5 +1,6 @@
 #include <utils.hh>
 #include <files.hh>
+#include <masks/messages.hh>
 #include "client.hh"
 
 namespace client
@@ -42,8 +43,6 @@ namespace client
   {
     (void) session;
     (void) packet;
-
-    Logger::cout() << "Client recv handling";
 
     return 0;
   }
@@ -95,9 +94,7 @@ namespace client
     master_session_.blocking_receive(
         [&pieces, &file, this](Packet p, Session& /*recv_session*/) -> error_code
         {
-          utils::Logger::cout() << p;
           CharT* data = p.message_seq_get().front().data();
-
           pieces = reinterpret_cast<m_c::pieces_loc*>(data);
 
           size_t list_size = (p.size_get() - sizeof (fid_type)) / sizeof (STPFIELD);
@@ -108,8 +105,6 @@ namespace client
             total_parts += pieces->fdetails.stplist[i].nb;
 
           size_t parts = total_parts;
-
-          Logger::cout() << "Splitting in " + std::to_string(parts) + " parts";
 
           for (size_t i = 0; i < list_size; ++i)
           {
@@ -167,12 +162,6 @@ namespace client
         }
       }
     };
-
-    std::string ipv6{addr.ipv6};
-    Logger::cout() << "Sending "
-                   + std::to_string(begin_id) + " - " + std::to_string(end_id)
-                   + " to (" + ipv6
-                   + " , " + std::to_string(addr.port) + ")";
 
     sending.join();
   }

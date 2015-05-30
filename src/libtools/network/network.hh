@@ -10,25 +10,11 @@
 #include <glob.h>
 
 #include <masks/blocks.hh>
-#include <masks/messages.hh>
 #include <utils.hh>
 #include <files.hh>
 
 namespace network
 {
-  enum FromTo
-  {
-    C_to_M = 0,
-    M_to_C = 1,
-    C_to_S = 2,
-    S_to_C = 3,
-    M_to_S = 4,
-    S_to_M = 5,
-    M_to_M = 6,
-    S_to_S = 7
-  };
-
-
   using error_code = uint16_t;
 
   /*---------.

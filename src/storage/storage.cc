@@ -2,6 +2,7 @@
 
 #include <utils.hh>
 #include "storage.hh"
+#include <masks/messages.hh>
 
 namespace storage
 {
@@ -98,30 +99,12 @@ namespace storage
   // Errors are defined in the ressources/errors file.
   error_code Storage::recv_dispatcher(Packet packet, Session& session)
   {
-    (void) session;
-    std::ostringstream s;
-    s << std::this_thread::get_id();
-    utils::Logger::cout() << "Storage dispatcher (tid=" + s.str() + ").";
-
-    // Create and get the Packet object from the session (buff_ & length_)
     if (packet.size_get() < 1)
       return 1;
 
-    auto& buf = packet.message_seq_get()[0];
-    const auto* buff = buf.data();
-
-    {
-      char c_pt = reinterpret_cast<char>(*buff);
-      int pt = c_pt;
-      std::ostringstream pts;
-      pts << pt;
-      std::ofstream f1(pts.str());
-      f1.write(buff + 1, buf.size() - 1);
-    }
-
     switch (packet.fromto_get())
     {
-      case FromTo::C_to_S:
+      case c_s::fromto:
         switch (packet.what_get())
         {
           case 1:

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "blocks.hh"
+#include <network.hh>
 
 namespace network
 {
@@ -15,12 +16,11 @@ namespace network
     {
       static const fromto_type fromto = 0;
 
-
       // 0-0 : error ~ Error message <ERR>
       static const what_type error_w = 0;
       struct error
       {
-        err_type err;
+        network::error_code err;
       } __attribute__ ((packed));
 
 
@@ -66,7 +66,7 @@ namespace network
       static const what_type error_w = 0;
       struct error
       {
-        err_type err;
+        network::error_code err;
       } __attribute__ ((packed));
 
 
@@ -87,7 +87,7 @@ namespace network
       static const what_type error_w = 0;
       struct error
       {
-        err_type err;
+        network::error_code err;
       } __attribute__ ((packed));
 
 
@@ -111,14 +111,14 @@ namespace network
 
     namespace s_c
     {
-      static const fromto_type from_to = 3;
+      static const fromto_type fromto = 3;
 
 
       // 3-0 : error ~ Error message <ERR>
       static const what_type error_w = 0;
       struct error
       {
-        err_type err;
+        network::error_code err;
       } __attribute__ ((packed));
 
 
@@ -142,14 +142,14 @@ namespace network
 
     namespace m_s
     {
-      static const fromto_type from_to = 4;
+      static const fromto_type fromto = 4;
 
 
       // 4-0 : error ~ Error message <ERR>
       static const what_type error_w = 0;
       struct error
       {
-        err_type err;
+        network::error_code err;
       } __attribute__ ((packed));
 
 
@@ -181,14 +181,14 @@ namespace network
 
     namespace s_m
     {
-      static const fromto_type from_to = 5;
+      static const fromto_type fromto = 5;
 
 
       // 5-0 : error ~ Error message <ERR>
       static const what_type error_w = 0;
       struct error
       {
-        err_type err;
+        network::error_code err;
       } __attribute__ ((packed));
 
 
@@ -211,27 +211,27 @@ namespace network
 
     namespace m_m
     {
-      static const fromto_type from_to = 6;
+      static const fromto_type fromto = 6;
 
 
       // 6-0 : error ~ Error message <ERR>
       static const what_type error_w = 0;
       struct error
       {
-        err_type err;
+        network::error_code err;
       } __attribute__ ((packed));
     }
 
     namespace s_s
     {
-      static const fromto_type from_to = 7;
+      static const fromto_type fromto = 7;
 
 
       // 7-0 : error ~ Error message <ERR>
       static const what_type error_w = 0;
       struct error
       {
-        err_type err;
+        network::error_code err;
       } __attribute__ ((packed));
 
 

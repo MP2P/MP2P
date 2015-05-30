@@ -123,7 +123,6 @@ namespace network
   {
     std::ostringstream s;
     s << std::this_thread::get_id();
-    utils::Logger::cout() << "Session receiving...(tid=" + s.str() + ")";
     receive_header(std::bind(&Session::receive_message,
                              this,
                              std::placeholders::_1,
@@ -141,7 +140,6 @@ namespace network
   {
     std::ostringstream s;
     s << std::this_thread::get_id();
-    utils::Logger::cout() << "Session receiving...(tid=" + s.str() + ")";
 
     std::array<char, sizeof(masks::PACKET_HEADER)> packet_buff;
     socket_.receive(boost::asio::buffer(&*packet_buff.begin(), packet_buff.size()));

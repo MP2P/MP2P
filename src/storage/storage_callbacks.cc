@@ -1,4 +1,5 @@
 #include "storage.hh"
+#include <masks/messages.hh>
 
 namespace storage
 {

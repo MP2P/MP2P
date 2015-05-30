@@ -1,3 +1,5 @@
+#include <masks/messages.hh>
+
 namespace master
 {
   using namespace network;
@@ -98,47 +100,43 @@ namespace master
   inline error_code
   Master::recv_dispatcher(Packet packet, Session& session)
   {
-    (void)session;
-    std::ostringstream s;
-    s << std::this_thread::get_id();
-    utils::Logger::cout() << "Master dispatcher (tid=" + s.str() + ").";
-
-    std::cout << "received packet : " << packet << std::endl;
-
-    // Create and get the Packet object from the session (buff_ & length_)
     if (packet.size_get() < 1)
       return 1;
 
     switch (packet.fromto_get())
     {
-      case FromTo::C_to_M: // Code=0
+      case c_m::fromto:
         switch (packet.what_get())
         {
-          case 0:
+          case c_m::error_w:
             return 10001; // Error
-          case 1:
+          case c_m::up_req_w:
             return cm_up_req(packet, session);
-          case 2:
+          case c_m::down_req_w:
             return cm_down_req(packet, session);
-          case 3:
+          case c_m::del_req_w:
             return cm_del_req(packet, session);
           default:
             return 10001;
         }
-      case FromTo::S_to_M: // Code=5
+      case s_m::fromto:
         switch (packet.what_get())
         {
-          case 0:
+          case s_m::error_w:
             return 10501; // Error
-          case 1:
+          case s_m::del_ack_w:
             return sm_del_ack(packet, session);
-          case 2:
+          case s_m::part_ack_w:
             return sm_part_ack(packet, session);
           default:
             return 10501;
         }
-      case FromTo::M_to_M: // Code=6
-        return 10601; // Error
+      case m_m::fromto:
+        switch (packet.what_get())
+        {
+          default:
+            return 10601; // Error
+        }
       default:
         return 1; // Error
     }

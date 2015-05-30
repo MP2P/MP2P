@@ -11,23 +11,21 @@ namespace master
 
     //Compute the number of parts.
     uint32_t nb_parts = DB::tools::number_of_parts(req->fsize);
-    std::cout << "nb_parts = " << nb_parts << std::endl;
     if (nb_parts == 0)
       return 1;
 
-    // Testing purpose
-    nb_parts = 4;
-
     std::vector<STPFIELD> fields;
-    for (stid_type i = 0; i < 4; ++i)
+    for (stid_type i = 0; i < nb_parts; ++i)
     {
-      STPFIELD field = { {"0:0:0:0:0:0:0:1", 3727}, 1}; // Send 1 part to localhost
+      // FIXME : Get storage's ADDR
+      STPFIELD field = { {"0:0:0:0:0:0:0:1", 3727}, 1};
       fields.push_back(field);
     }
 
+    // FIXME : Get an unique file id
     uint64_t file_id = 1;
 
-    Packet response{1, 2};
+    Packet response{m_c::fromto, m_c::pieces_loc_w};
     response.add_message(reinterpret_cast<const CharT*>(&file_id),
                          sizeof (file_id),
                          copy::Yes);
@@ -36,16 +34,7 @@ namespace master
                          copy::Yes);
     session.send(response);
 
-    //fdetails.stplist = new STPFIELD[nb_storage];
-    //For each Storage, select a number of part to send.
-    /*for (uint32_t u = 0; u < nb_storage; u++)
-    {
-      fdetails.stplist[u].stid =;
-      fdetails.stplist[u].nb =;
-    }*/
-    //Packet n(1, 2, fdetails, nb_storage * 6 + 8);
-    //session.send(n);
-    return (packet.size_get() && session.length_get());
+    return 0;
   }
 
   // May I download this file?
