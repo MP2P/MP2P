@@ -33,7 +33,7 @@ namespace network
 
     Error(const ErrorType et);
 
-    static bool initialize(const std::string& path);
+//    static bool initialize(const std::string& path);
 
     ErrorType status_get() const;
 

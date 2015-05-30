@@ -23,7 +23,7 @@ namespace utils
     if (!cfg.initialize(config_path))
       throw std::logic_error("Config file failed to init");
 
-    if (!network::Error::initialize("../ressources/errors"))
-      throw std::logic_error("Error description files not found");
+    // Specify all error messages here
+//    network::Error::errors.emplace(id, msg);
   }
 }
