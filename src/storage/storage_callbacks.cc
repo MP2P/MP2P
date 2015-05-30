@@ -1,31 +1,22 @@
 #include "storage.hh"
+#include <masks/messages.hh>
 
 namespace storage
 {
   using namespace network;
+  using namespace network::masks;
+  using copy = utils::shared_buffer::copy;
 
-  error_code CM_callback_may_i_upload_a_file(Packet& packet, Session& session)
+  network::error_code cs_up_act(network::Packet& packet, network::Session& /*session*/)
   {
-    return (packet.size_get() && session.length_get());
-  }
+    CharT* data = packet.message_seq_get().front().data();
+    const c_s::up_act* part = reinterpret_cast<const c_s::up_act*>(data);
 
-  error_code CM_callback_may_i_download_this_file(Packet& packet, Session& session)
-  {
-    return (packet.size_get() && session.length_get());
-  }
+    // Save the file to disk
+    std::ofstream file(std::to_string(part->partid.fid) + "." + std::to_string(part->partid.partnum));
+    file.write(part->data,
+               packet.size_get() - sizeof (c_s::up_act));
 
-  error_code CM_callback_can_you_delete_this_file(Packet& packet, Session& session)
-  {
-    return (packet.size_get() && session.length_get());
-  }
-
-  error_code SM_callback_part_deletion_succeded(Packet& packet, Session& session)
-  {
-    return (packet.size_get() && session.length_get());
-  }
-
-  error_code SM_callback_part_received(Packet& packet, Session& session)
-  {
-    return (packet.size_get() && session.length_get());
+    return 0;
   }
 }

@@ -102,10 +102,8 @@ namespace network
                    length_ = length;
                    auto error = callback(p, *this);
                    length_ = 0;
-                   if (error == 100)
+                   if (error == 1)
                      kill();
-                   if (length != p.size_get()) // FIXME : This should be tested in the dispatcher
-                     receive(); // Keep the socket alive
                  }
                  else
                  {
@@ -125,7 +123,6 @@ namespace network
   {
     std::ostringstream s;
     s << std::this_thread::get_id();
-    utils::Logger::cout() << "Session receiving...(tid=" + s.str() + ")";
     receive_header(std::bind(&Session::receive_message,
                              this,
                              std::placeholders::_1,
@@ -143,7 +140,6 @@ namespace network
   {
     std::ostringstream s;
     s << std::this_thread::get_id();
-    utils::Logger::cout() << "Session receiving...(tid=" + s.str() + ")";
 
     std::array<char, sizeof(masks::PACKET_HEADER)> packet_buff;
     socket_.receive(boost::asio::buffer(&*packet_buff.begin(), packet_buff.size()));
@@ -155,7 +151,9 @@ namespace network
     Packet p{header->type.fromto, header->type.what,
              empty_message(header->size)};
     socket_.receive(p.message_seq_get()[0]);
-    callback(p, *this);
+    auto error = callback(p, *this);
+    if (error == 1)
+      kill();
   }
 
   void Session::send(const Packet& packet)
@@ -165,7 +163,7 @@ namespace network
     write(socket_, seq);
     auto error = send_dispatcher_(packet, *this);
     if (error == 1)
-      socket_.close();
+      kill();
   }
 
   void Session::send(const Packet& packet, dispatcher_type callback)
@@ -175,7 +173,7 @@ namespace network
     write(socket_, seq);
     auto error = callback(packet, *this);
     if (error == 1)
-      socket_.close();
+      kill();
   }
 
   size_t Session::unique_id()

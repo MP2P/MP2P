@@ -80,13 +80,25 @@ namespace files
     return File{filename, size};
   }
 
-  // SHA-1 hash a buffer of bytes
   std::string hash_buffer(const char* sbuff, size_t size)
+  {
+    auto hash = hash_buffer_hex(sbuff, size);
+
+    // Create a string using the hash
+    std::stringstream result;
+    for (int i = 0; i < 20; ++i)
+      result << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+
+    return result.str();
+  }
+
+  // SHA-1 hash a buffer of bytes
+  std::array<unsigned char, 20> hash_buffer_hex(const char* sbuff, size_t size)
   {
     size_t parts = parts_for_hashing_size(size);
     size_t part_size = std::ceil((float)size / parts);
     const unsigned char* buff = reinterpret_cast<const unsigned char*>(sbuff);
-    unsigned char hash[20];
+    std::array<unsigned char, 20> hash;
 
     // Create a SHA_CTX to accumulate the hash
     // SHA1 function needs the whole buffer to hash it
@@ -103,14 +115,9 @@ namespace files
     }
 
     // Get the final hash
-    SHA1_Final(hash, &context);
+    SHA1_Final(hash.data(), &context);
 
-    // Create a string using the hash
-    std::stringstream result;
-    for (int i = 0; i < 20; ++i)
-      result << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
-
-    return result.str();
+    return hash;
   }
 
   std::string hash_file(const File& file)

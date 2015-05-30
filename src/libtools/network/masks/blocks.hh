@@ -20,8 +20,6 @@ namespace network
     static const size_t ipv6_type_size = 16;
     static const size_t sha1_type_size = 20;
 
-    using err_type = uint16_t;
-
     // Basic blocks
     using avspace_type = uint64_t;
     using fid_type = uint64_t;

@@ -1,5 +1,6 @@
 #include <utils.hh>
 #include <files.hh>
+#include <masks/messages.hh>
 #include "client.hh"
 
 namespace client
@@ -9,6 +10,21 @@ namespace client
   using namespace network::masks;
   using namespace utils;
   using copy = utils::shared_buffer::copy;
+
+  namespace // Anonymous namespace - used for local helpers
+  {
+    size_t part_size_for_sending_size(size_t size, size_t part_id, size_t parts)
+    {
+      size_t part_size = std::ceil((float)size / parts);
+      if (part_id == (parts - 1))
+      {
+        size_t offset = part_id * part_size;
+        if ((offset + part_size) > size)
+          part_size -= offset + part_size - size;
+      }
+      return part_size;
+    }
+  }
 
   Client::Client(const std::string& host, const std::string& port)
     : master_session_{io_service_, host, port,
@@ -28,8 +44,6 @@ namespace client
     (void) session;
     (void) packet;
 
-    Logger::cout() << "Client recv handling";
-
     return 0;
   }
 
@@ -38,7 +52,7 @@ namespace client
     (void) session;
     (void) packet;
 
-    Logger::cout() << "Client send handling";
+    Logger::cout() << "Packet sent!";
 
     return 0;
   }
@@ -53,11 +67,18 @@ namespace client
     // FIXME : Stop everything, join threads if needed
   }
 
-  m_c::pieces_loc request_upload(fsize_type fsize,
-                                 rdcy_type rdcy,
-                                 std::string fname,
-                                 Session& session)
+  void Client::send_file(const files::File& file, masks::rdcy_type redundancy)
   {
+    (void)redundancy;
+    request_upload(file, redundancy);
+  }
+
+  bool Client::request_upload(const files::File& file,
+                              rdcy_type rdcy)
+  {
+    fsize_type fsize = file.size();
+    const std::string& fname = file.filename_get();
+
     c_m::up_req request{fsize, rdcy, {}}; // The request message
 
     Packet req_packet{0, 1};
@@ -66,89 +87,82 @@ namespace client
                            copy::No);
     req_packet.add_message(fname.c_str(), fname.size(), copy::No);
 
-    session.send(req_packet);
+    master_session_.send(req_packet);
 
     m_c::pieces_loc* pieces; // The expected result
 
-    session.blocking_receive(
-        [&pieces](Packet p, Session& /*recv_session*/) -> error_code
+    master_session_.blocking_receive(
+        [&pieces, &file, this](Packet p, Session& /*recv_session*/) -> error_code
         {
-          utils::Logger::cout() << p;
           CharT* data = p.message_seq_get().front().data();
-
           pieces = reinterpret_cast<m_c::pieces_loc*>(data);
 
           size_t list_size = (p.size_get() - sizeof (fid_type)) / sizeof (STPFIELD);
 
+          // Get total number of parts
+          size_t total_parts = 0;
+          for (size_t i = 0; i < list_size; ++i)
+            total_parts += pieces->fdetails.stplist[i].nb;
+
+          size_t parts = total_parts;
+
           for (size_t i = 0; i < list_size; ++i)
           {
             STPFIELD& field = pieces->fdetails.stplist[i];
-            std::string ipv6{field.addr.ipv6};
-            Logger::cout() << "Field " + std::to_string(i) + " : (" + ipv6
-                           + " , " + std::to_string(field.addr.port) + ") , "
-                           + std::to_string(field.nb);
+            send_parts(pieces->fdetails.fid,
+                       file, field.addr,
+                       total_parts,
+                       parts - field.nb, parts);
+            parts -= field.nb;
           }
 
           return 0;
         });
-    return *pieces; // FIXME : Deep copy, please
+    return true;
   }
 
-  void Client::send_file(files::File& file, masks::rdcy_type redundancy)
+  void Client::send_parts(fid_type fid,
+                          const files::File& file,
+                          const ADDR& addr,
+                          size_t total_parts,
+                          size_t begin_id, size_t end_id)
   {
-    (void)redundancy;
-    request_upload(file.size(), redundancy, file.filename_get(), master_session_);
+    // Create an unique thread per session
+    std::thread sending{
+      [&file, this, &addr, total_parts, begin_id, end_id, fid]() {
+        // Create the storage session
+        Session storage{io_service_, addr.ipv6, std::to_string(addr.port),
+            std::bind(&Client::recv_handle, this, std::placeholders::_1,
+                      std::placeholders::_2),
+            std::bind(&Client::send_handle, this, std::placeholders::_1,
+                      std::placeholders::_2),
+            std::bind(&Client::remove_handle, this, std::placeholders::_1)};
 
-    /*std::vector<std::thread> threads;
+        // For each part to send, create a Packet and send it synchronously
+        for (size_t i = begin_id; i < end_id; ++i)
+        {
+          // Get the exact part size depending on the part id
+          // This allows us to avoid the last part to be bigger
+          size_t part_size = part_size_for_sending_size(file.size(), i,
+                                                        total_parts);
+          auto* part_buffer = file.data() + (file.size() / total_parts) * i;
+          partnum_type part_num = i;
 
-    auto size = file.size();
-    size_t parts = 4;
-    auto part_size = size / parts;
-    for (size_t i = 0; i < parts; ++i)
-    {
-      threads.emplace_back(
-          [this, &file, i, part_size]()
-          {
-            send_file_part(file, i, part_size);
-          });
-    }
+          auto hash = files::hash_buffer_hex(part_buffer, part_size);
 
-    for (auto& thread : threads)
-    {
-      utils::Logger::cout() << "Joining thread";
-      thread.join();
-    }
-    */
-  }
+          Packet to_send{c_s::fromto, c_s::up_act_w};
+          to_send.add_message(reinterpret_cast<const CharT*>(&fid),
+                              sizeof (fid), copy::Yes);
+          to_send.add_message(reinterpret_cast<const CharT*>(&part_num),
+                              sizeof (part_num), copy::Yes);
+          to_send.add_message(reinterpret_cast<const CharT*>(hash.data()),
+                              hash.size(), copy::Yes);
+          to_send.add_message(part_buffer, part_size, copy::No);
+          storage.send(to_send);
+        }
+      }
+    };
 
-  void Client::send_file_part(files::File& file, size_t part, size_type part_size)
-  {
-    const char* tmp = file.data() + part * part_size;
-
-    char pt = part;
-
-    // Example of a packet construction.
-    // Add multiple shared_buffers to create a sequence without merging them
-    Packet p{2, 1};
-    p.add_message(shared_buffer(&pt, sizeof (pt), copy::Yes));
-    p.add_message(shared_buffer(tmp, part_size, copy::No));
-    send_packet(p);
-  }
-
-  void Client::send_packet(const Packet& p)
-  {
-    // Query needs the port as a string. Ugly fix.
-    std::ostringstream port;
-    port << Conf::get_instance().port_get();
-    const auto& host = Conf::get_instance().host_get();
-
-    Session session{io_service_, host, port.str(),
-                    std::bind(&Client::recv_handle, this, std::placeholders::_1,
-                              std::placeholders::_2),
-                    std::bind(&Client::send_handle, this, std::placeholders::_1,
-                              std::placeholders::_2),
-                    std::bind(&Client::remove_handle, this,
-                              std::placeholders::_1)};
-    session.send(p);
+    sending.join();
   }
 }
