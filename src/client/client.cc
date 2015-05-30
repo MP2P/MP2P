@@ -10,6 +10,21 @@ namespace client
   using namespace utils;
   using copy = utils::shared_buffer::copy;
 
+  namespace // Anonymous namespace - used for local helpers
+  {
+    size_t part_size_for_sending_size(size_t size, size_t part_id, size_t parts)
+    {
+      size_t part_size = std::ceil((float)size / parts);
+      if (part_id == (parts - 1))
+      {
+        size_t offset = part_id * part_size;
+        if ((offset + part_size) > size)
+          part_size -= offset + part_size - size;
+      }
+      return part_size;
+    }
+  }
+
   Client::Client(const std::string& host, const std::string& port)
     : master_session_{io_service_, host, port,
         std::bind(&Client::recv_handle, this, std::placeholders::_1, std::placeholders::_2),
@@ -38,7 +53,7 @@ namespace client
     (void) session;
     (void) packet;
 
-    Logger::cout() << "Client send handling";
+    Logger::cout() << "Packet sent!";
 
     return 0;
   }
@@ -56,12 +71,11 @@ namespace client
   void Client::send_file(const files::File& file, masks::rdcy_type redundancy)
   {
     (void)redundancy;
-    request_upload(file, redundancy, master_session_);
+    request_upload(file, redundancy);
   }
 
-  bool request_upload(const files::File& file,
-                      rdcy_type rdcy,
-                      Session& session)
+  bool Client::request_upload(const files::File& file,
+                              rdcy_type rdcy)
   {
     fsize_type fsize = file.size();
     const std::string& fname = file.filename_get();
@@ -74,12 +88,12 @@ namespace client
                            copy::No);
     req_packet.add_message(fname.c_str(), fname.size(), copy::No);
 
-    session.send(req_packet);
+    master_session_.send(req_packet);
 
     m_c::pieces_loc* pieces; // The expected result
 
-    session.blocking_receive(
-        [&pieces, &file](Packet p, Session& /*recv_session*/) -> error_code
+    master_session_.blocking_receive(
+        [&pieces, &file, this](Packet p, Session& /*recv_session*/) -> error_code
         {
           utils::Logger::cout() << p;
           CharT* data = p.message_seq_get().front().data();
@@ -89,20 +103,20 @@ namespace client
           size_t list_size = (p.size_get() - sizeof (fid_type)) / sizeof (STPFIELD);
 
           // Get total number of parts
-          size_t parts = 0;
+          size_t total_parts = 0;
           for (size_t i = 0; i < list_size; ++i)
-            parts += pieces->fdetails.stplist[i].nb;
+            total_parts += pieces->fdetails.stplist[i].nb;
+
+          size_t parts = total_parts;
 
           Logger::cout() << "Splitting in " + std::to_string(parts) + " parts";
 
           for (size_t i = 0; i < list_size; ++i)
           {
             STPFIELD& field = pieces->fdetails.stplist[i];
-            //std::string ipv6{field.addr.ipv6};
-            //Logger::cout() << "Field " + std::to_string(i) + " : (" + ipv6
-                           //+ " , " + std::to_string(field.addr.port) + ") , "
-                           //+ std::to_string(field.nb);
-            send_parts(file, field.addr, parts - field.nb, parts);
+            send_parts(file, field.addr,
+                       total_parts,
+                       parts - field.nb, parts);
             parts -= field.nb;
           }
 
@@ -111,15 +125,40 @@ namespace client
     return true;
   }
 
-  void send_parts(const files::File& file,
-                  const ADDR& addr,
-                  size_t begin_id, size_t end_id)
+  void Client::send_parts(const files::File& file,
+                          const ADDR& addr,
+                          size_t total_parts,
+                          size_t begin_id, size_t end_id)
   {
-    (void)file;
+    // Create an unique thread per session
+    std::thread sending{
+      [&file, this, &addr, total_parts, begin_id, end_id]() {
+        // Create the storage session
+        Session storage{io_service_, addr.ipv6, std::to_string(addr.port),
+            std::bind(&Client::recv_handle, this, std::placeholders::_1, std::placeholders::_2),
+            std::bind(&Client::send_handle, this, std::placeholders::_1, std::placeholders::_2),
+            std::bind(&Client::remove_handle, this, std::placeholders::_1)};
+
+        // For each part to send, create a Packet and send it synchronously
+        for (size_t i = begin_id; i < end_id; ++i)
+        {
+          // Get the exact part size depending on the part id
+          // This allows us to avoid the last part to be bigger
+          size_t part_size = part_size_for_sending_size(file.size(), i, total_parts);
+          Packet to_send{static_cast<size_type>(part_size), // Explicit cast to fix compile issue
+                         c_s::fromto, c_s::up_act_w,
+                         file.data() + i * part_size, copy::No};
+          storage.send(to_send);
+        }
+      }
+    };
+
     std::string ipv6{addr.ipv6};
     Logger::cout() << "Sending "
                    + std::to_string(begin_id) + " - " + std::to_string(end_id)
                    + " to (" + ipv6
                    + " , " + std::to_string(addr.port) + ")";
+
+    sending.join();
   }
 }
