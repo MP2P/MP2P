@@ -1,3 +1,5 @@
+#include "client.hh"
+
 #include <utils.hh>
 #include <files.hh>
 #include <masks/messages.hh>
@@ -5,7 +7,6 @@
 
 namespace client
 {
-
   using namespace network;
   using namespace network::masks;
   using namespace utils;
@@ -34,12 +35,14 @@ namespace client
   {
   }
 
-  void Client::remove_handle(Session& session)
+  void
+  Client::remove_handle(Session& session)
   {
     (void) session;
   }
 
-  error_code Client::recv_handle(Packet packet, Session& session)
+  error_code
+  Client::recv_handle(Packet packet, Session& session)
   {
     (void) session;
     (void) packet;
@@ -47,7 +50,8 @@ namespace client
     return 0;
   }
 
-  error_code Client::send_handle(Packet packet, Session& session)
+  error_code
+  Client::send_handle(Packet packet, Session& session)
   {
     (void) session;
     (void) packet;
@@ -57,12 +61,14 @@ namespace client
     return 0;
   }
 
-  void Client::run()
+  void
+  Client::run()
   {
     io_service_.run();
   }
 
-  void Client::stop()
+  void
+  Client::stop()
   {
     // FIXME : Stop everything, join threads if needed
   }

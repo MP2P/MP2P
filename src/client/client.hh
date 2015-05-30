@@ -3,9 +3,26 @@
 #include <network.hh>
 #include <utils.hh>
 #include <experimental/optional>
+#include <tuple>
 
 namespace client
 {
+  enum action
+  {
+    upload,
+    download
+  };
+
+  struct conf
+  {
+    client::action action;
+    std::string file_path;
+    std::string config_path;
+    network::masks::rdcy_type redundancy;
+  };
+
+  void parse_options(int argc, const char *argv[], conf& config);
+
   class Client
   {
   private:
