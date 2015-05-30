@@ -48,6 +48,9 @@ namespace files
   // Hash a buffer of chars and return the SHA1 hash as a string
   std::string hash_buffer(const char* buff, size_t size);
 
+  // Hash a buffer of chars and return the SHA1 hash as a hex
+  std::array<unsigned char, 20> hash_buffer_hex(const char* buff, size_t size);
+
   // Hash a file. Calling hash_buffer on the mapped area
   std::string hash_file(const File& file);
 }
