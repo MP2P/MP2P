@@ -6,6 +6,10 @@ namespace network
 {
   namespace masks
   {
+
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wzero-length-array"
+
     // All messages are defined here.
     namespace c_m
     {
@@ -240,6 +244,8 @@ namespace network
         data_type data[0];
       } __attribute__ ((packed));
     }
+
+    #pragma clang diagnostic pop
 
   }
 }
