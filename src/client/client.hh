@@ -21,7 +21,7 @@ namespace client
     network::masks::rdcy_type redundancy;
   };
 
-  void parse_options(int argc, const char *argv[], conf& config);
+  void parse_options(int argc, const char *argv[], client::conf& config);
 
   class Client
   {

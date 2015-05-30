@@ -7,7 +7,7 @@ namespace client
   namespace po = boost::program_options;
 
   void
-  parse_options(int argc, const char *argv[], conf& config)
+  parse_options(int argc, const char *argv[], client::conf& config)
   {
     try
     {

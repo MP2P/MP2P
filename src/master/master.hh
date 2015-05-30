@@ -11,6 +11,17 @@
 
 namespace master
 {
+  struct conf
+  {
+    std::string config_path;
+    std::string host;
+    network::masks::port_type port;
+    unsigned concurrency;
+    unsigned timeout;
+  };
+
+  void parse_options(int argc, const char *argv[], master::conf& config);
+
   class Master
   {
   private:
@@ -44,3 +55,4 @@ namespace master
 
 #include "master.hxx"
 #include "master_callbacks.hxx"
+#include "option_parser.hxx"

@@ -4,9 +4,20 @@
 #include "master.hh"
 
 
-int main()
+int main(int argc, const char *argv[])
 {
   using namespace master; // Use the namespace in the main function only
+
+  master::conf config;
+  try
+  {
+    parse_options(argc, argv, config);
+  }
+  catch (int i)
+  {
+    return i;
+  }
+
   try
   {
     std::string config_path("../config/server.conf");
