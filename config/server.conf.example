@@ -1,6 +1,6 @@
 server:
 {
-  # Timeout in SECONDS for receive function.
+  # Timeout in seconds.
   timeout = 300,
 
   # concurency defines the number of threads to be launched when running the

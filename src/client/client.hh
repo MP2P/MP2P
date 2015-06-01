@@ -13,15 +13,18 @@ namespace client
     download
   };
 
-  struct conf
+  static struct Conf
   {
+    std::string config_path;
+    uint8_t concurrency;
+    std::string master_hostname;
+    uint16_t master_port;
     client::action action;
     std::string file_path;
-    std::string config_path;
     network::masks::rdcy_type redundancy;
-  };
+  } conf;
 
-  void parse_options(int argc, const char *argv[], client::conf& config);
+  void parse_options(int argc, const char *argv[]);
 
   class Client
   {

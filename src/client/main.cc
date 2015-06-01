@@ -5,10 +5,9 @@ int main(int argc, const char *argv[])
 {
   using namespace client; // Use this namespace inside the function only
 
-  conf config;
   try
   {
-    parse_options(argc, argv, config);
+    parse_options(argc, argv);
   }
   catch (int i)
   {
@@ -16,7 +15,7 @@ int main(int argc, const char *argv[])
   }
   try
   {
-    utils::init(config.config_path);
+    utils::init(client::conf.config_path);
 
     // Prepare socket
     std::ostringstream port;
@@ -29,12 +28,12 @@ int main(int argc, const char *argv[])
 
     client.run();
 
-    if (config.action == action::upload)
+    if (client::conf.action == action::upload)
     {
       // Prepare file
-      files::File file(config.file_path);
+      files::File file(client::conf.file_path);
 
-      client.send_file(file, config.redundancy);
+      client.send_file(file, client::conf.redundancy);
     }
 
     client.stop();

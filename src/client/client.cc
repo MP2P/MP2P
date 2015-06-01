@@ -3,7 +3,6 @@
 #include <utils.hh>
 #include <files.hh>
 #include <masks/messages.hh>
-#include "client.hh"
 
 namespace client
 {
