@@ -1,8 +1,14 @@
 #include "client.hh"
 
+#include <boost/filesystem.hpp>
 #include "boost/program_options.hpp"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+
+#define DEFAULT_CONFIG_PATH "../config/client.conf"
+#define DEFAULT_MASTER_HOSTNAME "localhost"
+#define DEFAULT_MASTER_PORT 3727
+#define DEFAULT_CONCURRENCY 4
 
 
 using c_ty = decltype(client::conf.config_path);
@@ -22,7 +28,7 @@ namespace std
   {
     string tmp;
     is >> tmp;
-    const size_t sep = tmp.find(':');
+    const size_t sep = tmp.find_first_of(':');
     if (sep != string::npos) // If found
     {
       master.first = boost::lexical_cast<mh_ty, std::string>(tmp.substr(0, sep));
@@ -52,8 +58,8 @@ namespace client
     boost::property_tree::read_json(fs, pt);
 
     client::conf.concurrency = pt.get<cy_ty>("concurrency");
-    client::conf.master_hostname = pt.get<mh_ty>("master_hostname");
-    client::conf.master_port = pt.get<mp_ty>("master_port");
+    client::conf.master_hostname = pt.get<mh_ty>("master.hostname");
+    client::conf.master_port = pt.get<mp_ty>("master.port");
   }
 
   void
@@ -92,14 +98,24 @@ namespace client
         throw 0;
       }
 
-      // First parse options specified in config file...
+      if (!vm.count("upload") && !vm.count("download"))
+        throw 0;
+
+      // First define default values...
+      client::conf.config_path = DEFAULT_CONFIG_PATH;
+      client::conf.concurrency = std::thread::hardware_concurrency();
+      client::conf.action = action::none;
+      client::conf.file_path = "";
+      client::conf.redundancy = 0;
+      client::conf.master_hostname = DEFAULT_MASTER_HOSTNAME;
+      client::conf.master_port = DEFAULT_MASTER_PORT;
+
+      // Second parse options specified in config file...
       if (vm.count("config"))
         client::conf.config_path = vm["config"].as<c_ty>();
-      else
-        client::conf.config_path = "../config/client.conf";
       parse_options_file(client::conf.config_path);
 
-      // ... then override them by specified CLI arguments if any.
+      // ... then override them by specified CLI arguments if any...
       if (vm.count("master"))
       {
         auto master = vm["master"].as<m_ty>();
@@ -107,18 +123,14 @@ namespace client
         if (master.second)
           client::conf.master_port = master.second;
       }
-      if (client::conf.master_port == 0)
-        client::conf.master_port = 3727;
-
-      if (!vm.count("upload") && !vm.count("download"))
-        throw 0;
 
       if (vm.count("upload"))
       {
-        client::conf.action = action::upload;
-
         if (!vm.count("redundancy"))
           throw std::runtime_error("Please provide a redundancy with -r.");
+
+        client::conf.action = action::upload;
+
         utils::Logger::cout() << "Trying to upload file: "
                                  + vm["upload"].as<fp_ty>()
                                  + " (redundancy=" + utils::misc::string_from(
@@ -135,17 +147,33 @@ namespace client
                                  + vm["download"].as<fp_ty>() + ".";
 
         client::conf.file_path = vm["upload"].as<fp_ty>();
-        client::conf.redundancy = vm["redundancy"].as<ry_ty>();
       }
+
+      // ... and finally check results
+      if (client::conf.master_hostname == "")
+        client::conf.master_hostname = DEFAULT_MASTER_HOSTNAME;
+      if (client::conf.master_port == 0)
+        client::conf.master_port = DEFAULT_MASTER_PORT;
+      if (client::conf.concurrency == 0)
+        client::conf.concurrency = DEFAULT_CONCURRENCY;
+      if (client::conf.action == action::upload)
+        if (client::conf.redundancy == 0)
+          throw std::logic_error("Redundancy must be 1 or more.");
+      if (client::conf.action != action::none)
+        if (boost::filesystem::exists(client::conf.file_path))
+          throw std::logic_error("File does not exists " + client::conf.file_path);
+
+      // Just try to resolve hostnames (throw if it does not work).
+      network::get_ipv6(client::conf.master_hostname);
+    }
+    catch (int i)
+    {
+      throw i;
     }
     catch (std::exception &e)
     {
       std::cerr << e.what() << " Try --help." << std::endl;
       throw 1;
-    }
-    catch (int i)
-    {
-      throw i;
     }
     catch (...)
     {

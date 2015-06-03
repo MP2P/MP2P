@@ -12,15 +12,13 @@ namespace storage
   using namespace boost::posix_time;
 
   Storage::Storage()
-      : server_{io_service_,
+      : server_{get_ipv6(storage::conf.hostname), storage::conf.port,
+                io_service_,
                 std::bind(&Storage::recv_dispatcher, this, std::placeholders::_1, std::placeholders::_2),
                 std::bind(&Storage::send_dispatcher, this, std::placeholders::_1, std::placeholders::_2)}
   {
-    unsigned concurrency = utils::Conf::get_instance().concurrency_get();
-    unsigned port = utils::Conf::get_instance().port_get();
-
-    utils::Logger::cout() << "Concurency level = " + std::to_string(concurrency);
-    utils::Logger::cout() << "Bind port = " + std::to_string(port);
+    utils::Logger::cout() << "Concurency level = " + std::to_string(storage::conf.concurrency);
+    utils::Logger::cout() << "Bind port = " + std::to_string(storage::conf.port);
   }
 
   Storage::~Storage()
@@ -37,9 +35,7 @@ namespace storage
       stop();
       return false;
     }
-    // Creating (concurent_threads) threads
-    unsigned concurrency = utils::Conf::get_instance().concurrency_get();
-    for (unsigned i = 0; i < concurrency; ++i)
+    for (unsigned i = 0; i < storage::conf.concurrency; ++i)
     {
       threads_.emplace_back(
           std::thread([i, this]()

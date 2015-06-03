@@ -9,6 +9,7 @@ namespace client
 {
   enum action
   {
+    none,
     upload,
     download
   };
@@ -16,9 +17,9 @@ namespace client
   static struct Conf
   {
     std::string config_path;
-    uint8_t concurrency;
+    unsigned concurrency;
     std::string master_hostname;
-    uint16_t master_port;
+    network::masks::port_type master_port;
     client::action action;
     std::string file_path;
     network::masks::rdcy_type redundancy;

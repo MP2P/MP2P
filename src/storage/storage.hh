@@ -8,6 +8,20 @@
 
 namespace storage
 {
+  static struct Conf
+  {
+    std::string config_path;
+    std::string hostname;
+    network::masks::port_type port;
+    unsigned concurrency;
+    unsigned timeout;
+    std::string master_hostname;
+    network::masks::port_type master_port;
+    std::string storage_path;
+  } conf;
+
+  void parse_options(int argc, const char *argv[]);
+
   class Storage
   {
   private:

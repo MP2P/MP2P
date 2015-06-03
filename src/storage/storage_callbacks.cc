@@ -13,7 +13,9 @@ namespace storage
     const c_s::up_act* part = reinterpret_cast<const c_s::up_act*>(data);
 
     // Save the file to disk
-    std::ofstream file(std::to_string(part->partid.fid) + "." + std::to_string(part->partid.partnum));
+    std::ofstream file(storage::conf.storage_path + '/'
+                       + std::to_string(part->partid.fid)
+                       + "." + std::to_string(part->partid.partnum));
     file.write(part->data,
                packet.size_get() - sizeof (c_s::up_act));
 

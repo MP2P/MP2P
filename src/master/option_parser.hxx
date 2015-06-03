@@ -12,9 +12,9 @@
 using c_ty = decltype(master::conf.config_path);
 using lh_ty = decltype(master::conf.hostname);
 using lp_ty = decltype(master::conf.port);
+using l_ty = std::pair<lh_ty, lp_ty>;
 using cy_ty = decltype(master::conf.concurrency);
 using to_ty = decltype(master::conf.timeout);
-using l_ty = std::pair<lh_ty, lp_ty>;
 using db_dh_ty = decltype(master::conf.db.hostname);
 using db_pw_ty = decltype(master::conf.db.password);
 using db_bu_ty = decltype(master::conf.db.bucket);
@@ -28,7 +28,7 @@ namespace std
   {
     string tmp;
     is >> tmp;
-    const size_t sep = tmp.find(':');
+    const size_t sep = tmp.find_first_of(':');
     if (sep != string::npos) // If found
     {
       master.first = boost::lexical_cast<lh_ty, std::string>(tmp.substr(0, sep));
@@ -110,7 +110,6 @@ namespace master
       // Second parse options specified in config file...
       if (vm.count("config"))
         master::conf.config_path = vm["config"].as<c_ty>();
-      else
       parse_options_file(master::conf.config_path);
 
       // ... then override them by specified CLI arguments if any...
@@ -129,6 +128,8 @@ namespace master
         master::conf.timeout = vm["timeout"].as<to_ty>();
 
       // ... and finally check results
+      if (master::conf.hostname == "")
+        master::conf.hostname = DEFAULT_HOSTNAME;
       if (master::conf.port == 0)
         master::conf.port = DEFAULT_PORT;
       if (master::conf.concurrency == 0)
@@ -137,12 +138,17 @@ namespace master
         master::conf.timeout = DEFAULT_TIMEOUT;
 
       // Just try to resolve hostnames (throw if it does not work).
-      get_ipv6(master::conf.hostname);
-      get_ipv6(master::conf.db.hostname);
+      network::get_ipv6(master::conf.hostname);
+      network::get_ipv6(master::conf.db.hostname);
     }
     catch (int i)
     {
       throw i;
+    }
+    catch (std::exception &e)
+    {
+      std::cerr << e.what() << " Try --help." << std::endl;
+      throw 1;
     }
     catch (...)
     {

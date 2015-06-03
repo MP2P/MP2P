@@ -3,15 +3,33 @@
 #include <utils.hh>
 #include "storage.hh"
 
-int main()
+int main(int argc, const char* argv[])
 {
   using namespace storage;
+
   try
   {
-    std::string config_path("../config/server.conf");
-    // Throws if anything goes bad
-    utils::init(config_path);
+    parse_options(argc, argv);
+    utils::check_system();
+  }
+  catch (int i)
+  {
+    return i;
+  }
+  catch (std::exception& e)
+  {
+    std::cerr << "Initialization failed " << e.what() << std::endl;
+    return 1;
+  }
+  catch (...)
+  {
+    std::cerr << "Fatal error: could not initialize." << std::endl;
+    return 1;
+  }
 
+  try
+  {
+    // Throws if anything goes bad
     Storage storage{};
 
     if (storage.run())
@@ -19,6 +37,13 @@ int main()
   }
   catch (std::exception &e)
   {
-    utils::Logger::cerr() << "Storage failed : " + std::string(e.what());
+    utils::Logger::cerr() << "Storage exception: " + std::string(e.what());
+    return 1;
   }
+  catch (...)
+  {
+    utils::Logger::cerr() << "Storage: Fatal error.";
+    return 1;
+  }
+  return 0;
 }
