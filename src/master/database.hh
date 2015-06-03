@@ -1,17 +1,17 @@
 #pragma once
 
-#include <string>
-#include <string.h>
-#include <typeinfo>
-#include <sstream>
-#include <map>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/foreach.hpp>
-#include "libcouchbase/couchbase++.h"
-
 #include <utils.hh>
 #include <masks/blocks.hh>
+
+#include <map>
+#include <string>
+#include <sstream>
+#include <string.h>
+#include <typeinfo>
+#include <boost/foreach.hpp>
+#include "libcouchbase/couchbase++.h"
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 using namespace network::masks;
 
@@ -45,10 +45,15 @@ namespace DB
     Connector(Connector const& ) = delete;
     void operator=(Connector const& ) = delete;
   public:
-    static std::unique_ptr<Database> database;
+    static std::unique_ptr<Database> database_;
+    // Initializer
+    static Database& get_instance(const std::string& host,
+                                  const std::string& pass,
+                                  const std::string& bucket);
+    // Getter
     static Database& get_instance();
   };
-  std::unique_ptr<Database> Connector::database;
+  std::unique_ptr<Database> Connector::database_;
 
 
   class CouchbaseDb : public Database

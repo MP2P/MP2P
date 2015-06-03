@@ -20,4 +20,23 @@ namespace network
     }
     throw std::logic_error("Could not resolve " + host + " ip(s).");
   }
+
+  // Returns an ip address from a hostname or from an IPVX string.
+  inline boost::asio::ip::address_v6 get_ipv6(const std::string& str)
+  {
+    try
+    {
+      auto ip = boost::asio::ip::address::from_string(str);
+      if (ip.is_v4())
+        ip = boost::asio::ip::address_v6::v4_mapped(ip.to_v4());
+      return ip.to_v6();
+    }
+    catch (...)
+    {
+      auto ip = one_ip_from_host(str);
+      if (ip.is_v4())
+        ip = boost::asio::ip::address_v6::v4_mapped(ip.to_v4());
+      return ip.to_v6();
+    }
+  }
 }

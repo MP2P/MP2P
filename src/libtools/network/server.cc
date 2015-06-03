@@ -1,14 +1,11 @@
 #include <network.hh>
-#include <utils.hh>
-
-#include <iostream>
-
 
 namespace network
 {
   using namespace boost::asio;
 
-  Server::Server(io_service &io_service,
+  Server::Server(boost::asio::ip::address_v6 addr, uint16_t port,
+                 io_service &io_service,
                  dispatcher_type recv_dispatcher,
                  dispatcher_type send_dispatcher)
       : acceptor_{io_service},
@@ -19,22 +16,15 @@ namespace network
     // Use of ipv6 by default, with IPV6_V6ONLY disabled, it will listen to
     // both ipv4 & ipv6.
     // ipv4 addresses will be mapped to ipv6 like this: `::ffff:192.168.0.'
-    unsigned short port = utils::Conf::get_instance().port_get();
-    ip::tcp::endpoint endpoint(ip::tcp::v6(), port);
+    ip::tcp::endpoint endpoint(addr, port);
 
     acceptor_.open(endpoint.protocol());
     acceptor_.set_option(ip::tcp::acceptor::reuse_address(true));
-    try
-    {
-      acceptor_.bind(endpoint);
-      acceptor_.listen();
-      listen(); // Listen for new connections
-    }
-    catch (const std::exception &e)
-    {
-      std::cerr << e.what() << std::endl;
-      acceptor_.cancel();
-    }
+    acceptor_.bind(endpoint); // Throws
+    acceptor_.listen();
+    utils::Logger::cout() << "Successfully binded " + addr.to_string()
+                             + "/" + std::to_string(port);
+    listen(); // Listen for new connections
   }
 
   Server::~Server()

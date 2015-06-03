@@ -1,26 +1,36 @@
 #pragma once
 
+#include <utils.hh>
+#include <network.hh>
+#include <database.hh>
+
 #include <vector>
 #include <thread>
 #include <boost/asio.hpp>
 #include <iostream>
 
-#include <network.hh>
-#include <utils.hh>
-#include "database.hh"
+using namespace network::masks;
 
 namespace master
 {
-  struct conf
+  struct DB_conf
+  {
+    std::string hostname;
+    std::string password;
+    std::string bucket;
+  };
+
+  static struct Conf
   {
     std::string config_path;
-    std::string host;
+    std::string hostname;
     network::masks::port_type port;
     unsigned concurrency;
     unsigned timeout;
-  };
+    DB_conf db;
+  } conf;
 
-  void parse_options(int argc, const char *argv[], master::conf& config);
+  void parse_options(int argc, const char *argv[]);
 
   class Master
   {
@@ -32,7 +42,8 @@ namespace master
     network::error_code recv_dispatcher(network::Packet packet, network::Session &session);
     network::error_code send_dispatcher(network::Packet packet, network::Session &session);
 
-    // Causes the server to stop its running threads if any.
+
+    // Causes the server to stop its running threads if any.0
     void stop();
 
   public:

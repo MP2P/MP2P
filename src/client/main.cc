@@ -15,12 +15,12 @@ int main(int argc, const char *argv[])
   }
   try
   {
-    utils::init(client::conf.config_path);
+    utils::init();
 
     // Prepare socket
     std::ostringstream port;
-    port << utils::Conf::get_instance().port_get();
-    const auto& host = utils::Conf::get_instance().host_get();
+    port << client::conf.master_port;
+    const auto& host = client::conf.master_hostname;
     utils::Logger::cout() << "Endpoint host = " + host;
     utils::Logger::cout() << "Endpoint port = " + port.str();
 

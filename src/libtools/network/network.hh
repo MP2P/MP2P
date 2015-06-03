@@ -257,7 +257,8 @@ namespace network
     std::unordered_map<size_t, Session> sessions_;
 
   public:
-    Server(boost::asio::io_service& io_service,
+    Server(boost::asio::ip::address_v6 addr, uint16_t port,
+           boost::asio::io_service& io_service,
            dispatcher_type recv_dispatcher,
            dispatcher_type send_dispatcher);
 
@@ -276,7 +277,7 @@ namespace network
   boost::asio::ip::tcp::resolver::iterator
       resolve_host(const std::string& host);
   boost::asio::ip::address one_ip_from_host(const std::string& host);
-
+  boost::asio::ip::address_v6 get_ipv6(const std::string& str);
 }
 
 #include "tools.hxx"

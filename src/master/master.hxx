@@ -8,15 +8,13 @@ namespace master
 
   inline
   Master::Master()
-      : server_{io_service_,
+      : server_{get_ipv6(master::conf.hostname), master::conf.port,
+                io_service_,
                 std::bind(&Master::recv_dispatcher, this, std::placeholders::_1, std::placeholders::_2),
                 std::bind(&Master::send_dispatcher, this, std::placeholders::_1, std::placeholders::_2)}
   {
-    unsigned concurrency = utils::Conf::get_instance().concurrency_get();
-    unsigned port = utils::Conf::get_instance().port_get();
-
-    utils::Logger::cout() << "Concurency level = " + std::to_string(concurrency);
-    utils::Logger::cout() << "Bind port = " + std::to_string(port);
+    utils::Logger::cout() << "Concurency level = " + std::to_string(master::conf.concurrency);
+    utils::Logger::cout() << "Bind port = " + std::to_string(master::conf.port);
   }
 
   inline
@@ -36,7 +34,7 @@ namespace master
       return false;
     }
     // Creating (concurrent_threads) threads
-    unsigned concurrency = utils::Conf::get_instance().concurrency_get();
+    unsigned concurrency = master::conf.concurrency;
     for (unsigned i = 0; i < concurrency; ++i)
     {
       threads_.emplace_back(
@@ -102,6 +100,8 @@ namespace master
   {
     if (packet.size_get() < 1)
       return 1;
+
+
 
     switch (packet.fromto_get())
     {

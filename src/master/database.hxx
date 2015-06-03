@@ -1,9 +1,11 @@
+#include "master.hh"
+
 namespace DB
 {
   inline
   CouchbaseDb::CouchbaseDb(const std::string& host,
-                                  const std::string& pass,
-                                  const std::string& bucket)
+                           const std::string& pass,
+                           const std::string& bucket)
       : Database{},
         client_{"couchbase://" + host + "/" + bucket, pass} // Throws
   {
@@ -18,37 +20,33 @@ namespace DB
   inline
   Database& Connector::get_instance()
   {
-    if (database.get() == 0)
-    {
-      std::string host;
-      std::string pass;
-      std::string bucket;
-      try
-      {
-        // Throws if anything goes bad
-        host = utils::Conf::get_instance().DBhost_get();
-        pass = utils::Conf::get_instance().DBpassword_get();
-        bucket = utils::Conf::get_instance().DBbucket_get();
-      }
-      catch (std::exception& e)
-      {
-        utils::Logger::cerr() << "Database exception: " + std::string(e.what());
-      }
+    if (database_.get() == 0)
+      throw std::runtime_error("Database is not initialized.");
+    return *database_;
+  }
 
+  inline
+  Database& Connector::get_instance(const std::string& host,
+                                    const std::string& pass,
+                                    const std::string& bucket)
+  {
+    if (database_.get() == 0)
+    {
       try
       {
         // Throws if anything goes bad
-        database.reset(new CouchbaseDb(host, pass, bucket));
+        database_.reset(new CouchbaseDb(host, pass, bucket));
         utils::Logger::cout() << "Successfully connected to database.";
       }
       catch (Couchbase::Status& s)
       {
         utils::Logger::cerr() << "Master exception: Invalid database "
-                                     "configuration (couchbase://" + host + "/"
+                                 "configuration (couchbase://"
+                                 + host + "/"
                                  + bucket + ").";
       }
     }
-    return *database;
+    return *database_;
   }
 
   // Database commands

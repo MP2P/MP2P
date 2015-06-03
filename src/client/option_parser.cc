@@ -4,6 +4,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+
 using c_ty = decltype(client::conf.config_path);
 using mh_ty = decltype(client::conf.master_hostname);
 using mp_ty = decltype(client::conf.master_port);
@@ -12,9 +13,10 @@ using fp_ty = decltype(client::conf.file_path);
 using ry_ty = decltype(client::conf.redundancy);
 using m_ty = std::pair<mh_ty, mp_ty>;
 
-namespace std {
+namespace std
+{
 
-  // Specifying >> operator for std::pair<mh_ty, mp_ty>to parse std::pair
+  // Specifying >> operator for std::pair<mh_ty, mp_ty> to parse std::pair
   // CLI arg type.
   istream& operator>>(istream& is, m_ty& master)
   {
@@ -65,7 +67,7 @@ namespace client
           ("help,h", "display this help and exit")
           ("version,v", "displays version of the client")
           ("config,c",  po::value<c_ty>(), "path to the configuration file")
-          ("concurrency,o", po::value<cy_ty>(), "concurrency level when uploading")
+          ("concurrency,y", po::value<cy_ty>(), "concurrency level when uploading")
           ("master,m", po::value<m_ty>(), "the hostname and port of the master")
           ("upload,u",  po::value<fp_ty>(), "upload the input file")
           ("download,d",  po::value<fp_ty>(), "download the input file")
@@ -105,6 +107,8 @@ namespace client
         if (master.second)
           client::conf.master_port = master.second;
       }
+      if (client::conf.master_port == 0)
+        client::conf.master_port = 3727;
 
       if (!vm.count("upload") && !vm.count("download"))
         throw 0;
@@ -139,9 +143,9 @@ namespace client
       std::cerr << e.what() << " Try --help." << std::endl;
       throw 1;
     }
-    catch (int)
+    catch (int i)
     {
-      throw 1;
+      throw i;
     }
     catch (...)
     {

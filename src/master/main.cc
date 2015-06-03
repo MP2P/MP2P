@@ -8,28 +8,33 @@ int main(int argc, const char *argv[])
 {
   using namespace master; // Use the namespace in the main function only
 
-  master::conf config;
   try
   {
-    parse_options(argc, argv, config);
+    parse_options(argc, argv);
   }
   catch (int i)
   {
     return i;
   }
 
-  try
-  {
-    std::string config_path("../config/server.conf");
-    // Throws if anything goes bad
-    utils::init(config_path);
-    DB::Connector::get_instance(); // Initialize connexion
-  }
-  catch (std::exception& e)
-  {
-    utils::Logger::cerr() << "Master exception: " + std::string(e.what());
-    return 1;
-  }
+  utils::check_system();
+  // Initialize DB connexion
+  DB::Connector::get_instance(master::conf.db.hostname,
+                              master::conf.db.password,
+                              master::conf.db.bucket);
+
+//  try
+//  {
+//    std::string config_path("../config/server.conf");
+//    // Throws if anything goes bad
+//    utils::init(config_path);
+
+//  }
+//  catch (std::exception& e)
+//  {
+//    utils::Logger::cerr() << "Master exception: " + std::string(e.what());
+//    return 1;
+//  }
 
   try
   {

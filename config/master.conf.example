@@ -1,0 +1,12 @@
+{
+  "concurrency": 4,
+  "hostname": "localhost",
+  "port": 3727,
+  "timeout": 300,
+  "database":
+  {
+    "hostname": "",
+    "password": "",
+    "bucket": ""
+  }
+}
