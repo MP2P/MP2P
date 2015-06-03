@@ -10,6 +10,15 @@
 #include <cmath>
 #include <ios>
 #include <boost/filesystem.hpp>
+#include <array>
+
+// Apple deprecated OpenSSL and provides its own
+// library called CommonCrypto. Use it to avoid warnings on
+// deprecated functions.
+#ifdef __APPLE__
+#define COMMON_DIGEST_FOR_OPENSSL
+#include <CommonCrypto/CommonDigest.h>
+#endif
 
 #include "files.hh"
 
