@@ -15,16 +15,16 @@
 #define DEFAULT_STORAGE_PATH "stock_dir"
 
 
-using c_ty = decltype(storage::conf.config_path);
-using lh_ty = decltype(storage::conf.hostname);
-using lp_ty = decltype(storage::conf.port);
+using c_ty = decltype(storage::Conf::config_path);
+using lh_ty = decltype(storage::Conf::hostname);
+using lp_ty = decltype(storage::Conf::port);
 using l_ty = std::pair<lh_ty, lp_ty>;
-using mh_ty = decltype(storage::conf.master_hostname);
-using mp_ty = decltype(storage::conf.master_port);
+using mh_ty = decltype(storage::Conf::master_hostname);
+using mp_ty = decltype(storage::Conf::master_port);
 using m_ty = std::pair<mh_ty, mp_ty>; // = l_ty
-using cy_ty = decltype(storage::conf.concurrency);
-using to_ty = decltype(storage::conf.timeout);
-using sp_ty = decltype(storage::conf.storage_path);
+using cy_ty = decltype(storage::Conf::concurrency);
+using to_ty = decltype(storage::Conf::timeout);
+using sp_ty = decltype(storage::Conf::storage_path);
 
 namespace std
 {
@@ -53,6 +53,9 @@ namespace std
 namespace storage
 {
   namespace po = boost::program_options;
+
+  // Definition of the configuration of the storage
+  struct Conf conf;
 
   void
   parse_options_file(const std::string& config_path)

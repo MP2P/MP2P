@@ -8,7 +8,7 @@
 
 namespace storage
 {
-  static struct Conf
+  struct Conf
   {
     std::string config_path;
     std::string hostname;
@@ -18,7 +18,10 @@ namespace storage
     std::string master_hostname;
     network::masks::port_type master_port;
     std::string storage_path;
-  } conf;
+  };
+
+  // Declaration of the storage configuration
+  extern struct Conf conf;
 
   void parse_options(int argc, const char *argv[]);
 
