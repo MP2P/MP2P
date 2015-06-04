@@ -131,10 +131,10 @@ namespace client
 
         client::conf.action = action::upload;
 
-        utils::Logger::cout() << "Trying to upload file: "
-                                 + vm["upload"].as<fp_ty>()
-                                 + " (redundancy=" + utils::misc::string_from(
-            vm["redundancy"].as<ry_ty>()) + ").";
+        std::cout << "Trying to upload file: "
+                     + vm["upload"].as<fp_ty>()
+                     + " (redundancy=" + utils::misc::string_from(
+            vm["redundancy"].as<ry_ty>()) + ")." << std::endl;
 
         client::conf.file_path = vm["upload"].as<fp_ty>();
         client::conf.redundancy = vm["redundancy"].as<ry_ty>();
@@ -143,8 +143,8 @@ namespace client
       {
         client::conf.action = action::download;
 
-        utils::Logger::cout() << "Trying to download file: "
-                                 + vm["download"].as<fp_ty>() + ".";
+        std::cout << "Trying to download file: "
+                     + vm["download"].as<fp_ty>() + "." << std::endl;
 
         client::conf.file_path = vm["upload"].as<fp_ty>();
       }
@@ -160,7 +160,7 @@ namespace client
         if (client::conf.redundancy == 0)
           throw std::logic_error("Redundancy must be 1 or more.");
       if (client::conf.action != action::none)
-        if (boost::filesystem::exists(client::conf.file_path))
+        if (!boost::filesystem::exists(client::conf.file_path))
           throw std::logic_error("File does not exists " + client::conf.file_path);
 
       // Just try to resolve hostnames (throw if it does not work).
