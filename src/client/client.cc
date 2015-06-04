@@ -26,7 +26,7 @@ namespace client
     }
   }
 
-  Client::Client(const std::string& host, const std::string& port)
+  Client::Client(const std::string& host, uint16_t port)
     : master_session_{io_service_, host, port,
         std::bind(&Client::recv_handle, this, std::placeholders::_1, std::placeholders::_2),
         std::bind(&Client::send_handle, this, std::placeholders::_1, std::placeholders::_2),

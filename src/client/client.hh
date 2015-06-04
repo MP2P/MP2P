@@ -40,7 +40,7 @@ namespace client
     void remove_handle(network::Session& session);
 
   public:
-    Client(const std::string& host, const std::string& port);
+    Client(const std::string& host, uint16_t port);
 
     // Run the io service
     void run();

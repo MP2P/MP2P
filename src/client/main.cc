@@ -28,11 +28,7 @@ int main(int argc, const char *argv[])
 
   try
   {
-    Client client{client::conf.master_hostname,
-                  boost::lexical_cast<
-                      std::string,
-                      decltype(client::conf.master_port)
-                  >(client::conf.master_port)};
+    Client client{client::conf.master_hostname, client::conf.master_port};
 
     client.run();
 

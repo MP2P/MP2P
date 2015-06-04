@@ -20,8 +20,7 @@ namespace network
   }
 
   Session::Session(io_service& io_service,
-                   const std::string& host,
-                   const std::string& port,
+                   const std::string& host, uint16_t port,
                    dispatcher_type recv_dispatcher,
                    dispatcher_type send_dispatcher,
                    std::function<void(Session&)> delete_dispatcher,
@@ -32,10 +31,7 @@ namespace network
       delete_dispatcher_{delete_dispatcher},
       id_{id}
   {
-    ip::tcp::resolver resolver{io_service}; // Resolve the host
-    ip::tcp::resolver::query query{host, port};
-    ip::tcp::resolver::iterator iter = resolver.resolve(query);
-    ip::tcp::endpoint endpoint = *iter;
+    ip::tcp::endpoint endpoint = *network::resolve_host(host, port);
 
     boost::system::error_code ec;
     socket_.connect(endpoint, ec); // Connect to the endpoint
