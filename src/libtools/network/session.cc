@@ -33,6 +33,8 @@ namespace network
   {
     ip::tcp::endpoint endpoint = network::endpoint_from_host(host, port);
 
+    std::cout << "host=" << host << " port=" << std::to_string(port) << std::endl;
+
     boost::system::error_code ec;
     socket_.connect(endpoint, ec); // Connect to the endpoint
     if (ec)

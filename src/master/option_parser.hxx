@@ -47,6 +47,8 @@ namespace master
 {
   namespace po = boost::program_options;
 
+  struct Conf conf;
+
   void
   parse_options_file(const std::string& config_path)
   {

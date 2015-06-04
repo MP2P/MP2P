@@ -20,7 +20,7 @@ namespace master
     std::string bucket;
   };
 
-  static struct Conf
+  struct Conf
   {
     std::string config_path;
     std::string hostname;
@@ -28,7 +28,9 @@ namespace master
     unsigned concurrency;
     unsigned timeout;
     DB_conf db;
-  } conf;
+  };
+
+  extern struct Conf conf;
 
   void parse_options(int argc, const char *argv[]);
 
