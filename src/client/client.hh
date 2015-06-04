@@ -14,7 +14,7 @@ namespace client
     download
   };
 
-  static struct Conf
+  struct Conf
   {
     std::string config_path;
     unsigned concurrency;
@@ -23,7 +23,9 @@ namespace client
     client::action action;
     std::string file_path;
     network::masks::rdcy_type redundancy;
-  } conf;
+  };
+
+  extern struct Conf conf;
 
   void parse_options(int argc, const char *argv[]);
 
