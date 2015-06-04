@@ -31,7 +31,7 @@ namespace network
       delete_dispatcher_{delete_dispatcher},
       id_{id}
   {
-    ip::tcp::endpoint endpoint = *network::resolve_host(host, port);
+    ip::tcp::endpoint endpoint = *network::endpoint_from_host(host, port);
 
     boost::system::error_code ec;
     socket_.connect(endpoint, ec); // Connect to the endpoint

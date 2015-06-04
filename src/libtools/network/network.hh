@@ -278,7 +278,9 @@ namespace network
       resolve_host(const std::string& host, std::string port = "");
   boost::asio::ip::tcp::resolver::iterator
       resolve_host(const std::string& host, uint16_t port);
-  boost::asio::ip::address one_ip_from_host(const std::string& host);
+  boost::asio::ip::tcp::endpoint endpoint_from_host(const std::string& host, const std::string port = "");
+  boost::asio::ip::address one_ip_from_host(const std::string& host, const std::string port = "");
+  boost::asio::ip::address one_ip_from_host(const std::string& host, uint16_t port);
   boost::asio::ip::address_v6 get_ipv6(const std::string& str);
 }
 
