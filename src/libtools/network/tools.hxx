@@ -30,6 +30,14 @@ namespace network
     throw std::logic_error("Could not resolve " + host + " ip(s).");
   }
 
+  inline
+  boost::asio::ip::tcp::endpoint
+      endpoint_from_host(const std::string& host, uint16_t port)
+  {
+    std::string str_port = boost::lexical_cast<std::string>(port);
+    return endpoint_from_host(host, str_port);
+  }
+
   // Returns the first ip it resolved.
   inline
   boost::asio::ip::address one_ip_from_host(const std::string& host,

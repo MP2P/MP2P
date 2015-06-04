@@ -31,12 +31,13 @@ namespace network
       delete_dispatcher_{delete_dispatcher},
       id_{id}
   {
-    ip::tcp::endpoint endpoint = *network::endpoint_from_host(host, port);
+    ip::tcp::endpoint endpoint = network::endpoint_from_host(host, port);
 
     boost::system::error_code ec;
     socket_.connect(endpoint, ec); // Connect to the endpoint
     if (ec)
-      throw std::logic_error("Unable to connect to server");
+
+      throw std::logic_error("Unable to connect to server (" + ec.message() + ").");
 
     std::ostringstream s;
     s << std::this_thread::get_id();
@@ -137,7 +138,8 @@ namespace network
     std::ostringstream s;
     s << std::this_thread::get_id();
 
-    std::array<char, sizeof(masks::PACKET_HEADER)> packet_buff;
+    std::array<char, sizeof(masks::PACKET_HEADER)> packet_buff{};
+
     socket_.receive(boost::asio::buffer(&*packet_buff.begin(), packet_buff.size()));
 
     const auto* header =

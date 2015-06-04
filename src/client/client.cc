@@ -15,6 +15,7 @@ namespace client
   {
     size_t part_size_for_sending_size(size_t size, size_t part_id, size_t parts)
     {
+      // FIXME : float may not fit in size_t
       size_t part_size = std::ceil((float)size / parts);
       if (part_id == (parts - 1))
       {
@@ -90,6 +91,8 @@ namespace client
     req_packet.add_message(reinterpret_cast<CharT*>(&request),
                            sizeof (request),
                            copy::No);
+
+    // FIXME : fname.size() may not fit in uint32_t
     req_packet.add_message(fname.c_str(), fname.size(), copy::No);
 
     master_session_.send(req_packet);
@@ -136,7 +139,7 @@ namespace client
     std::thread sending{
       [&file, this, &addr, total_parts, begin_id, end_id, fid]() {
         // Create the storage session
-        Session storage{io_service_, addr.ipv6, std::to_string(addr.port),
+        Session storage{io_service_, addr.ipv6, addr.port,
             std::bind(&Client::recv_handle, this, std::placeholders::_1,
                       std::placeholders::_2),
             std::bind(&Client::send_handle, this, std::placeholders::_1,
@@ -150,6 +153,8 @@ namespace client
           // This allows us to avoid the last part to be bigger
           size_t part_size = part_size_for_sending_size(file.size(), i,
                                                         total_parts);
+
+          // FIXME const auto* ?
           auto* part_buffer = file.data() + (file.size() / total_parts) * i;
           partnum_type part_num = i;
 
@@ -160,8 +165,11 @@ namespace client
                               sizeof (fid), copy::Yes);
           to_send.add_message(reinterpret_cast<const CharT*>(&part_num),
                               sizeof (part_num), copy::Yes);
+
+          // FIXME : hash.size() may not fit in uint32_t
           to_send.add_message(reinterpret_cast<const CharT*>(hash.data()),
                               hash.size(), copy::Yes);
+          // FIXME : part_size may not fit in uint32_t
           to_send.add_message(part_buffer, part_size, copy::No);
           storage.send(to_send);
         }

@@ -43,7 +43,7 @@ int main(int argc, const char *argv[])
   }
   catch (std::exception &e)
   {
-    utils::Logger::cerr() << "Client failed : " + std::string(e.what());
+    utils::Logger::cerr() << "Client failed: " + std::string(e.what());
     return 1;
   }
   catch (...)
