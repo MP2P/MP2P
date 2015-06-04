@@ -28,7 +28,7 @@ namespace std
   {
     string tmp;
     is >> tmp;
-    const size_t sep = tmp.find_first_of(':');
+    const size_t sep = tmp.find_last_of(':');
     if (sep != string::npos) // If found
     {
       master.first = boost::lexical_cast<lh_ty, std::string>(tmp.substr(0, sep));
