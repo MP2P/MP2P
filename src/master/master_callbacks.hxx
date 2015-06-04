@@ -18,7 +18,7 @@ namespace master
     for (stid_type i = 0; i < nb_parts; ++i)
     {
       // FIXME : Get storage's ADDR
-      STPFIELD field = { {"0:0:0:0:0:0:0:1", 3727}, 1};
+      STPFIELD field = { {"0:0:0:0:0:0:0:1", 3728}, 1};
       fields.push_back(field);
     }
 
