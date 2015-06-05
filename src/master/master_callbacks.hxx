@@ -69,6 +69,9 @@ namespace master
   inline error_code
   sm_part_ack(Packet& packet, Session& session)
   {
+    // FIXME : Look in the database if the redundancy is enough.
+    // if not, send a request to the storage to upload
+    // the file to other storages
     return (packet.size_get() && session.length_get());
   }
 }

@@ -19,7 +19,10 @@ namespace storage
     file.write(part->data,
                packet.size_get() - sizeof (c_s::up_act));
 
-    auto master_session = create_master_session(session.socket_get().get_io_service());
+    auto master_session = Session{session.socket_get().get_io_service(),
+                                  conf.master_hostname,
+                                  conf.master_port};
+
     Packet p{s_m::fromto, s_m::part_ack_w};
     const s_m::part_ack response{part->partid, 10};
     p.add_message(reinterpret_cast<const CharT*>(&response),
