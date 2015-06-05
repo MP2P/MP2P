@@ -17,12 +17,19 @@ namespace master
     std::vector<STPFIELD> fields;
     for (stid_type i = 0; i < nb_parts; ++i)
     {
-      // FIXME : Get storage's ADDR
-      STPFIELD field = { {"0:0:0:0:0:0:0:1", 3728}, 1};
+      // FIXME : Get storage's ADDR from db
+      auto ip = network::get_ipv6("0:0:0:0:0:0:0:1");
+
+      // FIXME : Ugly address initialization
+      ADDR addr;
+      memcpy(addr.ipv6, ip.to_bytes().data(), ipv6_type_size); // Copy IP
+      addr.port = 3728;
+
+      STPFIELD field = { addr, 1 };
       fields.push_back(field);
     }
 
-    // FIXME : Get an unique file id
+    // FIXME : Get an unique file id from db
     uint64_t file_id = 1;
 
     Packet response{m_c::fromto, m_c::pieces_loc_w};
