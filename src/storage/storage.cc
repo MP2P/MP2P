@@ -119,4 +119,12 @@ namespace storage
     (void)session;
     return 0;
   }
+
+  Session&& create_master_session(boost::asio::io_service& io_service)
+  {
+    return std::move(Session{io_service,
+                             conf.master_hostname,
+                             conf.master_port});
+  }
+
 }

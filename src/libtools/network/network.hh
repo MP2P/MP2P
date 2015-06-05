@@ -165,9 +165,12 @@ namespace network
     Session(boost::asio::io_service& io_service,
             const std::string& host,
             uint16_t port,
-            dispatcher_type recv_dispatcher,
-            dispatcher_type send_dispatcher,
-            std::function<void(Session&)> delete_dispatcher,
+            dispatcher_type recv_dispatcher
+              = [](Packet, Session&) -> error_code { return 0; },
+            dispatcher_type send_dispatcher
+              = [](Packet, Session&) -> error_code { return 0; },
+            std::function<void(Session&)> delete_dispatcher
+              = [](Session&) { },
             size_t id = unique_id());
 
     // Kill the session. Close the socket and remove from parent container

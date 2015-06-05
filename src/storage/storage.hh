@@ -51,4 +51,6 @@ namespace storage
 
   network::error_code cs_up_act(network::Packet& packet, network::Session& session);
 
+  network::Session&& create_master_session(boost::asio::io_service& io_service);
+
 }
