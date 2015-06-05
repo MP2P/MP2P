@@ -199,7 +199,7 @@ namespace DB
 
     for (auto it = locs_pt.begin(); it != locs_pt.end(); ++it)
     {
-      locations.push_back((const unsigned int&) std::stoi(it->second.data()));
+      locations.push_back(boost::lexical_cast<stid_type>(it->second.data()));
     }
     return PartItem(partid, hash, locations);
   }
