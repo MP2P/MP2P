@@ -163,7 +163,8 @@ namespace network
     // Same with the previous one.
     // The socket parameters are explicitly speciied
     Session(boost::asio::io_service& io_service,
-            const std::string& host, uint16_t port,
+            const std::string& host,
+            uint16_t port,
             dispatcher_type recv_dispatcher,
             dispatcher_type send_dispatcher,
             std::function<void(Session&)> delete_dispatcher,

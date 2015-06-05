@@ -154,8 +154,8 @@ namespace client
           size_t part_size = part_size_for_sending_size(file.size(), i,
                                                         total_parts);
 
-          // FIXME const auto* ?
-          auto* part_buffer = file.data() + (file.size() / total_parts) * i;
+          const auto* part_buffer = file.data()
+                                    + (file.size() / total_parts) * i;
           partnum_type part_num = i;
 
           auto hash = files::hash_buffer_hex(part_buffer, part_size);
@@ -166,7 +166,6 @@ namespace client
           to_send.add_message(reinterpret_cast<const CharT*>(&part_num),
                               sizeof (part_num), copy::Yes);
 
-          // FIXME : hash.size() may not fit in uint32_t
           to_send.add_message(reinterpret_cast<const CharT*>(hash.data()),
                               hash.size(), copy::Yes);
           // FIXME : part_size may not fit in uint32_t

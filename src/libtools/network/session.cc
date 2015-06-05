@@ -20,7 +20,8 @@ namespace network
   }
 
   Session::Session(io_service& io_service,
-                   const std::string& host, uint16_t port,
+                   const std::string& host,
+                   uint16_t port,
                    dispatcher_type recv_dispatcher,
                    dispatcher_type send_dispatcher,
                    std::function<void(Session&)> delete_dispatcher,
