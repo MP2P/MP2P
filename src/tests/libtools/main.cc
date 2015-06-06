@@ -252,3 +252,27 @@ TEST_CASE("Packet", "[libtools][packet]")
     }
   }
 }
+
+TEST_CASE("Network tools", "[libtools][network]")
+{
+  SECTION("get ipv6")
+  {
+    auto ipv6 = network::get_ipv6("0.0.0.0");
+    REQUIRE(std::string("::ffff:0.0.0.0").compare(ipv6.to_string()) == 0);
+    ipv6 = network::get_ipv6("0:0:0:0:0:0:0:1");
+    REQUIRE(std::string("::1").compare(ipv6.to_string()) == 0);
+    ipv6 = network::get_ipv6("::1");
+    REQUIRE(std::string("::1").compare(ipv6.to_string()) == 0);
+    ipv6 = network::get_ipv6("localhost");
+    REQUIRE(std::string("::1").compare(ipv6.to_string()) == 0);
+
+    auto endpoint = network::endpoint_from_host("0.0.0.0");
+    REQUIRE(std::string("0.0.0.0").compare(endpoint.address().to_string()) == 0);
+    endpoint = network::endpoint_from_host("0:0:0:0:0:0:0:1", 3738);
+    REQUIRE(std::string("::1").compare(endpoint.address().to_string()) == 0);
+    endpoint = network::endpoint_from_host("::1");
+    REQUIRE(std::string("::1").compare(endpoint.address().to_string()) == 0);
+    endpoint = network::endpoint_from_host("localhost");
+    REQUIRE(std::string("::1").compare(endpoint.address().to_string()) == 0);
+  }
+}

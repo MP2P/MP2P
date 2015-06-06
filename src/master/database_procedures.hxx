@@ -3,7 +3,9 @@ namespace DB
   namespace tools
   {
     // FIXME: cache this
-    inline uint32_t number_of_parts(fsize_type file_size)
+    inline
+    uint32_t
+    number_of_parts(fsize_type file_size)
     {
       std::string json = Connector::get_instance().cmd_get("storage_sizes");
 
@@ -28,8 +30,8 @@ namespace DB
       }
       catch (boost::property_tree::ptree_error)
       {
-        utils::Logger::cerr() << "Error: Database returned results with bad type.";
-        throw 1;
+        throw std::runtime_error("Error: Database returned results with bad "
+                                 "type, or with overfloaded values.");
       }
 
       for (auto it = values.begin() ; it != values.end(); ++it)

@@ -24,9 +24,7 @@ namespace network
   {
     for (auto i = resolve_host(host, port);
          i != boost::asio::ip::tcp::resolver::iterator();)
-    {
       return *i;
-    }
     throw std::logic_error("Could not resolve " + host + " ip(s).");
   }
 
