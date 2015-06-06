@@ -36,7 +36,7 @@ int main(int argc, const char *argv[])
     {
       // Prepare file
       files::File file(client::conf.file_path);
-      client.send_file(file, client::conf.redundancy);
+      client.request_upload(file, client::conf.redundancy);
     }
 
     client.stop();

@@ -48,9 +48,6 @@ namespace client
     // Stop the server
     void stop();
 
-    // Send a file to the storage
-    void send_file(const files::File& file, network::masks::rdcy_type redundancy);
-
     // Send parts to storages
     // In the range [begin_id, end_id)
     void send_parts(network::masks::fid_type fid,
@@ -59,8 +56,8 @@ namespace client
                     size_t total_parts,
                     size_t begin_id, size_t end_id);
 
-    // Send a c_m::up_req to session
-    bool request_upload(const files::File& file,
+    // Send a c_m::up_req to the master
+    void request_upload(const files::File& file,
                         network::masks::rdcy_type rdcy);
   };
 

@@ -73,13 +73,7 @@ namespace client
     // FIXME : Stop everything, join threads if needed
   }
 
-  void Client::send_file(const files::File& file, masks::rdcy_type redundancy)
-  {
-    (void)redundancy;
-    request_upload(file, redundancy);
-  }
-
-  bool Client::request_upload(const files::File& file,
+  void Client::request_upload(const files::File& file,
                               rdcy_type rdcy)
   {
     fsize_type fsize = file.size();
@@ -126,7 +120,6 @@ namespace client
 
           return 0;
         });
-    return true;
   }
 
   void Client::send_parts(fid_type fid,
