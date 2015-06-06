@@ -17,6 +17,16 @@ int main(int argc, const char *argv[])
     DB::Connector::get_instance(master::conf.db.hostname,
                                 master::conf.db.password,
                                 master::conf.db.bucket);
+    try
+    {
+      DB::Connector::get_instance().cmd_get("storage_sizes");
+    }
+    catch (std::logic_error)
+    {
+      DB::Connector::get_instance().cmd_put_file("storage_sizes",
+                                                 "../ressources/data/storage_sizes.json");
+      utils::Logger::cerr() << "Added storage_sizes in database.";
+    }
   }
   catch (int i)
   {

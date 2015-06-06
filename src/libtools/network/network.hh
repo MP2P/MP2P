@@ -294,12 +294,12 @@ namespace network
 
   boost::asio::ip::address_v6 get_ipv6(const std::string& str);
   boost::asio::ip::address_v6 get_ipv6(const masks::CharT* ch, size_t size);
+
   std::string binary_to_string_ipv6(const masks::CharT* ch, size_t size);
+  std::string binary_to_string_ipv6(const masks::CharT* ch);
 
   network::masks::ADDR get_addr(const std::string& str,
                                 network::masks::port_type port);
-
-  std::string binary_to_string_ipv6(const masks::CharT* ch);
 }
 
 #include "tools.hxx"

@@ -6,12 +6,13 @@ namespace DB
   void
   Database::cmd_put_file(const std::string& key, const std::string& filename)
   {
-    std::ifstream file;
-    file.open(filename);
-
-    std::stringstream stream;
-    stream << file.rdbuf();
-    Database::cmd_put(key, stream.str());
+    std::ifstream file(filename);
+    if (!file.good())
+      throw std::logic_error("Could not find " + filename + " file.");
+    std::string contents((std::istreambuf_iterator<char>(file)),
+                        (std::istreambuf_iterator<char>()));
+    this->cmd_put(key, contents);
+    file.close();
   }
 
   inline
