@@ -59,6 +59,9 @@ namespace client
     // Send a c_m::up_req to the master
     void request_upload(const files::File& file,
                         network::masks::rdcy_type rdcy);
+
+    // Send a c_m::down_req to the master
+    void request_download(const std::string& filename);
   };
 
 }

@@ -148,7 +148,7 @@ namespace client
         std::cout << "Trying to download file: "
                      + vm["download"].as<fp_ty>() + "." << std::endl;
 
-        client::conf.file_path = vm["upload"].as<fp_ty>();
+        client::conf.file_path = vm["download"].as<fp_ty>();
       }
 
       // ... and finally check results

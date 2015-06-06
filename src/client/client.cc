@@ -172,4 +172,14 @@ namespace client
 
     sending.join();
   }
+
+
+  // Send a c_m::down_req to the master
+  void Client::request_download(const std::string& filename)
+  {
+    Packet request{c_m::fromto, c_m::down_req_w};
+    request.add_message(filename.c_str(), filename.size(), copy::Yes);
+
+    master_session_.send(request);
+  }
 }
