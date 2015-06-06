@@ -99,8 +99,8 @@ namespace DB
 
   inline
   StorageItem::StorageItem(stid_type id, const std::string& host_addr,
-                           avspace_type available_space)
-      : id_{id}, host_addr_{host_addr}, available_space_{available_space} {};
+                           port_type port, avspace_type available_space)
+      : id_{id}, host_addr_{host_addr}, port_{port}, available_space_{available_space} {};
 
 
 
@@ -152,6 +152,7 @@ namespace DB
     ss << "{"
           << "\"id\":" << utils::misc::string_from(id_) << ','
           << "\"host_addr\":" << utils::misc::string_from(host_addr_) << ','
+          << "\"port\":" << utils::misc::string_from(port_) << ','
           << "\"available_space\":" << utils::misc::string_from(available_space_)
     << "}";
     return ss.str();
@@ -226,9 +227,10 @@ namespace DB
 
     stid_type id = pt.get<stid_type>("id");
     std::string host_addr = pt.get<std::string>("host_addr");
+    port_type port = pt.get<port_type>("port");
     avspace_type available_space =
         pt.get<avspace_type>("available_space");
 
-    return StorageItem(id, host_addr, available_space);
+    return StorageItem(id, host_addr, port, available_space);
   }
-}
+};

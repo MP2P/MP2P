@@ -155,7 +155,7 @@ namespace DB
   {
   public:
     StorageItem(stid_type id, const std::string& host_addr,
-                avspace_type available_space);
+                port_type port, avspace_type available_space);
 
   private:
     stid_type id_;
@@ -168,7 +168,7 @@ namespace DB
 
     stid_type id_get() const;
     std::string host_addr_get() const;
-    std::string port_get() const;
+    port_type port_get() const;
     ADDR addr_get() const;
     avspace_type available_space_get() const;
 

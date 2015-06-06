@@ -113,14 +113,17 @@ namespace DB
   }
 
   inline
-  std::string
-  port_get() const
+  port_type
+  StorageItem::port_get() const
   {
-
+    return port_;
   }
-  ADDR addr_get() const
-  {
 
+  inline
+  ADDR
+  StorageItem::addr_get() const
+  {
+    return network::get_addr(host_addr_, port_);
   }
 
   inline

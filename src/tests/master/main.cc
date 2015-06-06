@@ -66,14 +66,15 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]")
 
   SECTION("Create, serialize, deserialize a StorageItem")
   {
-    DB::StorageItem storage_item = DB::StorageItem(4242, host_addr,
-                                                               10000000042);
+    DB::StorageItem storage_item = DB::StorageItem(4242, host_addr, 3728,
+                                                   10000000042);
     std::string s_storage_item = storage_item.serialize();
     storage_item = DB::StorageItem::deserialize(s_storage_item);
 
     // Check the resulting MasterItem
     REQUIRE(storage_item.id_get() == 4242);
     REQUIRE(storage_item.host_addr_get() == host_addr);
+    REQUIRE(storage_item.port_get() == 3728);
     REQUIRE(storage_item.available_space_get() == 10000000042);
   }
 }
