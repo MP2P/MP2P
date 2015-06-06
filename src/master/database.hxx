@@ -3,6 +3,18 @@
 namespace DB
 {
   inline
+  void
+  Database::cmd_put_file(const std::string& key, const std::string& filename)
+  {
+    std::ifstream file;
+    file.open(filename);
+
+    std::stringstream stream;
+    stream << file.rdbuf();
+    Database::cmd_put(key, stream.str());
+  }
+
+  inline
   CouchbaseDb::CouchbaseDb(const std::string& host,
                            const std::string& pass,
                            const std::string& bucket)

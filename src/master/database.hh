@@ -33,8 +33,8 @@ namespace DB
 
     // Db commands -> Throws when it fails
     virtual std::string cmd_get(const std::string& key) = 0;
-
     virtual void cmd_put(const std::string& key, const std::string& value) = 0;
+    void cmd_put_file(const std::string& key, const std::string& filename);
   };
 
   // Singleton
