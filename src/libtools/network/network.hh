@@ -290,6 +290,10 @@ namespace network
   boost::asio::ip::address one_ip_from_host(const std::string& host,
                                             uint16_t port);
   boost::asio::ip::address_v6 get_ipv6(const std::string& str);
+
+  boost::asio::ip::address_v6 get_ipv6(const masks::CharT* ch);
+
+  std::string binary_to_string_ipv6(const masks::CharT* ch);
 }
 
 #include "tools.hxx"
