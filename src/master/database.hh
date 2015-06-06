@@ -160,6 +160,7 @@ namespace DB
   private:
     stid_type id_;
     std::string host_addr_;
+    port_type port_;
     avspace_type available_space_;
   public:
     StorageItem()
@@ -167,6 +168,8 @@ namespace DB
 
     stid_type id_get() const;
     std::string host_addr_get() const;
+    std::string port_get() const;
+    ADDR addr_get() const;
     avspace_type available_space_get() const;
 
     std::string serialize() const override;

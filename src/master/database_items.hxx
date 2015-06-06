@@ -79,6 +79,8 @@ namespace DB
   {
     return host_addr_;
   }
+  std::string port_get() const;
+  ADDR addr_get() const;
 
   inline avspace_type StorageItem::available_space_get() const
   {

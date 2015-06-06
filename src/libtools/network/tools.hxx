@@ -84,6 +84,20 @@ namespace network
   }
 
   inline
+  network::masks::ADDR
+  get_addr(const std::string& str, network::masks::port_type port)
+  {
+    auto ip = network::get_ipv6(str);
+
+    network::masks::ADDR addr;
+
+    memcpy(addr.ipv6, ip.to_bytes().data(), network::masks::ipv6_type_size);
+    addr.port = port;
+
+    return addr;
+  }
+
+  inline
   std::string binary_to_string_ipv6(const masks::CharT* ch, size_t size)
   {
     return get_ipv6(ch, size).to_string();
