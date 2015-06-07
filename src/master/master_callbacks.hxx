@@ -1,3 +1,5 @@
+#include <boost/filesystem.hpp>
+
 namespace master
 {
   using copy = utils::shared_buffer::copy;
@@ -63,6 +65,8 @@ namespace master
 
     uint64_t file_id = fids[fname];
 
+    fsize_type fsize = boost::filesystem::file_size(fname);
+
     utils::Logger::cout() << "Wanna download " + std::to_string(file_id);
 
     // FIXME : Look into the database for the file.
@@ -86,6 +90,9 @@ namespace master
     }
 
     Packet response{m_c::fromto, m_c::down_pieces_loc_w};
+    response.add_message(reinterpret_cast<const CharT*>(&fsize),
+                         sizeof (fsize_type),
+                         copy::Yes);
     response.add_message(reinterpret_cast<const CharT*>(&file_id),
                          sizeof (file_id),
                          copy::Yes);

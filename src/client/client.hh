@@ -62,6 +62,11 @@ namespace client
 
     // Send a c_m::down_req to the master
     void request_download(const std::string& filename);
+
+
+    void recv_part(files::File& file,
+                   const network::masks::ADDR& addr,
+                   size_t part_size);
   };
 
 }

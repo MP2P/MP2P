@@ -33,8 +33,7 @@ namespace client
         std::bind(&Client::send_handle, this, std::placeholders::_1, std::placeholders::_2),
         std::bind(&Client::remove_handle, this, std::placeholders::_1)}
   {
-  }
-
+  } 
   void
   Client::remove_handle(Session& session)
   {
@@ -96,7 +95,9 @@ namespace client
           CharT* data = p.message_seq_get().front().data();
           m_c::up_pieces_loc* pieces = reinterpret_cast<m_c::up_pieces_loc*>(data);
 
-          size_t list_size = (p.size_get() - sizeof (fid_type)) / sizeof (STPFIELD);
+          // Get the number of STPFIELDS
+          size_t list_size = (p.size_get() - sizeof (fid_type))
+                              / sizeof (STPFIELD);
 
           // Get total number of parts
           size_t total_parts = 0;
@@ -131,12 +132,7 @@ namespace client
         auto host = network::binary_to_string_ipv6(addr.ipv6,
                                                network::masks::ipv6_type_size);
         // Create the storage session
-        Session storage{io_service_, host, addr.port,
-            std::bind(&Client::recv_handle, this, std::placeholders::_1,
-                      std::placeholders::_2),
-            std::bind(&Client::send_handle, this, std::placeholders::_1,
-                      std::placeholders::_2),
-            std::bind(&Client::remove_handle, this, std::placeholders::_1)};
+        Session storage{io_service_, host, addr.port};
 
         // For each part to send, create a Packet and send it synchronously
         for (size_t i = begin_id; i < end_id; ++i)
@@ -167,17 +163,82 @@ namespace client
       }
     };
 
+    // FIXME : URGENT. Add to a vector to be joined at the end
     sending.join();
   }
-
 
   // Send a c_m::down_req to the master
   void Client::request_download(const std::string& filename)
   {
+    // Prepare the request packet: contains only the filename.
+    // There is no need for a custom structure
     Packet request{c_m::fromto, c_m::down_req_w};
     request.add_message(filename.c_str(), filename.size(), copy::Yes);
 
     master_session_.send(request);
 
+    // Wait for an answer from the master, then connect to each of the
+    // storages
+    master_session_.blocking_receive(
+        [&filename, this](Packet p, Session& /*recv_session*/) -> error_code
+        {
+          CharT* data = p.message_seq_get().front().data();
+          m_c::down_pieces_loc* pieces = reinterpret_cast<m_c::down_pieces_loc*>(data);
+
+          // Get the number of STPFIELDS
+          size_t list_size = (p.size_get()
+                              - sizeof (fid_type) - sizeof (fsize_type))
+                             / sizeof (STPFIELD);
+
+          // Get the size of a part
+          auto part_size = pieces->fsize / list_size;
+
+          // Create an empty file, resized to the size of the expected file
+          auto file = files::File::create_empty_file(filename + "-dl",
+                                                     pieces->fsize);
+
+          for (size_t i = 0; i < list_size; ++i)
+          {
+            // Recieve a part directly into the file
+            STPFIELD& field = pieces->fdetails.stplist[i];
+            recv_part(file,
+                      field.addr,
+                      part_size);
+          }
+
+          return 0;
+        });
+  }
+
+  void Client::recv_part(files::File& file,
+                         const ADDR& addr,
+                         size_t part_size)
+  {
+    std::thread recv{
+      [&file, this, &addr, part_size]() {
+        auto host = network::binary_to_string_ipv6(addr.ipv6,
+                                               network::masks::ipv6_type_size);
+        // Create the storage session
+        Session storage{io_service_, host, addr.port};
+
+        // Receive a part
+        storage.blocking_receive(
+            [&file, part_size](Packet p, Session&) -> error_code
+            {
+              CharT* data = p.message_seq_get().front().data();
+              s_c::up_act* upload = reinterpret_cast<s_c::up_act*>(data);
+
+              // Write the data to the file
+              memcpy(file.data() + upload->partid.partnum * part_size,
+                     upload->data,
+                     p.size_get() - sizeof (PARTID) - sizeof (sha1_type));
+              return 0;
+            }
+        );
+      }
+    };
+
+    // FIXME : URGENT. Add to a vector to be joined at the end
+    recv.join();
   }
 }
