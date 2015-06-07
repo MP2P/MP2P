@@ -73,13 +73,13 @@ namespace network
   }
 
   inline
-  boost::asio::ip::address_v6 get_ipv6(const masks::CharT* ch, size_t size)
+  boost::asio::ip::address_v6 get_ipv6(const masks::CharT* ch)
   {
     // FIXME : This is weird. We're creating an ip::address_v6
     // then converting to string, then get_ipv6(string)
     // converts it back to ip::address.
     boost::asio::ip::address_v6::bytes_type ar;
-    memcpy(&*ar.begin(), ch, size);
+    memcpy(&*ar.begin(), ch, 16);
     return get_ipv6(boost::asio::ip::address_v6(ar).to_string());
   }
 
@@ -98,8 +98,8 @@ namespace network
   }
 
   inline
-  std::string binary_to_string_ipv6(const masks::CharT* ch, size_t size)
+  std::string binary_to_string_ipv6(const masks::CharT* ch)
   {
-    return get_ipv6(ch, size).to_string();
+    return get_ipv6(ch).to_string();
   }
 }

@@ -178,7 +178,19 @@ namespace DB
 
   namespace tools
   {
+    // FIXME: create a smart templated function that try to get a value from DB
+    //        with access to value like "my.key.json_key.value.something"
+    //        where "my.key" is the DB key, "json_key" is a key in the json
+    //        retrieved from "my.key" etc...
+    //        The type of the value returned is given by the templated type of
+    //        this function.
+
     uint32_t number_of_parts(std::string& json, fsize_type file_size);
+    std::vector<StorageItem> get_all_storages();
+
+    FileItem create_new_file(std::string name, fsize_type file_size,
+                             rdcy_type redundancy, std::string hash);
+    std::vector<STPFIELD> get_stpfields_for_upload(FileItem fi);
   }
 }
 

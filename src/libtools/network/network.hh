@@ -293,9 +293,9 @@ namespace network
                                             uint16_t port);
 
   boost::asio::ip::address_v6 get_ipv6(const std::string& str);
-  boost::asio::ip::address_v6 get_ipv6(const masks::CharT* ch, size_t size);
+  boost::asio::ip::address_v6 get_ipv6(const masks::CharT* ch);
 
-  std::string binary_to_string_ipv6(const masks::CharT* ch, size_t size);
+  std::string binary_to_string_ipv6(const masks::CharT* ch);
   std::string binary_to_string_ipv6(const masks::CharT* ch);
 
   network::masks::ADDR get_addr(const std::string& str,

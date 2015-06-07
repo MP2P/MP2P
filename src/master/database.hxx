@@ -29,6 +29,25 @@ namespace DB
           + std::string(status) + ").");
   }
 
+  // Database commands
+  inline std::string
+  CouchbaseDb::cmd_get(const std::string& key)
+  {
+    auto result = client_.get(key);
+    if (!result.status().success())
+      throw std::logic_error("Key " + key + " does not exists.");
+    return result.value();
+  }
+
+  inline void
+  CouchbaseDb::cmd_put(const std::string& key, const std::string& value)
+  {
+    auto result = client_.upsert(key, value);
+    if (!result.status().success())
+      throw std::logic_error("Can't put " + key + ", error: " +
+                             std::to_string(result.cas()));
+  }
+
   // Connector
   inline
   Database& Connector::get_instance()
@@ -53,32 +72,40 @@ namespace DB
       }
       catch (Couchbase::Status& s)
       {
-        utils::Logger::cerr() << "Master exception: Invalid database "
+        throw std::runtime_error("Master exception: Invalid database "
                                  "configuration (couchbase://"
                                  + host + "/"
-                                 + bucket + ").";
+                                 + bucket + ").");
       }
     }
+    try
+    {
+      database_->cmd_get("storage_sizes");
+    }
+    catch (std::logic_error)
+    {
+      database_->cmd_put_file("storage_sizes", "../ressources/data/storage_sizes.json");
+      utils::Logger::cerr() << "Added storage_sizes in database.";
+    }
+    try
+    {
+      database_->cmd_get("storages");
+    }
+    catch (std::logic_error)
+    {
+      database_->cmd_put_file("storages", "{\"count\":0, \"available_space\":0}");
+      utils::Logger::cerr() << "Added storages in database.";
+    }
+    try
+    {
+      database_->cmd_get("files");
+    }
+    catch (std::logic_error)
+    {
+      database_->cmd_put_file("files", "{\"count\":0, \"total_size\":0}");
+      utils::Logger::cerr() << "Added files in database.";
+    }
     return *database_;
-  }
-
-  // Database commands
-  inline std::string
-  CouchbaseDb::cmd_get(const std::string& key)
-  {
-    auto result = client_.get(key);
-    if (!result.status().success())
-      throw std::logic_error("Key " + key + " does not exists.");
-    return result.value();
-  }
-
-  inline void
-  CouchbaseDb::cmd_put(const std::string& key, const std::string& value)
-  {
-    auto result = client_.upsert(key, value);
-    if (!result.status().success())
-      throw std::logic_error("Can't put " + key + ", error: " +
-                                   std::to_string(result.cas()));
   }
 
 

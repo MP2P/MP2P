@@ -131,8 +131,7 @@ namespace client
     // Create an unique thread per session
     std::thread sending{
       [&file, this, &addr, total_parts, begin_id, end_id, fid]() {
-        auto host = network::binary_to_string_ipv6(addr.ipv6,
-                                               network::masks::ipv6_type_size);
+        auto host = network::binary_to_string_ipv6(addr.ipv6);
         // Create the storage session
         Session storage{io_service_, host, addr.port,
             std::bind(&Client::recv_handle, this, std::placeholders::_1,
