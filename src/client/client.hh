@@ -34,10 +34,7 @@ namespace client
   private:
     boost::asio::io_service io_service_; // Default constructor is enough
     network::Session master_session_;
-
-    network::error_code recv_handle(network::Packet, network::Session& session);
-    network::error_code send_handle(network::Packet, network::Session& session);
-    void remove_handle(network::Session& session);
+    std::vector<std::thread> threads_;
 
   public:
     Client(const std::string& host, uint16_t port);
@@ -48,25 +45,27 @@ namespace client
     // Stop the server
     void stop();
 
-    // Send parts to storages
-    // In the range [begin_id, end_id)
-    void send_parts(network::masks::fid_type fid,
-                    const files::File& file,
-                    const network::masks::ADDR& addr,
-                    size_t total_parts,
-                    size_t begin_id, size_t end_id);
-
     // Send a c_m::up_req to the master
     void request_upload(const files::File& file,
                         network::masks::rdcy_type rdcy);
 
+    // Send parts to storages
+    // In the range [begin_id, end_id)
+    std::function<void()>
+    send_parts(network::masks::fid_type fid,
+               const files::File& file,
+               const network::masks::ADDR& addr,
+               size_t total_parts,
+               size_t begin_id, size_t end_id);
+
     // Send a c_m::down_req to the master
     void request_download(const std::string& filename);
 
-
-    void recv_part(files::File& file,
-                   const network::masks::ADDR& addr,
-                   size_t part_size);
+    // Recieve a part into file
+    std::function<void()>
+    recv_part(files::File& file,
+              const network::masks::ADDR& addr,
+              size_t part_size);
   };
 
 }

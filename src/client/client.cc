@@ -13,13 +13,13 @@ namespace client
 
   namespace // Anonymous namespace - used for local helpers
   {
-    size_t part_size_for_sending_size(size_t size, size_t part_id, size_t parts)
+    size_t part_size_for_sending_size(size_t size, size_t partid, size_t parts)
     {
       // FIXME : float may not fit in size_t
       size_t part_size = std::ceil((float)size / parts);
-      if (part_id == (parts - 1))
+      if (partid == (parts - 1))
       {
-        size_t offset = part_id * part_size;
+        size_t offset = partid * part_size;
         if ((offset + part_size) > size)
           part_size -= offset + part_size - size;
       }
@@ -28,36 +28,8 @@ namespace client
   }
 
   Client::Client(const std::string& host, uint16_t port)
-    : master_session_{io_service_, host, port,
-        std::bind(&Client::recv_handle, this, std::placeholders::_1, std::placeholders::_2),
-        std::bind(&Client::send_handle, this, std::placeholders::_1, std::placeholders::_2),
-        std::bind(&Client::remove_handle, this, std::placeholders::_1)}
+    : master_session_{io_service_, host, port}
   {
-  } 
-  void
-  Client::remove_handle(Session& session)
-  {
-    (void) session;
-  }
-
-  error_code
-  Client::recv_handle(Packet packet, Session& session)
-  {
-    (void) session;
-    (void) packet;
-
-    return 0;
-  }
-
-  error_code
-  Client::send_handle(Packet packet, Session& session)
-  {
-    (void) session;
-    (void) packet;
-
-    Logger::cout() << "Packet sent!";
-
-    return 0;
   }
 
   void
@@ -69,7 +41,9 @@ namespace client
   void
   Client::stop()
   {
-    // FIXME : Stop everything, join threads if needed
+    // Join all threads
+    std::for_each(threads_.begin(), threads_.end(),
+        [](auto& thread) { thread.join(); });
   }
 
   void Client::request_upload(const files::File& file,
@@ -109,10 +83,12 @@ namespace client
           for (size_t i = 0; i < list_size; ++i)
           {
             STPFIELD& field = pieces->fdetails.stplist[i];
-            send_parts(pieces->fdetails.fid,
-                       file, field.addr,
-                       total_parts,
-                       parts - field.nb, parts);
+            threads_.emplace_back(
+                       send_parts(pieces->fdetails.fid,
+                                  file, field.addr,
+                                  total_parts,
+                                  parts - field.nb, parts)
+            );
             parts -= field.nb;
           }
 
@@ -120,15 +96,16 @@ namespace client
         });
   }
 
-  void Client::send_parts(fid_type fid,
-                          const files::File& file,
-                          const ADDR& addr,
-                          size_t total_parts,
-                          size_t begin_id, size_t end_id)
+  std::function<void()>
+  Client::send_parts(fid_type fid,
+                     const files::File& file,
+                     const ADDR& addr,
+                     size_t total_parts,
+                     size_t begin_id, size_t end_id)
   {
     // Create an unique thread per session
-    std::thread sending{
-      [&file, this, &addr, total_parts, begin_id, end_id, fid]() {
+    return [&file, this, &addr, total_parts, begin_id, end_id, fid]()
+    {
         auto host = network::binary_to_string_ipv6(addr.ipv6,
                                                network::masks::ipv6_type_size);
         // Create the storage session
@@ -160,11 +137,7 @@ namespace client
           to_send.add_message(part_buffer, part_size, copy::No);
           storage.send(to_send);
         }
-      }
     };
-
-    // FIXME : URGENT. Add to a vector to be joined at the end
-    sending.join();
   }
 
   // Send a c_m::down_req to the master
@@ -201,44 +174,42 @@ namespace client
           {
             // Recieve a part directly into the file
             STPFIELD& field = pieces->fdetails.stplist[i];
-            recv_part(file,
-                      field.addr,
-                      part_size);
+            threads_.emplace_back(recv_part(file,
+                                  field.addr,
+                                  part_size));
           }
 
           return 0;
         });
   }
 
-  void Client::recv_part(files::File& file,
-                         const ADDR& addr,
-                         size_t part_size)
+  std::function<void()>
+  Client::recv_part(files::File& file,
+                    const ADDR& addr,
+                    size_t part_size)
   {
-    std::thread recv{
-      [&file, this, &addr, part_size]() {
-        auto host = network::binary_to_string_ipv6(addr.ipv6,
+    return [&file, this, &addr, part_size]()
+    {
+      auto host = network::binary_to_string_ipv6(addr.ipv6,
                                                network::masks::ipv6_type_size);
-        // Create the storage session
-        Session storage{io_service_, host, addr.port};
 
-        // Receive a part
-        storage.blocking_receive(
-            [&file, part_size](Packet p, Session&) -> error_code
-            {
-              CharT* data = p.message_seq_get().front().data();
-              s_c::up_act* upload = reinterpret_cast<s_c::up_act*>(data);
+      // Create the storage session
+      Session storage{io_service_, host, addr.port};
 
-              // Write the data to the file
-              memcpy(file.data() + upload->partid.partnum * part_size,
-                     upload->data,
-                     p.size_get() - sizeof (PARTID) - sizeof (sha1_type));
-              return 0;
-            }
-        );
-      }
+      // Receive a part
+      storage.blocking_receive(
+          [&file, part_size](Packet p, Session&) -> error_code
+          {
+            CharT* data = p.message_seq_get().front().data();
+            s_c::up_act* upload = reinterpret_cast<s_c::up_act*>(data);
+
+            // Write the data to the file
+            memcpy(file.data() + upload->partid.partnum * part_size,
+                   upload->data,
+                   p.size_get() - sizeof (PARTID) - sizeof (sha1_type));
+            return 0;
+          }
+      );
     };
-
-    // FIXME : URGENT. Add to a vector to be joined at the end
-    recv.join();
   }
 }
