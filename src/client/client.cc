@@ -88,16 +88,13 @@ namespace client
 
     // FIXME : fname.size() may not fit in uint32_t
     req_packet.add_message(fname.c_str(), fname.size(), copy::No);
-
     master_session_.send(req_packet);
 
-    m_c::pieces_loc* pieces; // The expected result
-
     master_session_.blocking_receive(
-        [&pieces, &file, this](Packet p, Session& /*recv_session*/) -> error_code
+        [&file, this](Packet p, Session& /*recv_session*/) -> error_code
         {
           CharT* data = p.message_seq_get().front().data();
-          pieces = reinterpret_cast<m_c::pieces_loc*>(data);
+          m_c::pieces_loc* pieces = reinterpret_cast<m_c::pieces_loc*>(data);
 
           size_t list_size = (p.size_get() - sizeof (fid_type)) / sizeof (STPFIELD);
 
@@ -181,5 +178,6 @@ namespace client
     request.add_message(filename.c_str(), filename.size(), copy::Yes);
 
     master_session_.send(request);
+
   }
 }
