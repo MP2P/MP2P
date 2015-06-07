@@ -30,7 +30,8 @@ namespace DB
   }
 
   // Database commands
-  inline std::string
+  inline
+  std::string
   CouchbaseDb::cmd_get(const std::string& key)
   {
     auto result = client_.get(key);
@@ -39,9 +40,18 @@ namespace DB
     return result.value();
   }
 
-  inline void
+  inline
+  void
+  CouchbaseDb::cmd_remove(const std::string& key)
+  {
+    client_.remove(key);
+  }
+
+  inline
+  void
   CouchbaseDb::cmd_put(const std::string& key, const std::string& value)
   {
+    utils::Logger::cout() << "Upserting " + key;
     auto result = client_.upsert(key, value);
     if (!result.status().success())
       throw std::logic_error("Can't put " + key + ", error: " +
@@ -50,7 +60,8 @@ namespace DB
 
   // Connector
   inline
-  Database& Connector::get_instance()
+  Database&
+  Connector::get_instance()
   {
     if (database_.get() == 0)
       throw std::runtime_error("Database is not initialized.");
@@ -58,9 +69,10 @@ namespace DB
   }
 
   inline
-  Database& Connector::get_instance(const std::string& host,
-                                    const std::string& pass,
-                                    const std::string& bucket)
+  Database&
+  Connector::get_instance(const std::string& host,
+                          const std::string& pass,
+                          const std::string& bucket)
   {
     if (database_.get() == 0)
     {
@@ -93,7 +105,7 @@ namespace DB
     }
     catch (std::logic_error)
     {
-      database_->cmd_put_file("storages", "{\"count\":0, \"available_space\":0}");
+      database_->cmd_put("storages", "{\"count\":0, \"available_space\":0}");
       utils::Logger::cerr() << "Added storages in database.";
     }
     try
@@ -102,7 +114,7 @@ namespace DB
     }
     catch (std::logic_error)
     {
-      database_->cmd_put_file("files", "{\"count\":0, \"total_size\":0}");
+      database_->cmd_put("files", "{\"count\":0, \"total_size\":0}");
       utils::Logger::cerr() << "Added files in database.";
     }
     return *database_;

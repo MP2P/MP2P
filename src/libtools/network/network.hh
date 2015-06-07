@@ -300,6 +300,10 @@ namespace network
 
   network::masks::ADDR get_addr(const std::string& str,
                                 network::masks::port_type port);
+
+  network::masks::partsize_type get_part_size(network::masks::fsize_type fsize,
+                                              network::masks::partnum_type partnum,
+                                              network::masks::partnum_type parts);
 }
 
 #include "tools.hxx"

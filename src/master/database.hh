@@ -33,6 +33,7 @@ namespace DB
 
     // Db commands -> Throws when it fails
     virtual std::string cmd_get(const std::string& key) = 0;
+    virtual void cmd_remove(const std::string& key) = 0;
     virtual void cmd_put(const std::string& key, const std::string& value) = 0;
     void cmd_put_file(const std::string& key, const std::string& filename);
   };
@@ -69,7 +70,7 @@ namespace DB
 
     // Db commands -> Throws when it fails
     std::string cmd_get(const std::string& key) override;
-
+    void cmd_remove(const std::string& key) override;
     void cmd_put(const std::string& key, const std::string& value) override;
   };
 
@@ -102,7 +103,7 @@ namespace DB
 
     fid_type id_get() const;
     std::string name_get() const;
-    fsize_type file_size_get() const;
+    fsize_type file_size_get() const; // FIXME: change name for size_get only.
     rdcy_type redundancy_get() const;
     rdcy_type current_redundancy_get() const;
     CharT* hash_get();
@@ -185,7 +186,7 @@ namespace DB
     //        The type of the value returned is given by the templated type of
     //        this function.
 
-    uint32_t number_of_parts(std::string& json, fsize_type file_size);
+    network::masks::partnum_type number_of_parts(fsize_type file_size);
     std::vector<StorageItem> get_all_storages();
 
     FileItem create_new_file(std::string name, fsize_type file_size,

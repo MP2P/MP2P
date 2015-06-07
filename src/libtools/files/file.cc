@@ -55,11 +55,11 @@ namespace files
 
   using namespace boost::filesystem;
 
-  File::File(const std::string& filename)
-    : filename_{filename}
+  File::File(const std::string& filepath)
+    : filepath_{filepath}
   {
-    auto size = boost::filesystem::file_size(filename);
-    file_ = boost::iostreams::mapped_file{filename_,
+    auto size = boost::filesystem::file_size(filepath);
+    file_ = boost::iostreams::mapped_file{filepath_,
                                           std::ios_base::binary
                                           | std::ios_base::in
                                           | std::ios_base::out,
@@ -67,7 +67,7 @@ namespace files
   }
 
   File::File(const std::string& filename, size_t size)
-    : filename_{filename}
+    : filepath_{filename}
   {
     // Create a file on disk
     int fd = ::open(filename.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0644);
@@ -79,7 +79,7 @@ namespace files
     boost::filesystem::resize_file(filename, size);
 
     // Map the file
-    file_ = boost::iostreams::mapped_file{filename_,
+    file_ = boost::iostreams::mapped_file{filepath_,
                                           std::ios_base::binary,
                                           size};
   }
@@ -131,7 +131,7 @@ namespace files
 
   std::string hash_file(const File& file)
   {
-    return hash_buffer(file.data(), boost::filesystem::file_size(file.filename_get()));
+    return hash_buffer(file.data(), boost::filesystem::file_size(file.filepath_get()));
   }
 
 }

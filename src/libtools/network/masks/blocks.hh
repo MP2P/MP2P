@@ -28,6 +28,7 @@ namespace network
     using fsize_type = uint64_t;
     using ipv6_type = CharT[ipv6_type_size];
     using partnum_type = uint32_t;
+    using partsize_type = uint64_t;
     using port_type = uint16_t;
     using rdcy_type = uint8_t;
     using sha1_type = CharT[sha1_type_size];

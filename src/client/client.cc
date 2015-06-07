@@ -11,22 +11,6 @@ namespace client
   using namespace utils;
   using copy = utils::shared_buffer::copy;
 
-  namespace // Anonymous namespace - used for local helpers
-  {
-    size_t part_size_for_sending_size(size_t size, size_t part_id, size_t parts)
-    {
-      // FIXME : float may not fit in size_t
-      size_t part_size = std::ceil((float)size / parts);
-      if (part_id == (parts - 1))
-      {
-        size_t offset = part_id * part_size;
-        if ((offset + part_size) > size)
-          part_size -= offset + part_size - size;
-      }
-      return part_size;
-    }
-  }
-
   Client::Client(const std::string& host, uint16_t port)
     : master_session_{io_service_, host, port,
         std::bind(&Client::recv_handle, this, std::placeholders::_1, std::placeholders::_2),
@@ -73,6 +57,7 @@ namespace client
     // FIXME : Stop everything, join threads if needed
   }
 
+  // FIXME : types
   void Client::request_upload(const files::File& file,
                               rdcy_type rdcy)
   {
@@ -86,7 +71,6 @@ namespace client
                            sizeof (request),
                            copy::No);
 
-    // FIXME : fname.size() may not fit in uint32_t
     req_packet.add_message(fname.c_str(), fname.size(), copy::No);
 
     master_session_.send(req_packet);
@@ -122,6 +106,7 @@ namespace client
         });
   }
 
+  // FIXME: types
   void Client::send_parts(fid_type fid,
                           const files::File& file,
                           const ADDR& addr,
@@ -145,8 +130,7 @@ namespace client
         {
           // Get the exact part size depending on the part id
           // This allows us to avoid the last part to be bigger
-          size_t part_size = part_size_for_sending_size(file.size(), i,
-                                                        total_parts);
+          size_t part_size = network::get_part_size(file.size(), i, total_parts);
 
           const auto* part_buffer = file.data()
                                     + (file.size() / total_parts) * i;
@@ -162,7 +146,6 @@ namespace client
 
           to_send.add_message(reinterpret_cast<const CharT*>(hash.data()),
                               hash.size(), copy::Yes);
-          // FIXME : part_size may not fit in uint32_t
           to_send.add_message(part_buffer, part_size, copy::No);
           storage.send(to_send);
         }

@@ -43,42 +43,6 @@ namespace utils
 
 
   /*----------.
-  | config.cc |
-  `----------*/
-//  class Conf
-//  {
-//  private:
-//    Conf() = default;
-//    Conf(Conf const& ) = delete;
-//    void operator=(Conf const& ) = delete;
-//
-//    std::string host_;
-//    unsigned short port_;
-//    unsigned concurrent_threads_;
-//    boost::posix_time::time_duration timeout_;
-//    std::string DBhost_;
-//    unsigned DBport_;
-//    std::string DBpassword_;
-//    std::string DBbucket_;
-//
-//  public:
-//    // Singleton
-//    static Conf& get_instance();
-//
-//    bool initialize(const std::string& config_path);
-//
-//    std::string host_get() const;
-//    unsigned short port_get() const;
-//    unsigned concurrency_get() const;
-//    boost::posix_time::time_duration timeout_get() const;
-//    std::string DBhost_get() const;
-//    unsigned DBport_get() const;
-//    std::string DBpassword_get() const;
-//    std::string DBbucket_get() const;
-//  };
-
-
-  /*----------.
   | logger.cc |
   `----------*/
   void print_debug(const std::string& info);

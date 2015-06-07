@@ -102,4 +102,22 @@ namespace network
   {
     return get_ipv6(ch).to_string();
   }
+
+
+  inline
+  network::masks::partsize_type
+  get_part_size(network::masks::fsize_type fsize,
+                network::masks::partnum_type partnum,
+                network::masks::partnum_type parts)
+  {
+    // FIXME : float to uint64_t
+    network::masks::partsize_type part_size = std::ceil((float)fsize / parts);
+    if (partnum == (parts - 1))
+    {
+      size_t offset = partnum * part_size;
+      if ((offset + part_size) > fsize)
+        part_size -= offset + part_size - fsize;
+    }
+    return part_size;
+  }
 }

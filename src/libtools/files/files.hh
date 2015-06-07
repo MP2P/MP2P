@@ -13,7 +13,7 @@ namespace files
     public:
 
       // Constructor for a file not hashed
-      File(const std::string& filename);
+      File(const std::string& filepath);
 
       // Disable copying files
       File(const File& other) = delete;
@@ -24,7 +24,8 @@ namespace files
       File& operator=(File&& other) = default;
 
       // Accessors
-      const std::string& filename_get() const;
+      const std::string filename_get() const;
+      const std::string& filepath_get() const;
 
       // Get the size from the mapped_file
       size_t size() const;
@@ -37,12 +38,12 @@ namespace files
       static File create_empty_file(const std::string& filename, size_t size);
 
     private:
-      std::string filename_;
+      std::string filepath_;
       boost::iostreams::mapped_file file_;
 
       // Private constructor for an empty file.
       // Should be used only for create_empty_file
-      File(const std::string& filename, size_t size);
+      File(const std::string& filepath, size_t size);
   };
 
   // Hash a buffer of chars and return the SHA1 hash as a string

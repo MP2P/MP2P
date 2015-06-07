@@ -116,7 +116,7 @@ TEST_CASE("Files", "[libtools][files]")
 
   SECTION("Filename")
   {
-    REQUIRE(filename == file.filename_get());
+    REQUIRE(filename == file.filepath_get());
   }
 
   SECTION("Size")
@@ -144,7 +144,7 @@ TEST_CASE("Files", "[libtools][files]")
     size_t size = 32;
     File empty = File::create_empty_file(empty_fname, size);
     REQUIRE(empty.size() == size);
-    REQUIRE(empty.filename_get() == empty_fname);
+    REQUIRE(empty.filepath_get() == empty_fname);
     std::remove(empty_fname.c_str()); // Always clean  up
     // FIXME : test hash?
   }
