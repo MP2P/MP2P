@@ -43,10 +43,8 @@ namespace master
     }
 
     Packet response{m_c::fromto, m_c::up_pieces_loc_w};
-    response.add_message(reinterpret_cast<const CharT*>(&file_id),
-                         sizeof (file_id),
-                         copy::Yes);
-    response.add_message(reinterpret_cast<const CharT*>(&*fields.begin()),
+    response.add_message(&file_id, sizeof (file_id), copy::Yes);
+    response.add_message(&*fields.begin(),
                          fields.size() * sizeof (STPFIELD),
                          copy::Yes);
     session.send(response);
@@ -90,20 +88,14 @@ namespace master
     }
 
     Packet response{m_c::fromto, m_c::down_pieces_loc_w};
-    response.add_message(reinterpret_cast<const CharT*>(&fsize),
-                         sizeof (fsize_type),
-                         copy::Yes);
-    response.add_message(reinterpret_cast<const CharT*>(&file_id),
-                         sizeof (file_id),
-                         copy::Yes);
-    response.add_message(reinterpret_cast<const CharT*>(&*fields.begin()),
+    response.add_message(&fsize, sizeof (fsize_type), copy::Yes);
+    response.add_message(&file_id, sizeof (file_id), copy::Yes);
+    response.add_message(&*fields.begin(),
                          fields.size() * sizeof (STPFIELD),
                          copy::Yes);
     session.send(response);
 
     return 0;
-
-
   }
 
   // Can you delete this file?

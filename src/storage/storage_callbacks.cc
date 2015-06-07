@@ -7,8 +7,8 @@ namespace storage
   using namespace network::masks;
   using copy = utils::shared_buffer::copy;
 
-  network::error_code cs_up_act(network::Packet& packet,
-                                network::Session& session)
+  network::error_code
+  cs_up_act(network::Packet& packet, network::Session& session)
   {
     CharT* data = packet.message_seq_get().front().data();
     const c_s::up_act* part = reinterpret_cast<const c_s::up_act*>(data);
@@ -27,15 +27,14 @@ namespace storage
 
     Packet p{s_m::fromto, s_m::part_ack_w};
     const s_m::part_ack response{part->partid, 10};
-    p.add_message(reinterpret_cast<const CharT*>(&response),
-                  sizeof (s_m::part_ack), copy::No);
+    p.add_message(&response, sizeof (s_m::part_ack), copy::No);
     master_session.send(p);
 
     return 0;
   }
 
-  network::error_code cs_down_act(network::Packet& packet,
-                                  network::Session& session)
+  network::error_code
+  cs_down_act(network::Packet& packet, network::Session& session)
   {
     CharT* data = packet.message_seq_get().front().data();
     const c_s::down_act* request = reinterpret_cast<const c_s::down_act*>(data);
@@ -50,14 +49,11 @@ namespace storage
 
     Packet p{s_c::fromto, s_c::up_act_w};
     // Add the PARTID
-    p.add_message(reinterpret_cast<const CharT*>(&request->partid),
-                  sizeof (PARTID), copy::No);
+    p.add_message(&request->partid, sizeof (PARTID), copy::No);
     // Add the sha1
-    p.add_message(reinterpret_cast<const CharT*>(hash.data()),
-                  hash.size(), copy::No);
+    p.add_message(hash.data(), hash.size(), copy::No);
     // Add the data
-    p.add_message(reinterpret_cast<const CharT*>(part.data()),
-                  part.size(), copy::No);
+    p.add_message(part.data(), part.size(), copy::No);
     session.send(p);
     return 0;
   }

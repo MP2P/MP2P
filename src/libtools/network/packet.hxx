@@ -12,12 +12,15 @@ namespace network
     header_.size += message.size();
   }
 
+  template <typename T>
   inline void
-  Packet::add_message(const masks::CharT* data,
+  Packet::add_message(const T* data,
                       const masks::size_type size,
                       utils::shared_buffer::copy to_copy)
   {
-    add_message(masks::message_type{data, size, to_copy});
+    add_message(masks::message_type{
+        reinterpret_cast<const masks::CharT*>(data), size, to_copy
+    });
   }
 
   inline masks::size_type

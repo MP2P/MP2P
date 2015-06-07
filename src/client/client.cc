@@ -65,9 +65,7 @@ namespace client
     c_m::up_req request{fsize, rdcy, {}}; // The request message
 
     Packet req_packet{0, 1};
-    req_packet.add_message(reinterpret_cast<CharT*>(&request),
-                           sizeof (request),
-                           copy::No);
+    req_packet.add_message(&request, sizeof (request), copy::No);
 
     // FIXME : fname.size() may not fit in uint32_t
     req_packet.add_message(fname.c_str(), fname.size(), copy::No);
@@ -139,13 +137,10 @@ namespace client
           auto hash = files::hash_buffer_hex(part_buffer, part_size);
 
           Packet to_send{c_s::fromto, c_s::up_act_w};
-          to_send.add_message(reinterpret_cast<const CharT*>(&fid),
-                              sizeof (fid), copy::Yes);
-          to_send.add_message(reinterpret_cast<const CharT*>(&part_num),
-                              sizeof (part_num), copy::Yes);
+          to_send.add_message(&fid, sizeof (fid), copy::Yes);
+          to_send.add_message(&part_num, sizeof (part_num), copy::Yes);
 
-          to_send.add_message(reinterpret_cast<const CharT*>(hash.data()),
-                              hash.size(), copy::Yes);
+          to_send.add_message(hash.data(), hash.size(), copy::Yes);
           // FIXME : part_size may not fit in uint32_t
           to_send.add_message(part_buffer, part_size, copy::No);
 
@@ -217,8 +212,7 @@ namespace client
       Session storage{io_service_, host, addr.port};
 
       Packet to_send{c_s::fromto, c_s::down_act_w};
-      to_send.add_message(reinterpret_cast<const CharT*>(&partid),
-                          sizeof (PARTID), copy::No);
+      to_send.add_message(&partid, sizeof (PARTID), copy::No);
 
       storage.send(to_send);
 

@@ -44,7 +44,6 @@ namespace master
     network::error_code recv_dispatcher(network::Packet packet, network::Session &session);
     network::error_code send_dispatcher(network::Packet packet, network::Session &session);
 
-
     // Causes the server to stop its running threads if any.0
     void stop();
 
