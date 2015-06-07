@@ -105,6 +105,8 @@ namespace network
                    length_ = 0;
                    if (error == 1)
                      kill();
+                   else
+                    receive();
                  }
                  else
                  {
