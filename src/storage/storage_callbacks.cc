@@ -13,6 +13,23 @@ namespace storage
     CharT* data = packet.message_seq_get().front().data();
     const c_s::up_act* part = reinterpret_cast<const c_s::up_act*>(data);
 
+    // Check if the hash is correct
+    {
+      // Compute the hash of the received buffer
+      auto hash = files::hash_buffer_hex(part->data,
+                                     packet.size_get() - sizeof (c_s::up_act));
+      // If the hash is not correct, send a s_c_fail_sha1 to the client
+      // and kill the connection
+      if(memcmp(hash.data(), part->sha1, 20))
+      {
+        utils::Logger::cerr() << "Hash failed";
+        Packet p{s_c::fromto, s_c::fail_sha1_w};
+        p.add_message(&part->partid, sizeof (PARTID), copy::Yes);
+        session.send(p);
+        return 1;
+      }
+    }
+
     // Save the file to disk
     std::ofstream file(storage::conf.storage_path + '/'
                        + std::to_string(part->partid.fid)

@@ -25,7 +25,7 @@ namespace DB
     return name_;
   }
 
-  inline CharT* FileItem::hash_get()
+  inline unsigned char* FileItem::hash_get()
   {
     return &hash_[0];
   }
@@ -50,7 +50,7 @@ namespace DB
     return partid_.partnum;
   }
 
-  inline CharT* PartItem::hash_get()
+  inline unsigned char* PartItem::hash_get()
   {
     return &hash_[0];
   }

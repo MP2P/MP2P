@@ -105,7 +105,7 @@ namespace DB
     fsize_type file_size_get() const;
     rdcy_type redundancy_get() const;
     rdcy_type current_redundancy_get() const;
-    CharT* hash_get();
+    unsigned char* hash_get();
     bool is_replicated() const;
     bool is_uploaded() const;
 
@@ -126,7 +126,7 @@ namespace DB
 
     fid_type fid_get() const;
     partnum_type num_get() const;
-    CharT* hash_get();
+    unsigned char* hash_get();
     std::vector<stid_type> locations_get() const;
 
     std::string serialize() const override;

@@ -150,6 +150,8 @@ namespace utils
 
     template <typename T>
     std::string string_from(T value);
+
+    std::string string_from(const unsigned char* value, size_t size);
     std::string string_from(const char* value, size_t size);
   }
 }

@@ -23,6 +23,11 @@ namespace utils
       return ss.str();
     }
 
+    std::string string_from(const unsigned char* value, size_t size)
+    {
+      return "\"" + std::string(reinterpret_cast<const char*>(value), size) + "\"";
+    }
+
     std::string string_from(const char* value, size_t size)
     {
       return "\"" + std::string(value, size) + "\"";
