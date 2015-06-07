@@ -28,7 +28,7 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]")
     REQUIRE(file_item.file_size_get() == 15000);
     REQUIRE(file_item.redundancy_get() == 3);
     REQUIRE(file_item.current_redundancy_get() == 1);
-    res_has = std::string(file_item.hash_get());
+    res_has = std::string(reinterpret_cast<const char*>(file_item.hash_get()));
     REQUIRE(res_has.compare(hash));
     REQUIRE(file_item.is_uploaded());
 
@@ -45,7 +45,7 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]")
     // Check the resulting PartItem
     REQUIRE(part_item.fid_get() == 1);
     REQUIRE(part_item.num_get() == 3);
-    res_has = std::string(part_item.hash_get());
+    res_has = std::string(reinterpret_cast<const char*>(part_item.hash_get()));
     REQUIRE(res_has.compare(hash));
     std::vector <stid_type> v = part_item.locations_get();
     REQUIRE(std::accumulate(v.begin(), v.end(), 0) == (3 + 4 + 5 + 6));

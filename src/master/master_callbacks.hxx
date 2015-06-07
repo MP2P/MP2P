@@ -52,7 +52,6 @@ namespace master
     // Get the unique id of the file
     network::masks::fid_type file_id = fi.id_get();
 
-    response.add_message(reinterpret_cast<const CharT*>(&*fields.begin()),
     Packet response{m_c::fromto, m_c::up_pieces_loc_w};
     response.add_message(&file_id, sizeof (file_id), copy::Yes);
     response.add_message(&*fields.begin(),
@@ -74,11 +73,7 @@ namespace master
 
     std::string fname(req->fname, packet.size_get());
 
-    uint64_t file_id = fids[fname];
-
     fsize_type fsize = boost::filesystem::file_size(fname);
-
-    utils::Logger::cout() << "Wanna download " + std::to_string(file_id);
 
     // FIXME : Look into the database for the file.
     // Get the address of each storage that contains the parts
@@ -99,6 +94,9 @@ namespace master
       STPFIELD field = { addr, i };
       fields.push_back(field);
     }
+
+    // FIXME : Get file_id from db
+    network::masks::fid_type file_id = 0; //fi.id_get();
 
     Packet response{m_c::fromto, m_c::down_pieces_loc_w};
     response.add_message(&fsize, sizeof (fsize_type), copy::Yes);
