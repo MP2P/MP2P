@@ -51,11 +51,11 @@ namespace DB
   void
   CouchbaseDb::cmd_put(const std::string& key, const std::string& value)
   {
-    utils::Logger::cout() << "Upserting " + key;
     auto result = client_.upsert(key, value);
     if (!result.status().success())
       throw std::logic_error("Can't put " + key + ", error: " +
                              std::to_string(result.cas()));
+    utils::Logger::cout() << "Upserted " + key;
   }
 
   // Connector
@@ -163,7 +163,7 @@ namespace DB
     std::stringstream ss;
     ss << "{"
           << "\"id\":" << utils::misc::string_from(id_) << ','
-          << "\"name\":" << utils::misc::string_from(name_) << ','
+          << "\"name\": " << utils::misc::string_from(name_) << ','
           << "\"file_size\":" << utils::misc::string_from(file_size_) << ','
           << "\"redundancy\":" << utils::misc::string_from(redundancy_) << ','
           << "\"current_redundancy\":" << utils::misc::string_from(current_redundancy_) << ','
@@ -280,8 +280,7 @@ namespace DB
     stid_type id = pt.get<stid_type>("id");
     std::string host_addr = pt.get<std::string>("host_addr");
     port_type port = pt.get<port_type>("port");
-    avspace_type available_space =
-        pt.get<avspace_type>("available_space");
+    avspace_type available_space = pt.get<avspace_type>("available_space");
 
     return StorageItem(id, host_addr, port, available_space);
   }

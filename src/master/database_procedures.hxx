@@ -89,13 +89,15 @@ namespace DB
       uint64_t total_size = pt.get<uint64_t>("total_size");
 
       auto fi = FileItem(count + 1, name, file_size, redundancy, 0, hash, 0);
+      total_size++;
+      DB::Connector::get_instance().cmd_put("files", "{\"count\": "
+          + std::to_string(count + 1) + ","
+          "\"total_size\": " + std::to_string(total_size + file_size) + "}");
 
-      DB::Connector::get_instance().cmd_put("files", ("{"
-      "\"count\":" + std::to_string(count + 1) + ","
-      "\"total_size:" + std::to_string(total_size + file_size) + "}"));
-
+      json = fi.serialize();
+      std::cout << "JSON FileItem = " << json << std::endl;
       DB::Connector::get_instance().cmd_put("file." + fi.name_get(),
-                                            fi.serialize());
+                                            json);
       return fi;
     }
 
@@ -118,51 +120,70 @@ namespace DB
         iterator_initialized = true;
       }
 
-      uint64_t total_available_space = 0;
-      for (auto it : storages)
-      {
-        total_available_space += it.available_space_get();
-      }
-
-      if (total_available_space < fi.file_size_get())
-      {
-        throw std::logic_error("Storages are full.");
-      }
+      // FIXME
+//      uint64_t total_available_space = 0;
+//      for (auto it : storages)
+//      {
+//        total_available_space += it.available_space_get();
+//        std::cout << "Storage : " << it.serialize() << std::endl;
+//      }
+//
+//      if (total_available_space < fi.file_size_get())
+//      {
+//        throw std::logic_error("Storages are full.");
+//      }
 
       // Round-robin distribution over all Storages.
-      std::vector<STPFIELD> fields;
+
+      // <Storage, count>
+      std::vector<std::pair<StorageItem, partnum_type>> tmp_values;
+
       auto nb_parts = number_of_parts(fi.file_size_get());
+
       for (network::masks::partnum_type i = 1; i <= nb_parts; ++i)
       {
         if (current_round_robin == storages.end())
           current_round_robin = storages.begin();
-        else
-          ++current_round_robin;
 
-        auto part_size = network::get_part_size(fi.file_size_get(), i - 1, nb_parts);
+        auto part_size = network::get_part_size(fi.file_size_get(),
+                                                i - 1,
+                                                nb_parts);
 
         // If this storage does not have enough place, check the next one.
         if (current_round_robin->available_space_get() < part_size)
           --i;
         else
         {
-          ADDR tmp_addr = current_round_robin->addr_get();
-
-          // Check if the storage isn't already in our fields list,
-          // If so, just add 1 to f.nb.
-          auto f = fields.begin();
-          for (; f < fields.end(); ++f)
+          auto f = tmp_values.begin();
+          for (; f < tmp_values.end(); ++f)
           {
-            if (f->addr.ipv6 == tmp_addr.ipv6 && f->addr.port == tmp_addr.port)
+            if (f->first.host_addr_get() == current_round_robin->host_addr_get()
+                && f->first.port_get() == current_round_robin->port_get())
             {
-              f->nb += 1;
+              f->second += 1;
+              break;
             }
           }
-          // Else add the storage to fields with nb=1.
-          if (f == fields.end())
-            fields.push_back({current_round_robin->addr_get(), 1});
+          // Else add the storage to fields with nb=1 if it's ipv6 it joinable
+          if (f == tmp_values.end())
+          {
+            try
+            {
+              current_round_robin->addr_get();
+              tmp_values.push_back({*current_round_robin, 1});
+            }
+            catch (...)
+            {
+              --i;
+            }
+          }
         }
+        ++current_round_robin;
       }
+
+      std::vector<STPFIELD> fields;
+      for (auto it : tmp_values)
+        fields.push_back({it.first.addr_get(), it.second});
       return fields;
     }
   }

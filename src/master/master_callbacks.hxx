@@ -6,22 +6,18 @@ namespace master
   inline error_code
   cm_up_req(Packet& packet, Session& session)
   {
-    std::cout << "I'm here bitch1" << std::endl;
 
     c_m::up_req* req = reinterpret_cast<c_m::up_req*>
         (packet.message_seq_get().front().data());
 
-    std::cout << "I'm here bitch2" << std::endl;
+    std::string fname = std::string(
+        req->fname, packet.size_get()
+                    - sizeof(req->fsize)
+                    - sizeof(req->rdcy)
+    );
 
-    // Check if file already exists
-    try
-    {
-      DB::Connector::get_instance().cmd_get("file." + std::string(req->fname));
-      // File already exists: return error
-      return 1;
-    }
-    catch (...)
-    { /* Contiinue action */ }
+    utils::Logger::cerr() << "Request to upload file " + fname
+                             + " of size " + std::to_string(req->fsize) + ".";
 
     // Compute the number of parts.
     uint32_t nb_parts = DB::tools::number_of_parts(req->fsize);
@@ -31,15 +27,21 @@ namespace master
     std::cout << "I'm here bitch3" << std::endl;
 
     // Create file in DB
-    DB::FileItem fi = DB::tools::create_new_file(req->fname,
+    DB::FileItem fi = DB::tools::create_new_file(fname,
                                                  req->fsize,
                                                  req->rdcy,
-                                                 "");
+                                                 "azertyuiopmlkjhgfdsq");
 
     std::cout << "I'm here bitch4" << std::endl;
 
     // Compute STPFIELD(s) depending on file parts.
     std::vector<STPFIELD> fields = DB::tools::get_stpfields_for_upload(fi);
+
+    if (fields.size() == 0)
+      std::cout << "No srly ?" << std::endl;
+
+    for (auto it : fields)
+      std::cout << "Field: " << it.addr.ipv6 << ":" << it.addr.port << " nb=" << it.nb << std::endl;
 
     // Get the unique id of the file
     network::masks::fid_type file_id = fi.id_get();
