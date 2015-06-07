@@ -24,24 +24,29 @@ namespace master
     if (nb_parts == 0)
       return 1;
 
-    std::cout << "I'm here bitch3" << std::endl;
-
     // Create file in DB
     DB::FileItem fi = DB::tools::create_new_file(fname,
                                                  req->fsize,
                                                  req->rdcy,
-                                                 "azertyuiopmlkjhgfdsq");
-
-    std::cout << "I'm here bitch4" << std::endl;
+                                                 "                    ");
 
     // Compute STPFIELD(s) depending on file parts.
     std::vector<STPFIELD> fields = DB::tools::get_stpfields_for_upload(fi);
 
     if (fields.size() == 0)
-      std::cout << "No srly ?" << std::endl;
+    {
+      utils::Logger::cerr() << "Could not find any Storage to send parts to...";
+      return 1;
+    }
 
+    utils::Logger::cout() << "Parts repartition for " + fname + ":";
     for (auto it : fields)
-      std::cout << "Field: " << it.addr.ipv6 << ":" << it.addr.port << " nb=" << it.nb << std::endl;
+    {
+      utils::Logger::cout() << "    -> " + network::binary_to_string_ipv6(it.addr.ipv6, 16) + ":"
+                               + std::to_string(it.addr.port)
+                               + " count = " + std::to_string(it.nb);
+    }
+
 
     // Get the unique id of the file
     network::masks::fid_type file_id = fi.id_get();
@@ -53,6 +58,8 @@ namespace master
     response.add_message(reinterpret_cast<const CharT*>(&*fields.begin()),
                          fields.size() * sizeof (STPFIELD),
                          copy::Yes);
+
+    utils::Logger::cout() << "Responding with m_c::pieces_loc answers for " + fname;
     session.send(response);
 
     return 0;

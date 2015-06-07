@@ -79,6 +79,26 @@ namespace DB
     create_new_file(std::string name, fsize_type file_size,
                     rdcy_type redundancy, std::string hash)
     {
+      // Check if filename already exists
+      uint64_t i = 0;
+
+      bool good_name = false;
+      do
+      {
+        try
+        {
+          DB::Connector::get_instance().cmd_get("file."
+                                                + name
+                                                + ".__" + std::to_string(i));
+          ++i;
+        }
+        catch (...)
+        {
+          name = name + ".__" + std::to_string(i);
+          good_name = true;
+        }
+      } while (!good_name);
+
       std::string json = DB::Connector::get_instance().cmd_get("files");
 
       boost::property_tree::ptree pt;
@@ -94,10 +114,8 @@ namespace DB
           + std::to_string(count + 1) + ","
           "\"total_size\": " + std::to_string(total_size + file_size) + "}");
 
-      json = fi.serialize();
-      std::cout << "JSON FileItem = " << json << std::endl;
       DB::Connector::get_instance().cmd_put("file." + fi.name_get(),
-                                            json);
+                                            fi.serialize());
       return fi;
     }
 
@@ -116,7 +134,6 @@ namespace DB
         std::srand(std::time(0));
         stid_type x = std::rand() % (storages.size() + 1);
         current_round_robin = std::next(storages.begin(), x);
-        std::cout << "current_round_robin_storage=" << std::to_string(x) << " (count=" << std::to_string(storages.size()) << ")" << std::endl;
         iterator_initialized = true;
       }
 
