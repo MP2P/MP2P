@@ -53,6 +53,9 @@ namespace files
 
   // Hash a file. Calling hash_buffer on the mapped area
   std::string hash_file(const File& file);
+
+  // Hash a file. Calling hash_buffer_hex on the mapped area
+  std::array<unsigned char, 20> hash_file_hex(const File& file);
 }
 
 #include "file.hxx"

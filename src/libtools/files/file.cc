@@ -134,4 +134,8 @@ namespace files
     return hash_buffer(file.data(), boost::filesystem::file_size(file.filename_get()));
   }
 
+  std::array<unsigned char, 20> hash_file_hex(const File& file)
+  {
+    return hash_buffer_hex(file.data(), boost::filesystem::file_size(file.filename_get()));
+  }
 }
