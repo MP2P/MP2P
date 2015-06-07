@@ -41,9 +41,19 @@ namespace client
   void
   Client::stop()
   {
-    // Join all threads
+    join_all_threads();
+  }
+
+  void
+  Client::join_all_threads()
+  {
     std::for_each(threads_.begin(), threads_.end(),
-        [](auto& thread) { thread.join(); });
+        [](auto& thread)
+        {
+          if (thread.joinable())
+            thread.join();
+        }
+    );
   }
 
   void Client::request_upload(const files::File& file,
@@ -92,8 +102,11 @@ namespace client
             parts -= field.nb;
           }
 
+          join_all_threads();
+
           return 0;
         });
+
   }
 
   std::function<void()>
@@ -104,7 +117,7 @@ namespace client
                      size_t begin_id, size_t end_id)
   {
     // Create an unique thread per session
-    return [&file, this, &addr, total_parts, begin_id, end_id, fid]()
+    return [&file, this, addr, total_parts, begin_id, end_id, fid]()
     {
         auto host = network::binary_to_string_ipv6(addr.ipv6,
                                                network::masks::ipv6_type_size);
@@ -135,6 +148,7 @@ namespace client
                               hash.size(), copy::Yes);
           // FIXME : part_size may not fit in uint32_t
           to_send.add_message(part_buffer, part_size, copy::No);
+
           storage.send(to_send);
         }
     };
@@ -170,14 +184,19 @@ namespace client
           auto file = files::File::create_empty_file(filename + "-dl",
                                                      pieces->fsize);
 
+
           for (size_t i = 0; i < list_size; ++i)
           {
             // Recieve a part directly into the file
             STPFIELD& field = pieces->fdetails.stplist[i];
+            PARTID partid{ pieces->fdetails.fid, field.nb };
             threads_.emplace_back(recv_part(file,
                                   field.addr,
+                                  partid,
                                   part_size));
           }
+
+          join_all_threads();
 
           return 0;
         });
@@ -185,10 +204,11 @@ namespace client
 
   std::function<void()>
   Client::recv_part(files::File& file,
-                    const ADDR& addr,
+                    ADDR addr,
+                    PARTID partid,
                     size_t part_size)
   {
-    return [&file, this, &addr, part_size]()
+    return [&file, this, addr, partid, part_size]()
     {
       auto host = network::binary_to_string_ipv6(addr.ipv6,
                                                network::masks::ipv6_type_size);
@@ -196,12 +216,20 @@ namespace client
       // Create the storage session
       Session storage{io_service_, host, addr.port};
 
+      Packet to_send{c_s::fromto, c_s::down_act_w};
+      to_send.add_message(reinterpret_cast<const CharT*>(&partid),
+                          sizeof (PARTID), copy::No);
+
+      storage.send(to_send);
+
       // Receive a part
       storage.blocking_receive(
           [&file, part_size](Packet p, Session&) -> error_code
           {
             CharT* data = p.message_seq_get().front().data();
             s_c::up_act* upload = reinterpret_cast<s_c::up_act*>(data);
+
+            std::cout << "size: " << p.size_get() - sizeof (PARTID) - sizeof (sha1_type) << std::endl;
 
             // Write the data to the file
             memcpy(file.data() + upload->partid.partnum * part_size,

@@ -45,6 +45,9 @@ namespace client
     // Stop the server
     void stop();
 
+    // Join all threads
+    void join_all_threads();
+
     // Send a c_m::up_req to the master
     void request_upload(const files::File& file,
                         network::masks::rdcy_type rdcy);
@@ -64,7 +67,8 @@ namespace client
     // Recieve a part into file
     std::function<void()>
     recv_part(files::File& file,
-              const network::masks::ADDR& addr,
+              network::masks::ADDR addr,
+              network::masks::PARTID partid,
               size_t part_size);
   };
 
