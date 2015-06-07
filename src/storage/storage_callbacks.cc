@@ -7,7 +7,8 @@ namespace storage
   using namespace network::masks;
   using copy = utils::shared_buffer::copy;
 
-  network::error_code cs_up_act(network::Packet& packet, network::Session& session)
+  network::error_code cs_up_act(network::Packet& packet,
+                                network::Session& session)
   {
     CharT* data = packet.message_seq_get().front().data();
     const c_s::up_act* part = reinterpret_cast<const c_s::up_act*>(data);
