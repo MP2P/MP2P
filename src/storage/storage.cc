@@ -105,6 +105,8 @@ namespace storage
         {
           case 1:
             return cs_up_act(packet, session);
+          case 2:
+            return cs_down_act(packet, session);
           default:
             return 1;
         }

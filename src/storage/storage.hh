@@ -53,4 +53,8 @@ namespace storage
 
   network::error_code cs_up_act(network::Packet& packet,
                                 network::Session& session);
+
+  network::error_code cs_down_act(network::Packet& packet,
+                                  network::Session& session);
+
 }
