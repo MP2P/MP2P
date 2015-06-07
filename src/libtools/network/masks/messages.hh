@@ -69,11 +69,19 @@ namespace network
         network::error_code err;
       } __attribute__ ((packed));
 
-
-      // 1-2 : pieces_loc ~ The pieces locations <FID<<STID|UINT16>,...>,...>
-      static const what_type pieces_loc_w = 2;
-      struct pieces_loc
+      // 1-1 : up_pieces_loc ~ The pieces locations <FID<<STID|UINT16>,...>,...>
+      static const what_type up_pieces_loc_w = 1;
+      struct up_pieces_loc
       {
+        FDETAILS fdetails;
+      } __attribute__ ((packed));
+
+
+      // 1-2 : down_pieces_loc ~ The pieces locations <FSIZE<FID<<STID|UINT16>,...>,...>>
+      static const what_type down_pieces_loc_w = 2;
+      struct down_pieces_loc
+      {
+        fsize_type fsize;
         FDETAILS fdetails;
       } __attribute__ ((packed));
     }

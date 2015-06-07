@@ -38,6 +38,10 @@ int main(int argc, const char *argv[])
       files::File file(client::conf.file_path);
       client.request_upload(file, client::conf.redundancy);
     }
+    else if (client::conf.action == action::download)
+    {
+      client.request_download(client::conf.file_path);
+    }
 
     client.stop();
   }

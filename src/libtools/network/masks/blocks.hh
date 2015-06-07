@@ -31,7 +31,7 @@ namespace network
     using partsize_type = uint64_t;
     using port_type = uint16_t;
     using rdcy_type = uint8_t;
-    using sha1_type = CharT[sha1_type_size];
+    using sha1_type = unsigned char[sha1_type_size];
     using size_type = uint32_t;
     using stid_type = uint32_t;
     using mtid_type = uint32_t;

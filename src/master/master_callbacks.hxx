@@ -1,3 +1,5 @@
+#include <boost/filesystem.hpp>
+
 namespace master
 {
   using copy = utils::shared_buffer::copy;
@@ -47,15 +49,13 @@ namespace master
                                + " count = " + std::to_string(it.nb);
     }
 
-
     // Get the unique id of the file
     network::masks::fid_type file_id = fi.id_get();
 
-    Packet response{m_c::fromto, m_c::pieces_loc_w};
-    response.add_message(reinterpret_cast<const CharT*>(&file_id),
-                         sizeof (file_id),
-                         copy::Yes);
     response.add_message(reinterpret_cast<const CharT*>(&*fields.begin()),
+    Packet response{m_c::fromto, m_c::up_pieces_loc_w};
+    response.add_message(&file_id, sizeof (file_id), copy::Yes);
+    response.add_message(&*fields.begin(),
                          fields.size() * sizeof (STPFIELD),
                          copy::Yes);
 
@@ -69,7 +69,46 @@ namespace master
   inline error_code
   cm_down_req(Packet& packet, Session& session)
   {
-    return (packet.size_get() && session.length_get());
+    c_m::down_req* req = reinterpret_cast<c_m::down_req*>
+        (packet.message_seq_get().front().data());
+
+    std::string fname(req->fname, packet.size_get());
+
+    uint64_t file_id = fids[fname];
+
+    fsize_type fsize = boost::filesystem::file_size(fname);
+
+    utils::Logger::cout() << "Wanna download " + std::to_string(file_id);
+
+    // FIXME : Look into the database for the file.
+    // Get the address of each storage that contains the parts
+
+    size_t nb_servers = 1;
+
+    std::vector<STPFIELD> fields;
+    for (stid_type i = 0; i < nb_servers; ++i)
+    {
+      // FIXME : Get storage's ADDR from db
+      auto ip = network::get_ipv6("0:0:0:0:0:0:0:1");
+
+      // FIXME : Ugly address initialization
+      ADDR addr;
+      memcpy(addr.ipv6, ip.to_bytes().data(), ipv6_type_size); // Copy IP
+      addr.port = 3728;
+
+      STPFIELD field = { addr, i };
+      fields.push_back(field);
+    }
+
+    Packet response{m_c::fromto, m_c::down_pieces_loc_w};
+    response.add_message(&fsize, sizeof (fsize_type), copy::Yes);
+    response.add_message(&file_id, sizeof (file_id), copy::Yes);
+    response.add_message(&*fields.begin(),
+                         fields.size() * sizeof (STPFIELD),
+                         copy::Yes);
+    session.send(response);
+
+    return 0;
   }
 
   // Can you delete this file?

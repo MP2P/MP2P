@@ -36,7 +36,7 @@ namespace DB
   }
 
   inline
-  CharT*
+  unsigned char*
   FileItem::hash_get()
   {
     return &hash_[0];
@@ -71,7 +71,7 @@ namespace DB
   }
 
   inline
-  CharT*
+  unsigned char*
   PartItem::hash_get()
   {
     return &hash_[0];

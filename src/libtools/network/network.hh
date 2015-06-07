@@ -106,7 +106,8 @@ namespace network
     // Set to_copy to copy::Yes if you want the data
     // to be copied to a new buffer.
     // If not, the data should remain valid during the usage of the packet
-    void add_message(const masks::CharT* data,
+    template <typename T>
+    void add_message(const T* data,
                      const masks::size_type size,
                      utils::shared_buffer::copy to_copy);
 

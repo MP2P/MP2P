@@ -80,7 +80,9 @@ namespace files
 
     // Map the file
     file_ = boost::iostreams::mapped_file{filepath_,
-                                          std::ios_base::binary,
+                                          std::ios_base::binary
+                                          | std::ios_base::in
+                                          | std::ios_base::out,
                                           size};
   }
 
@@ -134,4 +136,8 @@ namespace files
     return hash_buffer(file.data(), boost::filesystem::file_size(file.filepath_get()));
   }
 
+  std::array<unsigned char, 20> hash_file_hex(const File& file)
+  {
+    return hash_buffer_hex(file.data(), boost::filesystem::file_size(file.filepath_get()));
+  }
 }

@@ -101,8 +101,6 @@ namespace master
     if (packet.size_get() < 1)
       return 1;
 
-
-
     switch (packet.fromto_get())
     {
       case c_m::fromto:
@@ -145,8 +143,8 @@ namespace master
   inline error_code
   Master::send_dispatcher(Packet packet, Session& session)
   {
-    (void)packet;
     (void)session;
+    (void)packet;
     return 0;
   }
 }
