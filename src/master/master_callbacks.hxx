@@ -40,7 +40,7 @@ namespace master
       fields.push_back(field);
     }
 
-    Packet response{m_c::fromto, m_c::pieces_loc_w};
+    Packet response{m_c::fromto, m_c::up_pieces_loc_w};
     response.add_message(reinterpret_cast<const CharT*>(&file_id),
                          sizeof (file_id),
                          copy::Yes);
@@ -85,7 +85,7 @@ namespace master
       fields.push_back(field);
     }
 
-    Packet response{m_c::fromto, m_c::pieces_loc_w};
+    Packet response{m_c::fromto, m_c::down_pieces_loc_w};
     response.add_message(reinterpret_cast<const CharT*>(&file_id),
                          sizeof (file_id),
                          copy::Yes);

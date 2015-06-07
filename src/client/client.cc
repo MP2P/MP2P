@@ -94,7 +94,7 @@ namespace client
         [&file, this](Packet p, Session& /*recv_session*/) -> error_code
         {
           CharT* data = p.message_seq_get().front().data();
-          m_c::pieces_loc* pieces = reinterpret_cast<m_c::pieces_loc*>(data);
+          m_c::up_pieces_loc* pieces = reinterpret_cast<m_c::up_pieces_loc*>(data);
 
           size_t list_size = (p.size_get() - sizeof (fid_type)) / sizeof (STPFIELD);
 
