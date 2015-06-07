@@ -80,7 +80,9 @@ namespace files
 
     // Map the file
     file_ = boost::iostreams::mapped_file{filename_,
-                                          std::ios_base::binary,
+                                          std::ios_base::binary
+                                          | std::ios_base::in
+                                          | std::ios_base::out,
                                           size};
   }
 
