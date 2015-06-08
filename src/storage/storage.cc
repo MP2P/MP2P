@@ -35,11 +35,17 @@ namespace storage
   bool
   Storage::run()
   {
+    init_id();
+
     if (!server_.is_running())
     {
       stop();
       return false;
     }
+
+    utils::Logger::cout() << "Launching storage with id : "
+                             + std::to_string(id_);
+
     for (unsigned i = 0; i < storage::conf.concurrency; ++i)
     {
       threads_.emplace_back(
@@ -53,6 +59,7 @@ namespace storage
           })
       );
     }
+
     return true;
   }
 
@@ -74,6 +81,46 @@ namespace storage
           utils::Logger::cout() << "Done stopping thread " + id.str() + "!";
         }
     );
+  }
+
+  void
+  Storage::init_id()
+  {
+    std::ifstream id_file(storage::conf.id_path);
+    if (!id_file)
+    {
+      std::ofstream id_file(storage::conf.id_path);
+
+      io_service_.run();
+
+      auto master_session = Session{io_service_,
+                                    conf.master_hostname,
+                                    conf.master_port};
+
+      // Prepare the packet
+      /*s_m::id_req req{ 3272 };
+      Packet to_send{s_m::fromto, s_m::id_req_w};
+      to_send.add_message(&storage::conf::port,
+                          sizeof (network::masks::port_type),
+                          copy::No);
+      master_session.send(to_send);
+      master_session.blocking_receive(
+          [](Packet p, Session& s)
+          {
+            const CharT* data = p.message_seq_get().front().data();
+            const auto* response = reinterpret_cast<const m_s::fid_info*>(data);
+            id_ = data.stid;
+            id_file << data.stid;
+
+            io_service_.stop();
+
+            return 1;
+          }
+      );
+      */
+    }
+    else
+      id_file >> id_;
   }
 
   // When CTRL+C is typed, we call storage::stop();
