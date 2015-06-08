@@ -11,6 +11,8 @@ namespace storage
   using namespace boost::asio;
   using namespace boost::posix_time;
 
+  using copy = utils::shared_buffer::copy;
+
   Storage::Storage()
       : server_{get_ipv6(storage::conf.hostname), storage::conf.port,
                 io_service_,
@@ -35,11 +37,17 @@ namespace storage
   bool
   Storage::run()
   {
+    init_id();
+
     if (!server_.is_running())
     {
       stop();
       return false;
     }
+
+    utils::Logger::cout() << "Launching storage with id : "
+                             + std::to_string(id_);
+
     for (unsigned i = 0; i < storage::conf.concurrency; ++i)
     {
       threads_.emplace_back(
@@ -53,6 +61,7 @@ namespace storage
           })
       );
     }
+
     return true;
   }
 
@@ -74,6 +83,47 @@ namespace storage
           utils::Logger::cout() << "Done stopping thread " + id.str() + "!";
         }
     );
+  }
+
+  void
+  Storage::init_id()
+  {
+    std::ifstream id_file(storage::conf.id_path);
+    if (!id_file)
+    {
+
+      auto master_session = Session{io_service_,
+                                    conf.master_hostname,
+                                    conf.master_port};
+
+      // Send a request for an id
+      s_m::id_req req{storage::conf.port};
+      Packet to_send{s_m::fromto, s_m::id_req_w};
+      to_send.add_message(&req, sizeof (s_m::id_req), copy::No);
+      master_session.send(to_send);
+
+      master_session.blocking_receive(
+          [this](Packet p, Session&)
+          {
+            const CharT* data = p.message_seq_get().front().data();
+            const auto* response = reinterpret_cast<const m_s::fid_info*>(data);
+            id_ = response->stid;
+
+            std::ofstream id_file(storage::conf.id_path);
+            id_file << response->stid;
+
+            io_service_.stop();
+
+            return 1;
+          }
+      );
+
+      // The io_service is ran after the IO operations have been "commited"
+      io_service_.run();
+
+    }
+    else
+      id_file >> id_;
   }
 
   // When CTRL+C is typed, we call storage::stop();

@@ -126,6 +126,8 @@ namespace master
             return sm_del_ack(packet, session);
           case s_m::part_ack_w:
             return sm_part_ack(packet, session);
+          case s_m::id_req_w:
+            return sm_id_req(packet, session);
           default:
             return 10501;
         }

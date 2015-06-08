@@ -18,6 +18,7 @@ namespace storage
     std::string master_hostname;
     network::masks::port_type master_port;
     std::string storage_path;
+    std::string id_path;
   };
 
   // Declaration of the storage configuration
@@ -31,6 +32,7 @@ namespace storage
     boost::asio::io_service io_service_; // Does not need instantiation
     network::Server server_;
     std::vector<std::thread> threads_;
+    uint32_t id_;
 
     network::error_code recv_dispatcher(network::Packet packet,
                                         network::Session& session);
@@ -39,6 +41,9 @@ namespace storage
 
     // Causes the server to stop its running threads if any.
     void stop();
+
+    // Request an id from the master, in case the file is missing
+    void init_id();
 
   public:
     Storage();

@@ -138,4 +138,22 @@ namespace master
     // the file to other storages
     return (packet.size_get() && session.length_get());
   }
+
+  inline error_code
+  sm_id_req(Packet& packet, Session& session)
+  {
+    const CharT* data = packet.message_seq_get().front().data();
+    const auto* req = reinterpret_cast<const s_m::id_req*>(data);
+
+    // FIXME : Query the database using the req->port
+    (void)req->port;
+    stid_type stid = 1;
+
+    const m_s::fid_info response{stid};
+    Packet to_send{m_s::fromto, m_s::fid_info_w};
+    to_send.add_message(&response, sizeof (m_s::fid_info), copy::No);
+    session.send(to_send);
+
+    return 1; // Close the connection
+  }
 }

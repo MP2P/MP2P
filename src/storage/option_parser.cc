@@ -13,6 +13,7 @@
 #define DEFAULT_CONCURRENCY 4
 #define DEFAULT_TIMEOUT 300
 #define DEFAULT_STORAGE_PATH "stock_dir"
+#define DEFAULT_ID_PATH "storage.id"
 
 
 using c_ty = decltype(storage::conf.config_path);
@@ -25,6 +26,7 @@ using m_ty = std::pair<mh_ty, mp_ty>; // = l_ty
 using cy_ty = decltype(storage::conf.concurrency);
 using to_ty = decltype(storage::conf.timeout);
 using sp_ty = decltype(storage::conf.storage_path);
+using idp_ty = decltype(storage::conf.id_path);
 
 namespace std
 {
@@ -73,6 +75,7 @@ namespace storage
     storage::conf.master_hostname = pt.get<mh_ty>("master.hostname");
     storage::conf.master_port = pt.get<mp_ty>("master.port");
     storage::conf.storage_path = pt.get<sp_ty>("storage_path");
+    storage::conf.id_path = pt.get<idp_ty>("id_path");
   }
 
   void
@@ -119,6 +122,7 @@ namespace storage
       storage::conf.concurrency = std::thread::hardware_concurrency() * 2;
       storage::conf.timeout = DEFAULT_TIMEOUT;
       storage::conf.storage_path = DEFAULT_STORAGE_PATH;
+      storage::conf.id_path = DEFAULT_ID_PATH;
 
       // Second parse options specified in config file...
       if (vm.count("config"))
@@ -149,6 +153,9 @@ namespace storage
 
       if (vm.count("storage_path"))
         storage::conf.storage_path = vm["storage_path"].as<sp_ty>();
+
+      if (vm.count("id_path"))
+        storage::conf.id_path = vm["id_path"].as<idp_ty>();
 
       // ... and finally check results
       if (storage::conf.hostname == "")
