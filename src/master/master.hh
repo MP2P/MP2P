@@ -63,6 +63,7 @@ namespace master
   network::error_code cm_del_req(network::Packet& packet, network::Session& session);
   network::error_code sm_del_ack(network::Packet& packet, network::Session& session);
   network::error_code sm_part_ack(network::Packet& packet, network::Session& session);
+  network::error_code sm_id_req(network::Packet& packet, network::Session& session);
 }
 
 #include "master.hxx"
