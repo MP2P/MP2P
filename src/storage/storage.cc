@@ -91,9 +91,6 @@ namespace storage
     std::ifstream id_file(storage::conf.id_path);
     if (!id_file)
     {
-      std::ofstream id_file(storage::conf.id_path);
-
-      io_service_.run();
 
       auto master_session = Session{io_service_,
                                     conf.master_hostname,
@@ -106,11 +103,13 @@ namespace storage
       master_session.send(to_send);
 
       master_session.blocking_receive(
-          [this, &id_file](Packet p, Session&)
+          [this](Packet p, Session&)
           {
             const CharT* data = p.message_seq_get().front().data();
             const auto* response = reinterpret_cast<const m_s::fid_info*>(data);
             id_ = response->stid;
+
+            std::ofstream id_file(storage::conf.id_path);
             id_file << response->stid;
 
             io_service_.stop();
@@ -118,6 +117,10 @@ namespace storage
             return 1;
           }
       );
+
+      // The io_service is ran after the IO operations have been "commited"
+      io_service_.run();
+
     }
     else
       id_file >> id_;
