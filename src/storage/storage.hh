@@ -18,6 +18,7 @@ namespace storage
     std::string master_hostname;
     network::masks::port_type master_port;
     std::string storage_path;
+    std::string id_path;
   };
 
   // Declaration of the storage configuration
