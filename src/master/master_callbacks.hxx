@@ -139,7 +139,7 @@ namespace master
     return (packet.size_get() && session.length_get());
   }
 
-  inline error_code
+  inline masks::ack_type
   sm_id_req(Packet& packet, Session& session)
   {
     const CharT* data = packet.message_seq_get().front().data();
