@@ -150,7 +150,7 @@ namespace storage
 
   // Handle the session after filling the buffer
   // Errors are defined in the ressources/errors file.
-  error_code
+  masks::ack_type
   Storage::recv_dispatcher(Packet packet, Session& session)
   {
     if (packet.size_get() < 1)
@@ -173,7 +173,7 @@ namespace storage
     }
   }
 
-  error_code
+  masks::ack_type
   Storage::send_dispatcher(Packet packet, Session& session)
   {
     (void)packet;

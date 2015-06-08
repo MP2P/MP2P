@@ -7,7 +7,7 @@ namespace storage
   using namespace network::masks;
   using copy = utils::shared_buffer::copy;
 
-  network::error_code
+  network::masks::ack_type
   cs_up_act(network::Packet& packet, network::Session& session)
   {
     CharT* data = packet.message_seq_get().front().data();
@@ -50,7 +50,7 @@ namespace storage
     return 0;
   }
 
-  network::error_code
+  network::masks::ack_type
   cs_down_act(network::Packet& packet, network::Session& session)
   {
     CharT* data = packet.message_seq_get().front().data();

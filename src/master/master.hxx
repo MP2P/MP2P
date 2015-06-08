@@ -95,7 +95,7 @@ namespace master
 
   // Handle the session after filling the buffer
   // Errors are defined in the ressources/errors file.
-  inline error_code
+  inline masks::ack_type
   Master::recv_dispatcher(Packet packet, Session& session)
   {
     if (packet.size_get() < 1)
@@ -107,7 +107,8 @@ namespace master
         switch (packet.what_get())
         {
           case c_m::error_w:
-            return 10001; // Error
+            //return 10001; // Error
+            return 2; //FIXME
           case c_m::up_req_w:
             return cm_up_req(packet, session);
           case c_m::down_req_w:
@@ -115,13 +116,15 @@ namespace master
           case c_m::del_req_w:
             return cm_del_req(packet, session);
           default:
-            return 10001;
+            //return 10001;
+            return 3; //FIXME
         }
       case s_m::fromto:
         switch (packet.what_get())
         {
           case s_m::error_w:
-            return 10501; // Error
+            //return 10501; // Error
+            return 4; //FIXME
           case s_m::del_ack_w:
             return sm_del_ack(packet, session);
           case s_m::part_ack_w:
@@ -129,20 +132,22 @@ namespace master
           case s_m::id_req_w:
             return sm_id_req(packet, session);
           default:
-            return 10501;
+            //return 10501;
+            return 5; //FIXME
         }
       case m_m::fromto:
         switch (packet.what_get())
         {
           default:
-            return 10601; // Error
+            //return 10601; // Error
+            return 6; //FIXME
         }
       default:
         return 1; // Error
     }
   }
 
-  inline error_code
+  inline masks::ack_type
   Master::send_dispatcher(Packet packet, Session& session)
   {
     (void)session;

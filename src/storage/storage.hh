@@ -34,9 +34,9 @@ namespace storage
     std::vector<std::thread> threads_;
     uint32_t id_;
 
-    network::error_code recv_dispatcher(network::Packet packet,
+    network::masks::ack_type recv_dispatcher(network::Packet packet,
                                         network::Session& session);
-    network::error_code send_dispatcher(network::Packet packet,
+    network::masks::ack_type send_dispatcher(network::Packet packet,
                                         network::Session& session);
 
     // Causes the server to stop its running threads if any.
@@ -56,10 +56,10 @@ namespace storage
     void catch_stop();
   };
 
-  network::error_code cs_up_act(network::Packet& packet,
+  network::masks::ack_type cs_up_act(network::Packet& packet,
                                 network::Session& session);
 
-  network::error_code cs_down_act(network::Packet& packet,
+  network::masks::ack_type cs_down_act(network::Packet& packet,
                                   network::Session& session);
 
 }

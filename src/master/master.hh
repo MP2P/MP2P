@@ -41,8 +41,8 @@ namespace master
     network::Server server_;
     std::vector<std::thread> threads_;
 
-    network::error_code recv_dispatcher(network::Packet packet, network::Session &session);
-    network::error_code send_dispatcher(network::Packet packet, network::Session &session);
+    network::masks::ack_type recv_dispatcher(network::Packet packet, network::Session &session);
+    network::masks::ack_type send_dispatcher(network::Packet packet, network::Session &session);
 
     // Causes the server to stop its running threads if any.0
     void stop();
@@ -58,12 +58,12 @@ namespace master
     void catch_stop();
   };
 
-  network::error_code cm_up_req(network::Packet& packet, network::Session& session);
-  network::error_code cm_down_req(network::Packet& packet, network::Session& session);
-  network::error_code cm_del_req(network::Packet& packet, network::Session& session);
-  network::error_code sm_del_ack(network::Packet& packet, network::Session& session);
-  network::error_code sm_part_ack(network::Packet& packet, network::Session& session);
-  network::error_code sm_id_req(network::Packet& packet, network::Session& session);
+  network::masks::ack_type cm_up_req(network::Packet& packet, network::Session& session);
+  network::masks::ack_type cm_down_req(network::Packet& packet, network::Session& session);
+  network::masks::ack_type cm_del_req(network::Packet& packet, network::Session& session);
+  network::masks::ack_type sm_del_ack(network::Packet& packet, network::Session& session);
+  network::masks::ack_type sm_part_ack(network::Packet& packet, network::Session& session);
+  network::masks::ack_type sm_id_req(network::Packet& packet, network::Session& session);
 }
 
 #include "master.hxx"

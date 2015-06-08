@@ -20,7 +20,7 @@ namespace network
       static const what_type error_w = 0;
       struct error
       {
-        network::error_code err;
+        masks::ack_type err;
       } __attribute__ ((packed));
 
 
@@ -66,7 +66,7 @@ namespace network
       static const what_type error_w = 0;
       struct error
       {
-        network::error_code err;
+        masks::ack_type err;
       } __attribute__ ((packed));
 
       // 1-1 : up_pieces_loc ~ The pieces locations <FID<<STID|UINT16>,...>,...>
@@ -95,7 +95,7 @@ namespace network
       static const what_type error_w = 0;
       struct error
       {
-        network::error_code err;
+        masks::ack_type err;
       } __attribute__ ((packed));
 
 
@@ -126,7 +126,7 @@ namespace network
       static const what_type error_w = 0;
       struct error
       {
-        network::error_code err;
+        masks::ack_type err;
       } __attribute__ ((packed));
 
 
@@ -157,7 +157,7 @@ namespace network
       static const what_type error_w = 0;
       struct error
       {
-        network::error_code err;
+        masks::ack_type err;
       } __attribute__ ((packed));
 
 
@@ -203,7 +203,7 @@ namespace network
       static const what_type error_w = 0;
       struct error
       {
-        network::error_code err;
+        masks::ack_type err;
       } __attribute__ ((packed));
 
 
@@ -240,7 +240,7 @@ namespace network
       static const what_type error_w = 0;
       struct error
       {
-        network::error_code err;
+        masks::ack_type err;
       } __attribute__ ((packed));
     }
 
@@ -253,7 +253,7 @@ namespace network
       static const what_type error_w = 0;
       struct error
       {
-        network::error_code err;
+        masks::ack_type err;
       } __attribute__ ((packed));
 
 

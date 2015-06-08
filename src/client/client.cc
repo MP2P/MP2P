@@ -56,7 +56,7 @@ namespace client
     master_session_.send(req_packet);
 
     master_session_.blocking_receive(
-        [&file, this](Packet p, Session& /*recv_session*/) -> error_code
+        [&file, this](Packet p, Session& /*recv_session*/) -> ack_type
         {
           CharT* data = p.message_seq_get().front().data();
           m_c::up_pieces_loc* pieces = reinterpret_cast<m_c::up_pieces_loc*>(data);
@@ -157,7 +157,7 @@ namespace client
     // Wait for an answer from the master, then connect to each of the
     // storages
     master_session_.blocking_receive(
-        [&filename, this](Packet p, Session& /*recv_session*/) -> error_code
+        [&filename, this](Packet p, Session& /*recv_session*/) -> ack_type
         {
           CharT* data = p.message_seq_get().front().data();
           m_c::down_pieces_loc* pieces = reinterpret_cast<m_c::down_pieces_loc*>(data);
@@ -213,7 +213,7 @@ namespace client
 
       // Receive a part
       storage.blocking_receive(
-          [&file, part_size](Packet p, Session&) -> error_code
+          [&file, part_size](Packet p, Session&) -> ack_type
           {
             CharT* data = p.message_seq_get().front().data();
             s_c::up_act* upload = reinterpret_cast<s_c::up_act*>(data);

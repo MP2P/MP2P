@@ -10,7 +10,6 @@ namespace network
 {
   namespace masks
   {
-
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Wzero-length-array"
 
@@ -21,6 +20,7 @@ namespace network
     static const size_t sha1_type_size = 20;
 
     // Basic blocks
+    using ack_type = uint8_t;
     using avspace_type = uint64_t;
     using fid_type = uint64_t;
     using fname_type = const CharT;
@@ -34,7 +34,7 @@ namespace network
     using sha1_type = unsigned char[sha1_type_size];
     using size_type = uint32_t;
     using stid_type = uint32_t;
-    using mtid_type = uint32_t;
+    using mtid_type = uint32_t; //FIXME: Useless?
     using what_type = uint8_t;
     using data_type = const CharT;
 

@@ -5,7 +5,7 @@ namespace master
   using copy = utils::shared_buffer::copy;
 
   // May I upload a file?
-  inline error_code
+  inline masks::ack_type
   cm_up_req(Packet& packet, Session& session)
   {
 
@@ -65,7 +65,7 @@ namespace master
   }
 
   // May I download this file?
-  inline error_code
+  inline masks::ack_type
   cm_down_req(Packet& packet, Session& session)
   {
     const c_m::down_req* req = reinterpret_cast<c_m::down_req*>
@@ -110,21 +110,21 @@ namespace master
   }
 
   // Can you delete this file?
-  inline error_code
+  inline masks::ack_type
   cm_del_req(Packet& packet, Session& session)
   {
     return (packet.size_get() && session.length_get());
   }
 
   // Part deletetion succedeed!
-  inline error_code
+  inline masks::ack_type
   sm_del_ack(Packet& packet, Session& session)
   {
     return (packet.size_get() && session.length_get());
   }
 
   // Part successfully received!
-  inline error_code
+  inline masks::ack_type
   sm_part_ack(Packet& packet, Session& session)
   {
 //    const s_m::part_ack* req = reinterpret_cast<s_m::part_ack*>

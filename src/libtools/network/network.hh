@@ -15,8 +15,6 @@
 
 namespace network
 {
-  using error_code = uint16_t;
-
   /*---------.
   | error.cc |
   `---------*/
@@ -142,7 +140,7 @@ namespace network
 
   class Session;
 
-  using dispatcher_type = std::function<error_code(Packet, Session&)>;
+  using dispatcher_type = std::function<masks::ack_type(Packet, Session&)>;
 
   /*-----------.
   | session.cc |
@@ -167,9 +165,9 @@ namespace network
             const std::string& host,
             uint16_t port,
             dispatcher_type recv_dispatcher
-              = [](Packet, Session&) -> error_code { return 0; },
+              = [](Packet, Session&) -> masks::ack_type { return 0; },
             dispatcher_type send_dispatcher
-              = [](Packet, Session&) -> error_code { return 0; },
+              = [](Packet, Session&) -> masks::ack_type { return 0; },
             std::function<void(Session&)> delete_dispatcher
               = [](Session&) { },
             size_t id = unique_id());
