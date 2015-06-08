@@ -9,7 +9,7 @@ namespace master
   cm_up_req(Packet& packet, Session& session)
   {
 
-    c_m::up_req* req = reinterpret_cast<c_m::up_req*>
+    const c_m::up_req* req = reinterpret_cast<c_m::up_req*>
         (packet.message_seq_get().front().data());
 
     std::string fname = std::string(
@@ -68,7 +68,7 @@ namespace master
   inline error_code
   cm_down_req(Packet& packet, Session& session)
   {
-    c_m::down_req* req = reinterpret_cast<c_m::down_req*>
+    const c_m::down_req* req = reinterpret_cast<c_m::down_req*>
         (packet.message_seq_get().front().data());
 
     std::string fname(req->fname, packet.size_get());
@@ -127,6 +127,12 @@ namespace master
   inline error_code
   sm_part_ack(Packet& packet, Session& session)
   {
+//    const s_m::part_ack* req = reinterpret_cast<s_m::part_ack*>
+//                               (packet.message_seq_get().front().data());
+//
+//    (void)req->partid.fid;
+
+
     // FIXME : Look in the database if the redundancy is enough.
     // if not, send a request to the storage to upload
     // the file to other storages

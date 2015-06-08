@@ -72,6 +72,7 @@ namespace client
 
           size_t parts = total_parts;
 
+          auto begin = std::chrono::steady_clock::now();
           for (size_t i = 0; i < list_size; ++i)
           {
             STPFIELD& field = pieces->fdetails.stplist[i];
@@ -85,6 +86,15 @@ namespace client
           }
 
           join_all_threads();
+          auto end = std::chrono::steady_clock::now();
+
+          auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+
+          utils::Logger::cout() << "Upload took "
+                                   + boost::lexical_cast<std::string>(duration)
+                                   + " milliseconds ("
+                                   + boost::lexical_cast<std::string>(file.size() / duration)
+                                   + "Kio/s).";
 
           return 0;
         });
