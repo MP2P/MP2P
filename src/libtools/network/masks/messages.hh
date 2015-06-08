@@ -185,6 +185,13 @@ namespace network
         stid_type stid;
         ADDR addr;
       } __attribute__((packed));
+
+      // 4-4 fid_info : Send the STID to the storage <STID>
+      static const what_type fid_info_w = 4;
+      struct fid_info
+      {
+        stid_type stid;
+      } __attribute__((packed));
     }
 
     namespace s_m
@@ -214,6 +221,13 @@ namespace network
       {
         PARTID partid;
         avspace_type avspace;
+      } __attribute__ ((packed));
+
+      // 5-3 : id_req ~ Ask for an unique id <PORT>
+      static const what_type id_req_w = 3;
+      struct id_req
+      {
+        port_type port;
       } __attribute__ ((packed));
     }
 

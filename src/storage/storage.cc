@@ -11,6 +11,8 @@ namespace storage
   using namespace boost::asio;
   using namespace boost::posix_time;
 
+  using copy = utils::shared_buffer::copy;
+
   Storage::Storage()
       : server_{get_ipv6(storage::conf.hostname), storage::conf.port,
                 io_service_,
@@ -97,27 +99,25 @@ namespace storage
                                     conf.master_hostname,
                                     conf.master_port};
 
-      // Prepare the packet
-      /*s_m::id_req req{ 3272 };
+      // Send a request for an id
+      s_m::id_req req{storage::conf.port};
       Packet to_send{s_m::fromto, s_m::id_req_w};
-      to_send.add_message(&storage::conf::port,
-                          sizeof (network::masks::port_type),
-                          copy::No);
+      to_send.add_message(&req, sizeof (s_m::id_req), copy::No);
       master_session.send(to_send);
+
       master_session.blocking_receive(
-          [](Packet p, Session& s)
+          [this, &id_file](Packet p, Session&)
           {
             const CharT* data = p.message_seq_get().front().data();
             const auto* response = reinterpret_cast<const m_s::fid_info*>(data);
-            id_ = data.stid;
-            id_file << data.stid;
+            id_ = response->stid;
+            id_file << response->stid;
 
             io_service_.stop();
 
             return 1;
           }
       );
-      */
     }
     else
       id_file >> id_;
