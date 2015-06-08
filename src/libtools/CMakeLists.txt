@@ -21,8 +21,8 @@ endforeach(subdir)
 
 set_target_properties(libtools-debug PROPERTIES OUTPUT_NAME tools-debug)
 set_target_properties(libtools-debug PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set_target_properties(libtools-debug PROPERTIES COMPILE_FLAGS "-ggdb3 ${SHARED_FLAGS}")
-target_link_libraries(libtools-debug ${Boost_LIBRARIES} ${LIBCONFIG++_LIBRARY} ${LIBCRYPTO_LIBRARY} ${OPENSSL_LIBRARY})
+set_target_properties(libtools-debug PROPERTIES COMPILE_FLAGS ${DEBUG_FLAGS})
+target_link_libraries(libtools-debug ${Boost_LIBRARIES} ${LIBCRYPTO_LIBRARY} ${OPENSSL_LIBRARY})
 #The release target
 add_library(libtools-release ${LIBSOURCES})
 add_dependencies(release libtools-release)
@@ -33,5 +33,5 @@ endforeach(subdir)
 
 set_target_properties(libtools-release PROPERTIES OUTPUT_NAME tools-release)
 set_target_properties(libtools-release PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set_target_properties(libtools-release PROPERTIES EXCLUDE_FROM_ALL true COMPILE_FLAGS "-O3 ${SHARED_FLAGS}")
-target_link_libraries(libtools-release ${Boost_LIBRARIES} ${LIBCONFIG++_LIBRARY} ${LIBCRYPTO_LIBRARY} ${OPENSSL_LIBRARY})
+set_target_properties(libtools-release PROPERTIES EXCLUDE_FROM_ALL true COMPILE_FLAGS ${OPTIMIZED_FLAGS})
+target_link_libraries(libtools-release ${Boost_LIBRARIES} ${LIBCRYPTO_LIBRARY} ${OPENSSL_LIBRARY})

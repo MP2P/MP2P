@@ -6,16 +6,6 @@ cmake_minimum_required(VERSION 2.8)
 project(MP2P)
 
 # ********[01] CMAKE OPTIONS ********* #
-# Finding libconfig++
-#find_path(LIBCONFIG++_INCLUDE_DIR libconfig.h++)
-#find_library(LIBCONFIG++_LIBRARY config++)
-#if (LIBCONFIG++_INCLUDE_DIR AND LIBCONFIG++_LIBRARY)
-#   set(LIBCONFIG++_FOUND TRUE)
-#else (LIBCONFIG++_INCLUDE_DIR AND LIBCONFIG++_LIBRARY)
-#   set(LIBCONFIG++_FOUND FALSE)
-#endif (LIBCONFIG++_INCLUDE_DIR AND LIBCONFIG++_LIBRARY)
-
-#MESSAGE( STATUS "LIBCONFIG++_FOUND:      " ${LIBCONFIG++_FOUND} )
 
 find_library(LIBCRYPTO_LIBRARY crypto)
 if (LIBCRYPTO_LIBRARY)
@@ -42,22 +32,27 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 
 # ********[02] COMPILER OPTIONS ******** #
-#set(CMAKE_CXX_COMPILER "clang++")
-#set(CMAKE_CXX_COMPILER if hash clang++ 2>/dev/null; then "clang++" else "g++")
-#execute_process(COMMAND (if hash clang++ 2>/dev/null; then echo clang++; else echo g++; fi) OUTPUT_VARIABLE CMAKE_CXX_COMPILER)
 
 execute_process(COMMAND which clang++ RESULT_VARIABLE clangnotavailable OUTPUT_QUIET ERROR_QUIET)
 #message("cavailable: ${cavailable}")
 if(${clangnotavailable} EQUAL 0)
   set(CMAKE_CXX_COMPILER "clang++")
-#else(NOT ${cavailable})
-#  set(CMAKE_CXX_COMPILER "g++")
+else(${clangnotavailable} EQUAL 0)
+  execute_process(COMMAND which clang++-3.5 RESULT_VARIABLE clang35notavailable OUTPUT_QUIET ERROR_QUIET)
+  if(${clang35notavailable} EQUAL 0)
+    set(CMAKE_CXX_COMPILER "clang++-3.5")
+  #else(${clangnotavailable} EQUAL 0)
+    #set(CMAKE_CXX_COMPILER "g++")
+  endif(${clang35notavailable} EQUAL 0)
+    #set(CMAKE_CXX_COMPILER "g++")
 endif(${clangnotavailable} EQUAL 0)
 
 #message(STATUS "CMAKE_CXX_COMPILER:     " ${CMAKE_CXX_COMPILER})
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -pedantic -Wall -Wextra -Werror -O3 -Wno-error=deprecated-declarations")
 set(SHARED_FLAGS "-std=c++1y -pedantic -Wall -Wextra -Werror -Wno-error=deprecated-declarations -Wno-error=sign-compare -Wno-error=zero-length-array")
+set(DEBUG_FLAGS "-ggdb3 ${SHARED_FLAGS}")
+set(OPTIMIZED_FLAGS "-O3 -DNDEBUG ${SHARED_FLAGS}")
 
 if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
