@@ -63,7 +63,7 @@ namespace files
                                           std::ios_base::binary
                                           | std::ios_base::in
                                           | std::ios_base::out,
-                                          size};
+                                          static_cast<unsigned int>(size)};
   }
 
   File::File(const std::string& filename, size_t size)

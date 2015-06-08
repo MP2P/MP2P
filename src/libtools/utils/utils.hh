@@ -3,7 +3,6 @@
 #include <ostream>
 #include <string>
 #include <mutex>
-#include <libconfig.h++>
 #include <thread>
 #include "concurentqueue.hh"
 #include "boost/date_time/posix_time/posix_time.hpp"
