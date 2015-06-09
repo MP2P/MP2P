@@ -8,5 +8,6 @@
       "hostname": "localhost",
       "port": 3727
     },
-    "storage_path": "stock_dir"
+    "storage_path": "stock_dir",
+    "id_path": "storage.id"
 }
