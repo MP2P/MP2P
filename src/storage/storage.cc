@@ -100,7 +100,7 @@ namespace storage
       s_m::id_req req{storage::conf.port};
       Packet to_send{s_m::fromto, s_m::id_req_w};
       to_send.add_message(&req, sizeof (s_m::id_req), copy::No);
-      master_session.blocking_send(to_send);
+      master_session.send(to_send);
 
       master_session.blocking_receive(
           [this](Packet p, Session&)

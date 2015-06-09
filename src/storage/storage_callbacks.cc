@@ -25,6 +25,7 @@ namespace storage
         utils::Logger::cerr() << "Hash failed";
         Packet p{s_c::fromto, s_c::fail_sha1_w};
         p.add_message(&part->partid, sizeof (PARTID), copy::Yes);
+        // FIXME : Use an async_send, but close the session only after the async_send
         session.blocking_send(p);
         return 1;
       }
@@ -44,8 +45,8 @@ namespace storage
 
     Packet p{s_m::fromto, s_m::part_ack_w};
     const s_m::part_ack response{part->partid, 10};
-    p.add_message(&response, sizeof (s_m::part_ack), copy::No);
-    master_session.blocking_send(p);
+    p.add_message(&response, sizeof (s_m::part_ack), copy::Yes);
+    master_session.send(p);
 
     return 0;
   }
@@ -66,12 +67,12 @@ namespace storage
 
     Packet p{s_c::fromto, s_c::up_act_w};
     // Add the PARTID
-    p.add_message(&request->partid, sizeof (PARTID), copy::No);
+    p.add_message(&request->partid, sizeof (PARTID), copy::Yes);
     // Add the sha1
-    p.add_message(hash.data(), hash.size(), copy::No);
+    p.add_message(hash.data(), hash.size(), copy::Yes);
     // Add the data
-    p.add_message(part.data(), part.size(), copy::No);
-    session.blocking_send(p);
+    p.add_message(part.data(), part.size(), copy::Yes);
+    session.send(p);
     return 0;
   }
 }
