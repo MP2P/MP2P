@@ -154,6 +154,10 @@ namespace DB
                            port_type port, avspace_type available_space)
       : id_{id}, host_addr_{host_addr}, port_{port}, available_space_{available_space} {};
 
+  inline
+  MetaOnFilesItem::MetaOnFilesItem(const uint64_t count, uint128_t total_size,
+                                   const std::unordered_map<fid_type, std::string>& name_by_id)
+      : count_{count}, total_size_{total_size}, name_by_id_{name_by_id} {};
 
 
   // Item's serializers
@@ -206,6 +210,31 @@ namespace DB
           << "\"host_addr\":" << utils::misc::string_from(host_addr_) << ','
           << "\"port\":" << utils::misc::string_from(port_) << ','
           << "\"available_space\":" << utils::misc::string_from(available_space_)
+    << "}";
+    return ss.str();
+  }
+
+  inline std::string
+  MetaOnFilesItem::serialize() const
+  {
+    std::stringstream ss;
+    ss << "{"
+          << "\"count\":" << utils::misc::string_from(count_) << ','
+          << "\"total_size\":" << utils::misc::string_from(total_size_) << ','
+          << "\"name_by_id\":[";
+          auto it = name_by_id_.cbegin();
+          auto end = name_by_id_.cend();
+          if (it != end)
+            ss << "{\"id\":" << it->first << ",\"name\":"
+               << utils::misc::string_from(it->second) << "}";
+          ++it;
+          for (; it != end; ++it)
+          {
+            ss << "," << "{\"id\":" << it->first << ",\"name\":"
+               << utils::misc::string_from(it->second)
+            << "}";
+          }
+       ss << "]"
     << "}";
     return ss.str();
   }
@@ -283,5 +312,24 @@ namespace DB
     avspace_type available_space = pt.get<avspace_type>("available_space");
 
     return StorageItem(id, host_addr, port, available_space);
+  }
+
+  inline MetaOnFilesItem
+  MetaOnFilesItem::deserialize(std::string& json)
+  {
+    boost::property_tree::ptree pt;
+    std::istringstream is(json);
+    boost::property_tree::read_json(is, pt);
+
+    uint64_t count = pt.get<uint64_t>("count");
+    uint128_t total_size = pt.get<uint128_t>("total_size");
+    std::unordered_map<fid_type, std::string> name_by_id;
+
+    boost::property_tree::ptree locs_pt = pt.get_child("name_by_id");
+    for (auto v : locs_pt)
+      name_by_id.emplace(v.second.get<fid_type>("id"),
+                         v.second.get<std::string>("name"));
+
+    return MetaOnFilesItem(count, total_size, name_by_id);
   }
 };

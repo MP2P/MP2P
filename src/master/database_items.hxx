@@ -132,4 +132,46 @@ namespace DB
   {
     return available_space_;
   }
+
+  inline
+  uint64_t
+  MetaOnFilesItem::count_get() const
+  {
+    return count_;
+  }
+
+  inline
+  void
+  MetaOnFilesItem::count_set(uint64_t v)
+  {
+    count_ = v;
+  }
+
+  inline
+  uint128_t
+  MetaOnFilesItem::total_size_get() const
+  {
+    return total_size_;
+  }
+
+  inline
+  void
+  MetaOnFilesItem::total_size_set(uint128_t v)
+  {
+    total_size_ = v;
+  }
+
+  inline
+  std::unordered_map<fid_type, std::string>&
+  MetaOnFilesItem::name_by_id_get()
+  {
+    return name_by_id_;
+  }
+
+  inline
+  std::string
+  MetaOnFilesItem::file_name_by_id(network::masks::fid_type id) const
+  {
+    return name_by_id_.at(id);
+  }
 }

@@ -100,20 +100,20 @@ namespace DB
       } while (!good_name);
 
       std::string json = DB::Connector::get_instance().cmd_get("files");
+      DB::MetaOnFilesItem mof = DB::MetaOnFilesItem::deserialize(json);
 
-      boost::property_tree::ptree pt;
-      std::istringstream is(json);
-      boost::property_tree::read_json(is, pt);
+      // Update count & total_size of metadata on files
+      mof.count_set(mof.count_get() + 1);
+      mof.total_size_set(mof.total_size_get() + file_size);
 
-      uint64_t count = pt.get<uint64_t>("count");
-      uint64_t total_size = pt.get<uint64_t>("total_size");
+      // Add file in name_by_id list
+      mof.name_by_id_get().emplace(mof.count_get(), name);
 
-      auto fi = FileItem(count + 1, name, file_size, redundancy, 0, hash, 0);
-      total_size++;
-      DB::Connector::get_instance().cmd_put("files", "{\"count\": "
-          + std::to_string(count + 1) + ","
-          "\"total_size\": " + std::to_string(total_size + file_size) + "}");
+      // Update metadata on files
+      DB::Connector::get_instance().cmd_put("files", mof.serialize());
 
+      // Create a FileItem and add it in DB
+      auto fi = FileItem(mof.count_get(), name, file_size, redundancy, 0, hash, 0);
       DB::Connector::get_instance().cmd_put("file." + fi.name_get(),
                                             fi.serialize());
       return fi;

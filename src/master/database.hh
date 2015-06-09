@@ -3,6 +3,8 @@
 #include <utils.hh>
 #include <masks/blocks.hh>
 
+using namespace network::masks;
+
 #include <map>
 #include <string>
 #include <sstream>
@@ -12,8 +14,9 @@
 #include "libcouchbase/couchbase++.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 
-using namespace network::masks;
+using namespace boost::multiprecision;
 
 namespace DB
 {
@@ -175,6 +178,28 @@ namespace DB
 
     std::string serialize() const override;
     static StorageItem deserialize(std::string& json);
+  };
+
+  class MetaOnFilesItem : public Item
+  {
+  private:
+    uint64_t count_;
+    uint128_t total_size_;
+    std::unordered_map<fid_type, std::string> name_by_id_;
+  public:
+    MetaOnFilesItem(const uint64_t count, uint128_t total_size,
+                    const std::unordered_map<fid_type, std::string>& name_by_id);
+
+    uint64_t count_get() const;
+    void count_set(uint64_t v);
+    uint128_t total_size_get() const;
+    void total_size_set(uint128_t v);
+    std::unordered_map<fid_type, std::string>& name_by_id_get();
+
+    std::string file_name_by_id(fid_type id) const;
+
+    std::string serialize() const override;
+    static MetaOnFilesItem deserialize(std::string& json);
   };
 
   namespace tools

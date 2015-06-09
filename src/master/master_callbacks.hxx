@@ -129,8 +129,9 @@ namespace master
   {
 //    const s_m::part_ack* req = reinterpret_cast<s_m::part_ack*>
 //                               (packet.message_seq_get().front().data());
-//
-//    (void)req->partid.fid;
+
+
+
 
 
     // FIXME : Look in the database if the redundancy is enough.
