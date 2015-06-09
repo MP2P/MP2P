@@ -54,15 +54,10 @@ namespace DB
     get_all_storages()
     {
       std::string json = DB::Connector::get_instance().cmd_get("storages");
-
-      boost::property_tree::ptree pt;
-      std::istringstream is(json);
-      boost::property_tree::read_json(is, pt);
+      DB::MetaOnStoragesItem mos = DB::MetaOnStoragesItem::deserialize(json);
 
       std::vector<StorageItem> storages;
-      stid_type count = pt.get<stid_type>("count");
-
-      for (stid_type i = 0; i < count; ++i)
+      for (stid_type i = 0; i < mos.count_get(); ++i)
       {
         json = DB::Connector::get_instance().cmd_get("st." + std::to_string(i));
         storages.push_back(StorageItem::deserialize(json));
@@ -75,26 +70,26 @@ namespace DB
 
     // FIXME: CAS this
     inline
-    FileItem
-    create_new_file(std::string name, fsize_type file_size,
-                    rdcy_type redundancy, std::string hash)
+    void
+    create_new_file(DB::FileItem& fi)
     {
       // Check if filename already exists
       uint64_t i = 0;
 
+      std::string tmp_name = fi.name_get();
       bool good_name = false;
       do
       {
         try
         {
           DB::Connector::get_instance().cmd_get("file."
-                                                + name
+                                                + tmp_name
                                                 + ".__" + std::to_string(i));
           ++i;
         }
         catch (...)
         {
-          name = name + ".__" + std::to_string(i);
+          fi.name_set(tmp_name + ".__" + std::to_string(i));
           good_name = true;
         }
       } while (!good_name);
@@ -102,26 +97,26 @@ namespace DB
       std::string json = DB::Connector::get_instance().cmd_get("files");
       DB::MetaOnFilesItem mof = DB::MetaOnFilesItem::deserialize(json);
 
+      // Update fi id
+      fi.id_set(mof.count_get());
+
       // Update count & total_size of metadata on files
       mof.count_set(mof.count_get() + 1);
-      mof.total_size_set(mof.total_size_get() + file_size);
+      mof.total_size_set(mof.total_size_get() + fi.file_size_get());
 
       // Add file in name_by_id list
-      mof.name_by_id_get().emplace(mof.count_get(), name);
+      mof.name_by_id_get().emplace(mof.count_get(), fi.name_get());
 
       // Update metadata on files
       DB::Connector::get_instance().cmd_put("files", mof.serialize());
 
-      // Create a FileItem and add it in DB
-      auto fi = FileItem(mof.count_get(), name, file_size, redundancy, 0, hash, 0, {});
-      DB::Connector::get_instance().cmd_put("file." + fi.name_get(),
-                                            fi.serialize());
-      return fi;
+      // Put the FileItem in DB
+      DB::Connector::get_instance().cmd_put("file." + fi.name_get(), fi.serialize());
     }
 
     inline
     std::vector<STPFIELD>
-    get_stpfields_for_upload(FileItem fi)
+    get_stpfields_for_upload(fsize_type file_size)
     {
       if (!iterator_initialized)
       {
@@ -145,7 +140,7 @@ namespace DB
 //        std::cout << "Storage : " << it.serialize() << std::endl;
 //      }
 //
-//      if (total_available_space < fi.file_size_get())
+//      if (total_available_space < file_size)
 //      {
 //        throw std::logic_error("Storages are full.");
 //      }
@@ -155,14 +150,14 @@ namespace DB
       // <Storage, count>
       std::vector<std::pair<StorageItem, partnum_type>> tmp_values;
 
-      auto nb_parts = number_of_parts(fi.file_size_get());
+      auto nb_parts = number_of_parts(file_size);
 
       for (network::masks::partnum_type i = 1; i <= nb_parts; ++i)
       {
         if (current_round_robin == storages.end())
           current_round_robin = storages.begin();
 
-        auto part_size = network::get_part_size(fi.file_size_get(),
+        auto part_size = network::get_part_size(file_size,
                                                 i - 1,
                                                 nb_parts);
 

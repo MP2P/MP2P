@@ -18,13 +18,17 @@ namespace master
                     - sizeof(req->rdcy)
     );
 
-    utils::Logger::cerr() << "Request to upload file " + fname
-                             + " of size " + std::to_string(req->fsize) + ".";
+    auto fi = DB::FileItem(0, fname, req->fsize, req->rdcy, 0,
+                           "                    ", 0, {});
+
+    utils::Logger::cerr() << "Request to upload file " + fi.name_get()
+                             + " of size " + std::to_string(fi.file_size_get()) + ".";
 
     // Compute the number of parts.
-    uint32_t nb_parts = DB::tools::number_of_parts(req->fsize);
+    uint32_t nb_parts = DB::tools::number_of_parts(fi.file_size_get());
     if (nb_parts == 0)
     {
+      utils::Logger::cerr() << "Add some storages so that clients can upload!";
       const m_c::ack response{1};
       Packet to_send{m_s::fromto, m_s::ack_w};
       to_send.add_message(&response, sizeof (m_c::ack), copy::Yes);
@@ -32,19 +36,13 @@ namespace master
       return 1;
     }
 
-    // Create file in DB
-    DB::FileItem fi = DB::tools::create_new_file(fname,
-                                                 req->fsize,
-                                                 req->rdcy,
-                                                 "                    ");
-
     // Compute STPFIELD(s) depending on file parts.
-    std::vector<STPFIELD> fields = DB::tools::get_stpfields_for_upload(fi);
+    std::vector<STPFIELD> fields = DB::tools::get_stpfields_for_upload(fi.file_size_get());
 
-    if (fields.size() < req->rdcy)
+    if (fields.size() < fi.redundancy_get())
     {
       utils::Logger::cerr() << "Client is asking for a redundancy of "
-                               + std::to_string(req->rdcy)
+                               + std::to_string(fi.redundancy_get())
                                + " but there is only "
                                + std::to_string(fields.size())
                                + " storages available.";
@@ -55,13 +53,14 @@ namespace master
       return 1;
     }
 
-    utils::Logger::cout() << "Parts repartition for " + fname + ":";
+    // After all checks, we can now create the file in DB
+    DB::tools::create_new_file(fi);
+
+    utils::Logger::cout() << "Parts repartition for " + fi.name_get() + ":";
     for (auto it : fields)
-    {
       utils::Logger::cout() << "    -> " + network::binary_to_string_ipv6(it.addr.ipv6, 16) + ":"
                                + std::to_string(it.addr.port)
                                + " count = " + std::to_string(it.nb);
-    }
 
     // Get the unique id of the file
     network::masks::fid_type file_id = fi.id_get();
@@ -209,13 +208,13 @@ namespace master
     std::string json = DB::Connector::get_instance().cmd_get("storages");
     DB::MetaOnStoragesItem mos = DB::MetaOnStoragesItem::deserialize(json);
 
-    mos.count_set(mos.count_get() + 1);
-    mos.available_space_set(mos.available_space_get() + req->avspace);
-    DB::Connector::get_instance().cmd_put("storages", mos.serialize());
-
     // FIXME Get ip of remote storage
     DB::StorageItem si{mos.count_get(), "::1", req->port, req->avspace};
     DB::Connector::get_instance().cmd_put("st." + std::to_string(si.id_get()), si.serialize());
+
+    mos.count_set(mos.count_get() + 1);
+    mos.available_space_set(mos.available_space_get() + req->avspace);
+    DB::Connector::get_instance().cmd_put("storages", mos.serialize());
 
     const m_s::fid_info response{si.id_get()};
     Packet to_send{m_s::fromto, m_s::fid_info_w};

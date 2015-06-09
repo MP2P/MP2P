@@ -60,12 +60,23 @@ namespace client
     master_session_.blocking_receive(
         [&file, this](Packet p, Session& /*recv_session*/) -> ack_type
         {
+          if (p.what_get() == 0)
+            throw std::logic_error("Error received from Master");
+
           CharT* data = p.message_seq_get().front().data();
           m_c::up_pieces_loc* pieces = reinterpret_cast<m_c::up_pieces_loc*>(data);
+
+          utils::Logger::cout() << "Received FDETAILS from master.";
 
           // Get the number of STPFIELDS
           size_t list_size = (p.size_get() - sizeof (fid_type))
                               / sizeof (STPFIELD);
+
+          utils::Logger::cout() << "Parts repartition for upload:";
+          for (size_t i = 0; i < list_size; ++i)
+            utils::Logger::cout() << "    -> " + network::binary_to_string_ipv6(pieces->fdetails.stplist[i].addr.ipv6, 16) + ":"
+                                     + std::to_string(pieces->fdetails.stplist[i].addr.port)
+                                     + " count = " + std::to_string(pieces->fdetails.stplist[i].nb);
 
           // Get total number of parts
           size_t total_parts = 0;
@@ -74,7 +85,7 @@ namespace client
 
           size_t parts = total_parts;
 
-          //auto begin = std::chrono::steady_clock::now();
+          auto begin = std::chrono::steady_clock::now();
           for (size_t i = 0; i < list_size; ++i)
           {
             STPFIELD& field = pieces->fdetails.stplist[i];
@@ -87,8 +98,10 @@ namespace client
             parts -= field.nb;
           }
 
+          utils::Logger::cout() << "Upload started...";
+
           join_all_threads();
-          /*
+
           auto end = std::chrono::steady_clock::now();
 
           auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
@@ -98,7 +111,6 @@ namespace client
                                    + " milliseconds ("
                                    + boost::lexical_cast<std::string>(file.size() / duration)
                                    + "Kio/s).";
-          */
 
           return 0;
         });

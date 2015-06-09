@@ -29,10 +29,24 @@ namespace DB
   }
 
   inline
+  void
+  FileItem::id_set(fid_type id)
+  {
+    id_ = id;
+  }
+
+  inline
   std::string
   FileItem::name_get() const
   {
     return name_;
+  }
+
+  inline
+  void
+  FileItem::name_set(std::string name)
+  {
+    name_ = name;
   }
 
   inline

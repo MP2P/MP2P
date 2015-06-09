@@ -181,10 +181,12 @@ namespace DB
           auto it = parts_.cbegin();
           auto end = parts_.cend();
           if (it != end)
+          {
             ss << it->serialize();
-          ++it;
-          for (; it != end; ++it)
-            ss << "," << it->serialize();
+            ++it;
+            for (; it != end; ++it)
+              ss << "," << it->serialize();
+          }
           ss << "]"
     << "}";
     return ss.str();

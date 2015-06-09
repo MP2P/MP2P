@@ -128,7 +128,9 @@ namespace DB
              bool uploaded, std::vector<PartItem> parts);
 
     fid_type id_get() const;
+    void id_set(fid_type id);
     std::string name_get() const;
+    void name_set(std::string name);
     fsize_type file_size_get() const; // FIXME: change name for size_get only.
     rdcy_type redundancy_get() const;
     rdcy_type current_redundancy_get() const;
@@ -235,9 +237,9 @@ namespace DB
     network::masks::partnum_type number_of_parts(fsize_type file_size);
     std::vector<StorageItem> get_all_storages();
 
-    FileItem create_new_file(std::string name, fsize_type file_size,
-                             rdcy_type redundancy, std::string hash);
-    std::vector<STPFIELD> get_stpfields_for_upload(FileItem fi);
+    void create_new_file(std::string name, fsize_type file_size,
+                         rdcy_type redundancy, std::string hash);
+    std::vector<STPFIELD> get_stpfields_for_upload(fsize_type file_size);
   }
 }
 
