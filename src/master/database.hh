@@ -209,13 +209,13 @@ namespace DB
   class MetaOnStoragesItem : public Item
   {
   private:
-    uint64_t count_;
+    stid_type count_;
     uint128_t available_space_;
   public:
-    MetaOnStoragesItem(const uint64_t count, uint128_t available_space);
+    MetaOnStoragesItem(const stid_type count, uint128_t available_space);
 
-    uint64_t count_get() const;
-    void count_set(uint64_t v);
+    stid_type count_get() const;
+    void count_set(stid_type v);
     uint128_t available_space_get() const;
     void available_space_set(uint128_t v);
 

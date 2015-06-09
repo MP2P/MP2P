@@ -137,7 +137,7 @@ namespace DB
         iterator_initialized = true;
       }
 
-      // FIXME
+      // FIXME: check if available space on storages is OK
 //      uint64_t total_available_space = 0;
 //      for (auto it : storages)
 //      {

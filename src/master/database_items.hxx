@@ -190,7 +190,7 @@ namespace DB
   }
 
   inline
-  uint64_t
+  stid_type
   MetaOnStoragesItem::count_get() const
   {
     return count_;
@@ -198,7 +198,7 @@ namespace DB
 
   inline
   void
-  MetaOnStoragesItem::count_set(uint64_t v)
+  MetaOnStoragesItem::count_set(stid_type v)
   {
     count_ = v;
   }

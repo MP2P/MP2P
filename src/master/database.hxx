@@ -160,7 +160,7 @@ namespace DB
       : count_{count}, total_size_{total_size}, name_by_id_{name_by_id} {};
 
   inline
-  MetaOnStoragesItem::MetaOnStoragesItem(const uint64_t count,
+  MetaOnStoragesItem::MetaOnStoragesItem(const stid_type count,
                                          const uint128_t available_space)
       : count_{count}, available_space_{available_space} {};
 
@@ -371,7 +371,7 @@ namespace DB
     std::istringstream is(json);
     boost::property_tree::read_json(is, pt);
 
-    uint64_t count = pt.get<uint64_t>("count");
+    stid_type count = pt.get<stid_type>("count");
     uint128_t available_space = pt.get<uint128_t>("available_space");
     return MetaOnStoragesItem(count, available_space);
   }

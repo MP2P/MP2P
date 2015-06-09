@@ -55,6 +55,8 @@ namespace storage
 
     // Catch a CTRL+C / CTRL+D signal, call Storage::stop(); and exit.
     void catch_stop();
+
+    static uint64_t how_much_space_available();
   };
 
   network::masks::ack_type cs_up_act(network::Packet& packet,

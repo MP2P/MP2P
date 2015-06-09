@@ -197,6 +197,7 @@ namespace master
     return 1;
   }
 
+  // A new storage poped, and he wants a unique id
   inline masks::ack_type
   sm_id_req(Packet& packet, Session& session)
   {
@@ -204,12 +205,19 @@ namespace master
     const auto* req = reinterpret_cast<const s_m::id_req*>(data);
 
 
+    // FIXME: CAS this
+    std::string json = DB::Connector::get_instance().cmd_get("storages");
+    DB::MetaOnStoragesItem mos = DB::MetaOnStoragesItem::deserialize(json);
 
-    // FIXME : Query the database using the req->port
-    (void)req->port;
-    stid_type stid = 1;
+    mos.count_set(mos.count_get() + 1);
+    mos.available_space_set(mos.available_space_get() + req->avspace);
+    DB::Connector::get_instance().cmd_put("storages", mos.serialize());
 
-    const m_s::fid_info response{stid};
+    // FIXME Get ip of remote storage
+    DB::StorageItem si{mos.count_get(), "::1", req->port, req->avspace};
+    DB::Connector::get_instance().cmd_put("st." + std::to_string(si.id_get()), si.serialize());
+
+    const m_s::fid_info response{si.id_get()};
     Packet to_send{m_s::fromto, m_s::fid_info_w};
     to_send.add_message(&response, sizeof (m_s::fid_info), copy::Yes);
     session.send(to_send);

@@ -98,7 +98,7 @@ namespace storage
                                     conf.master_port};
 
       // Send a request for an id
-      s_m::id_req req{storage::conf.port};
+      s_m::id_req req{storage::conf.port, (avspace_type)Storage::how_much_space_available()};
       Packet to_send{s_m::fromto, s_m::id_req_w};
       to_send.add_message(&req, sizeof (s_m::id_req), copy::No);
       master_session.send(to_send);
@@ -180,5 +180,10 @@ namespace storage
     (void)packet;
     (void)session;
     return 0;
+  }
+
+  uint64_t Storage::how_much_space_available()
+  {
+    return boost::filesystem::space(storage::conf.storage_path).available;
   }
 }

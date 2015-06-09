@@ -228,6 +228,7 @@ namespace network
       struct id_req
       {
         port_type port;
+        avspace_type avspace;
       } __attribute__ ((packed));
     }
 
