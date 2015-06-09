@@ -162,6 +162,41 @@ namespace network
 
   void Session::send(const Packet& packet)
   {
+    send(packet, send_dispatcher_);
+  }
+
+  void Session::send(const Packet& packet, dispatcher_type callback)
+  {
+    auto p = std::make_shared<Packet>(packet);
+    auto& seq = p->message_seq_get();
+    seq.insert(seq.begin(), packet.serialize_header());
+
+    async_write(socket_,
+        seq,
+        [this, callback, p](boost::system::error_code ec,
+                         std::size_t length)
+        {
+          if (!ec)
+          {
+            length_ = length;
+            auto error = callback(*p, *this);
+            length_ = 0;
+            if (error == 1)
+              kill();
+            else
+              receive(); // FIXME : What to do to keep the socket alive?
+          }
+          else
+          {
+            utils::Logger::cerr() << "Error while sending: " + ec.message();
+            kill();
+          }
+        }
+    );
+  }
+
+  void Session::blocking_send(const Packet& packet)
+  {
     auto seq = packet.message_seq_get();
     seq.insert(seq.begin(), packet.serialize_header());
     write(socket_, seq);
@@ -170,7 +205,7 @@ namespace network
       kill();
   }
 
-  void Session::send(const Packet& packet, dispatcher_type callback)
+  void Session::blocking_send(const Packet& packet, dispatcher_type callback)
   {
     auto seq = packet.message_seq_get();
     seq.insert(seq.begin(), packet.serialize_header());

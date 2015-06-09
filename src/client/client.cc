@@ -53,7 +53,7 @@ namespace client
     req_packet.add_message(&request, sizeof (request), copy::No);
 
     req_packet.add_message(fname.c_str(), fname.size(), copy::No);
-    master_session_.send(req_packet);
+    master_session_.blocking_send(req_packet);
 
     master_session_.blocking_receive(
         [&file, this](Packet p, Session& /*recv_session*/) -> ack_type
@@ -72,7 +72,7 @@ namespace client
 
           size_t parts = total_parts;
 
-          auto begin = std::chrono::steady_clock::now();
+          //auto begin = std::chrono::steady_clock::now();
           for (size_t i = 0; i < list_size; ++i)
           {
             STPFIELD& field = pieces->fdetails.stplist[i];
@@ -86,6 +86,7 @@ namespace client
           }
 
           join_all_threads();
+          /*
           auto end = std::chrono::steady_clock::now();
 
           auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
@@ -95,6 +96,7 @@ namespace client
                                    + " milliseconds ("
                                    + boost::lexical_cast<std::string>(file.size() / duration)
                                    + "Kio/s).";
+          */
 
           return 0;
         });
@@ -139,7 +141,7 @@ namespace client
           // FIXME : part_size may not fit in uint32_t
           to_send.add_message(part_buffer, part_size, copy::No);
 
-          storage.send(to_send);
+          storage.blocking_send(to_send);
         }
     };
   }
@@ -152,7 +154,7 @@ namespace client
     Packet request{c_m::fromto, c_m::down_req_w};
     request.add_message(filename.c_str(), filename.size(), copy::Yes);
 
-    master_session_.send(request);
+    master_session_.blocking_send(request);
 
     // Wait for an answer from the master, then connect to each of the
     // storages
@@ -209,7 +211,7 @@ namespace client
       Packet to_send{c_s::fromto, c_s::down_act_w};
       to_send.add_message(&partid, sizeof (PARTID), copy::No);
 
-      storage.send(to_send);
+      storage.blocking_send(to_send);
 
       // Receive a part
       storage.blocking_receive(

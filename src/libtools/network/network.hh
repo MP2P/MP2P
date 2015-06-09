@@ -199,12 +199,17 @@ namespace network
     // Same as receive, but blocking
     void blocking_receive(dispatcher_type callback);
 
-    // Send a packet.
-    // This operation is blocking. It's using a synchronous send
+    // Send a packet
     void send(const Packet& packet);
 
-    // Send a packet using a custom dispatcher
+    // Send a packet
     void send(const Packet& packet, dispatcher_type callback);
+
+    // This operation is blocking. It's using a synchronous send
+    void blocking_send(const Packet& packet);
+
+    // Send a packet using a custom dispatcher
+    void blocking_send(const Packet& packet, dispatcher_type callback);
 
     // Creates an unique id for a socket.
     // It's using an atomic integer

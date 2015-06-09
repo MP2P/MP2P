@@ -25,7 +25,7 @@ namespace storage
         utils::Logger::cerr() << "Hash failed";
         Packet p{s_c::fromto, s_c::fail_sha1_w};
         p.add_message(&part->partid, sizeof (PARTID), copy::Yes);
-        session.send(p);
+        session.blocking_send(p);
         return 1;
       }
     }
@@ -45,7 +45,7 @@ namespace storage
     Packet p{s_m::fromto, s_m::part_ack_w};
     const s_m::part_ack response{part->partid, 10};
     p.add_message(&response, sizeof (s_m::part_ack), copy::No);
-    master_session.send(p);
+    master_session.blocking_send(p);
 
     return 0;
   }
@@ -71,7 +71,7 @@ namespace storage
     p.add_message(hash.data(), hash.size(), copy::No);
     // Add the data
     p.add_message(part.data(), part.size(), copy::No);
-    session.send(p);
+    session.blocking_send(p);
     return 0;
   }
 }
