@@ -16,11 +16,31 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]")
   std::string host_addr = "master.mp2p.mydomain.com";
   std::string res_has;
 
+
+  SECTION("Create, serialize, deserialize a PartItem")
+  {
+    DB::PartItem part_item = DB::PartItem(partid, hash, vect);
+    std::string s_part_item = part_item.serialize();
+    part_item = DB::PartItem::deserialize(s_part_item);
+
+    // Check the resulting PartItem
+    REQUIRE(part_item.fid_get() == partid.fid);
+    REQUIRE(part_item.num_get() == partid.partnum);
+    res_has = std::string(reinterpret_cast<const char*>(part_item.hash_get()));
+    REQUIRE(res_has.compare(hash));
+    std::vector <stid_type> v = part_item.locations_get();
+    REQUIRE(std::accumulate(v.begin(), v.end(), 0) == (3 + 4 + 5 + 6));
+  }
+
+
   SECTION("Create, serialize, deserialize a FileItem")
   {
-    DB::FileItem file_item(1, "filename.txt", 15000, 3, 1, hash, true);
+    DB::PartItem part_item = DB::PartItem(partid, hash, vect);
+
+    DB::FileItem file_item(1, "filename.txt", 15000, 3, 1, hash, true, {part_item});
     std::string s_file_item = file_item.serialize();
     file_item = DB::FileItem::deserialize(s_file_item);
+    DB::PartItem res_part_item = *file_item.parts_get().begin();
 
     // Check the resulting FileItem
     REQUIRE(file_item.id_get() == 1);
@@ -31,24 +51,10 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]")
     res_has = std::string(reinterpret_cast<const char*>(file_item.hash_get()));
     REQUIRE(res_has.compare(hash));
     REQUIRE(file_item.is_uploaded());
+    REQUIRE(res_part_item.fid_get() == partid.fid);
+    REQUIRE(res_part_item.num_get() == partid.partnum);
 
     REQUIRE_FALSE(file_item.is_replicated()); // 3 == 1
-  }
-
-
-  SECTION("Create, serialize, deserialize a PartItem")
-  {
-    DB::PartItem part_item = DB::PartItem(partid, hash, vect);
-    std::string s_part_item = part_item.serialize();
-    part_item = DB::PartItem::deserialize(s_part_item);
-
-    // Check the resulting PartItem
-    REQUIRE(part_item.fid_get() == 1);
-    REQUIRE(part_item.num_get() == 3);
-    res_has = std::string(reinterpret_cast<const char*>(part_item.hash_get()));
-    REQUIRE(res_has.compare(hash));
-    std::vector <stid_type> v = part_item.locations_get();
-    REQUIRE(std::accumulate(v.begin(), v.end(), 0) == (3 + 4 + 5 + 6));
   }
 
 

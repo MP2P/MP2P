@@ -87,36 +87,6 @@ namespace DB
     virtual std::string serialize() const = 0;
   };
 
-  class FileItem : public Item
-  {
-  private:
-    fid_type id_;
-    std::string name_;
-    fsize_type file_size_ = 0;
-    rdcy_type redundancy_ = 0;
-    rdcy_type current_redundancy_ = 0;
-    sha1_type hash_;
-    bool uploaded_ = false;
-
-  public:
-    FileItem(fid_type id, const std::string& name,
-             fsize_type file_size, rdcy_type redundancy,
-             rdcy_type current_redundancy, std::string hash,
-             bool uploaded);
-
-    fid_type id_get() const;
-    std::string name_get() const;
-    fsize_type file_size_get() const; // FIXME: change name for size_get only.
-    rdcy_type redundancy_get() const;
-    rdcy_type current_redundancy_get() const;
-    unsigned char* hash_get();
-    bool is_replicated() const;
-    bool is_uploaded() const;
-
-    std::string serialize() const override;
-    static FileItem deserialize(std::string& json);
-  };
-
   class PartItem : public Item
   {
   private:
@@ -135,6 +105,39 @@ namespace DB
 
     std::string serialize() const override;
     static PartItem deserialize(std::string& json);
+    static PartItem deserialize(boost::property_tree::ptree& pt);
+  };
+
+  class FileItem : public Item
+  {
+  private:
+    fid_type id_;
+    std::string name_;
+    fsize_type file_size_ = 0;
+    rdcy_type redundancy_ = 0;
+    rdcy_type current_redundancy_ = 0;
+    sha1_type hash_;
+    bool uploaded_ = false;
+    std::vector<PartItem> parts_;
+
+  public:
+    FileItem(fid_type id, const std::string& name,
+             fsize_type file_size, rdcy_type redundancy,
+             rdcy_type current_redundancy, std::string hash,
+             bool uploaded, std::vector<PartItem> parts);
+
+    fid_type id_get() const;
+    std::string name_get() const;
+    fsize_type file_size_get() const; // FIXME: change name for size_get only.
+    rdcy_type redundancy_get() const;
+    rdcy_type current_redundancy_get() const;
+    unsigned char* hash_get();
+    bool is_replicated() const;
+    bool is_uploaded() const;
+    std::vector<PartItem>& parts_get();
+
+    std::string serialize() const override;
+    static FileItem deserialize(std::string& json);
   };
 
   class MasterItem : public Item

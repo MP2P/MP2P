@@ -113,7 +113,7 @@ namespace DB
       DB::Connector::get_instance().cmd_put("files", mof.serialize());
 
       // Create a FileItem and add it in DB
-      auto fi = FileItem(mof.count_get(), name, file_size, redundancy, 0, hash, 0);
+      auto fi = FileItem(mof.count_get(), name, file_size, redundancy, 0, hash, 0, {});
       DB::Connector::get_instance().cmd_put("file." + fi.name_get(),
                                             fi.serialize());
       return fi;

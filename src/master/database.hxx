@@ -114,7 +114,7 @@ namespace DB
     }
     catch (std::logic_error)
     {
-      database_->cmd_put("files", "{\"count\":0, \"total_size\":0}");
+      database_->cmd_put("files", "{\"count\":0, \"total_size\":0, \"name_by_id\":[]}");
       utils::Logger::cerr() << "Added files in database.";
     }
     return *database_;
@@ -128,9 +128,9 @@ namespace DB
                      fsize_type file_size,
                      rdcy_type redundancy,
                      rdcy_type current_redundancy,
-                     std::string hash, bool uploaded)
+                     std::string hash, bool uploaded, std::vector<PartItem> parts)
       : id_{id}, name_{name}, file_size_{file_size}, redundancy_{redundancy},
-        current_redundancy_{current_redundancy}, uploaded_{uploaded}
+        current_redundancy_{current_redundancy}, uploaded_{uploaded}, parts_{parts}
   {
     for (size_t j = 0; j < sha1_type_size; ++j)
       hash_[j] = hash.c_str()[j];
@@ -172,7 +172,16 @@ namespace DB
           << "\"redundancy\":" << utils::misc::string_from(redundancy_) << ','
           << "\"current_redundancy\":" << utils::misc::string_from(current_redundancy_) << ','
           << "\"hash\":" << utils::misc::string_from(hash_, sha1_type_size) << ','
-          << "\"uploaded\":" << utils::misc::string_from(uploaded_)
+          << "\"uploaded\":" << utils::misc::string_from(uploaded_) << ','
+          << "\"parts\":[";
+          auto it = parts_.cbegin();
+          auto end = parts_.cend();
+          if (it != end)
+            ss << it->serialize();
+          ++it;
+          for (; it != end; ++it)
+            ss << "," << it->serialize();
+          ss << "]"
     << "}";
     return ss.str();
   }
@@ -229,11 +238,8 @@ namespace DB
                << utils::misc::string_from(it->second) << "}";
           ++it;
           for (; it != end; ++it)
-          {
             ss << "," << "{\"id\":" << it->first << ",\"name\":"
-               << utils::misc::string_from(it->second)
-            << "}";
-          }
+               << utils::misc::string_from(it->second) << "}";
        ss << "]"
     << "}";
     return ss.str();
@@ -244,31 +250,9 @@ namespace DB
   using boost::property_tree::write_json;
 
   // Item's deserializers
-  inline FileItem
-  FileItem::deserialize(std::string& json)
-  {
-    boost::property_tree::ptree pt;
-    std::istringstream is(json);
-    boost::property_tree::read_json(is, pt);
-    fid_type id = pt.get<fid_type>("id");
-    std::string name = pt.get<std::string>("name");
-    fsize_type file_size = pt.get<fsize_type>("file_size");
-    rdcy_type redundancy = pt.get<rdcy_type>("redundancy");
-    rdcy_type current_redundancy = pt.get<rdcy_type>("current_redundancy");
-    std::string hash = pt.get<std::string>("hash");
-    bool uploaded = pt.get<bool>("uploaded");
-
-    return FileItem(id, name, file_size, redundancy, current_redundancy, hash,
-                    uploaded);
-  }
-
   inline PartItem
-  PartItem::deserialize(std::string& json)
+  PartItem::deserialize(boost::property_tree::ptree& pt)
   {
-    boost::property_tree::ptree pt;
-    std::istringstream is(json);
-    boost::property_tree::read_json(is, pt);
-
     PARTID partid;
     std::string hash;
     std::vector<stid_type> locations;
@@ -284,6 +268,38 @@ namespace DB
       locations.push_back(boost::lexical_cast<stid_type>(it->second.data()));
     }
     return PartItem(partid, hash, locations);
+  }
+
+  // Item's deserializers
+  inline PartItem
+  PartItem::deserialize(std::string& json)
+  {
+    boost::property_tree::ptree pt;
+    std::istringstream is(json);
+    boost::property_tree::read_json(is, pt);
+    return PartItem::deserialize(pt);
+  }
+
+  inline FileItem
+  FileItem::deserialize(std::string& json)
+  {
+    boost::property_tree::ptree pt;
+    std::istringstream is(json);
+    boost::property_tree::read_json(is, pt);
+    fid_type id = pt.get<fid_type>("id");
+    std::string name = pt.get<std::string>("name");
+    fsize_type file_size = pt.get<fsize_type>("file_size");
+    rdcy_type redundancy = pt.get<rdcy_type>("redundancy");
+    rdcy_type current_redundancy = pt.get<rdcy_type>("current_redundancy");
+    std::string hash = pt.get<std::string>("hash");
+    bool uploaded = pt.get<bool>("uploaded");
+
+    std::vector<PartItem> parts;
+    boost::property_tree::ptree locs_pt = pt.get_child("parts");
+    for (auto v : locs_pt)
+      parts.push_back(PartItem::deserialize(v.second));
+    return FileItem(id, name, file_size, redundancy, current_redundancy, hash,
+                    uploaded, parts);
   }
 
   inline MasterItem

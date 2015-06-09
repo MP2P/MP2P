@@ -57,6 +57,13 @@ namespace DB
   }
 
   inline
+  std::vector<PartItem>&
+  FileItem::parts_get()
+  {
+    return parts_;
+  }
+
+  inline
   fid_type
   PartItem::fid_get() const
   {
