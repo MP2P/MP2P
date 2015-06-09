@@ -183,8 +183,7 @@ namespace network
             length_ = 0;
             if (error == 1)
               kill();
-            else
-              receive(); // FIXME : What to do to keep the socket alive?
+            // FIXME : What to do to keep the socket alive?
           }
           else
           {
