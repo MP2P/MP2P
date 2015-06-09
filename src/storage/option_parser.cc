@@ -93,6 +93,7 @@ namespace storage
           ("master,m", po::value<m_ty>(), "the hostname and port of the master")
           ("concurrency,y", po::value<cy_ty>(), "concurrency level when uploading")
           ("timeout,t", po::value<to_ty>(), "timeout in seconds")
+          ("id_path,i", po::value<idp_ty>(), "the folder where the storage id will be saved")
           ;
 
       // Parse options.
