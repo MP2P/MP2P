@@ -59,7 +59,7 @@ namespace master
                          copy::Yes);
 
     utils::Logger::cout() << "Responding with m_c::pieces_loc answers for " + fname;
-    session.blocking_send(response);
+    session.send(response);
 
     return 0;
   }
@@ -104,7 +104,7 @@ namespace master
     response.add_message(&*fields.begin(),
                          fields.size() * sizeof (STPFIELD),
                          copy::Yes);
-    session.blocking_send(response);
+    session.send(response);
 
     return 0;
   }
@@ -152,8 +152,8 @@ namespace master
 
     const m_s::fid_info response{stid};
     Packet to_send{m_s::fromto, m_s::fid_info_w};
-    to_send.add_message(&response, sizeof (m_s::fid_info), copy::No);
-    session.blocking_send(to_send);
+    to_send.add_message(&response, sizeof (m_s::fid_info), copy::Yes);
+    session.send(to_send);
 
     return 1; // Close the connection
   }
