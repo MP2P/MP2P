@@ -94,14 +94,15 @@ namespace DB
     sha1_type hash_;
     std::vector<stid_type> locations_;
   public:
-    PartItem(const PARTID& partid, std::string& hash,
+    PartItem(const PARTID& partid, std::string hash,
              const std::vector<stid_type>& locations);
 
 
     fid_type fid_get() const;
     partnum_type num_get() const;
     unsigned char* hash_get();
-    std::vector<stid_type> locations_get() const;
+    std::vector<stid_type>& locations_get();
+    void add_stid(stid_type id);
 
     std::string serialize() const override;
     static PartItem deserialize(std::string& json);
@@ -216,6 +217,7 @@ namespace DB
 
     network::masks::partnum_type number_of_parts(fsize_type file_size);
     std::vector<StorageItem> get_all_storages();
+    ADDR get_storage_addr(stid_type id);
 
     FileItem create_new_file(std::string name, fsize_type file_size,
                              rdcy_type redundancy, std::string hash);

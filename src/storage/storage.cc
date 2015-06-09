@@ -26,6 +26,7 @@ namespace storage
     utils::Logger::cout() << "Bind port = "
                           + std::to_string(storage::conf.port);
   }
+  uint32_t Storage::id = 0;
 
   Storage::~Storage()
   {
@@ -46,7 +47,7 @@ namespace storage
     }
 
     utils::Logger::cout() << "Launching storage with id : "
-                             + std::to_string(id_);
+                             + std::to_string(Storage::id);
 
     for (unsigned i = 0; i < storage::conf.concurrency; ++i)
     {
@@ -107,7 +108,7 @@ namespace storage
           {
             const CharT* data = p.message_seq_get().front().data();
             const auto* response = reinterpret_cast<const m_s::fid_info*>(data);
-            id_ = response->stid;
+            id = response->stid;
 
             std::ofstream id_file(storage::conf.id_path);
             id_file << response->stid;
@@ -123,7 +124,7 @@ namespace storage
 
     }
     else
-      id_file >> id_;
+      id_file >> id;
   }
 
   // When CTRL+C is typed, we call storage::stop();

@@ -73,6 +73,14 @@ namespace DB
       return storages;
     }
 
+    ADDR get_storage_addr(stid_type id)
+    {
+      std::string json = DB::Connector::get_instance().cmd_get("st." + std::to_string(id));
+      DB::StorageItem si = DB::StorageItem::deserialize(json);
+      return si.addr_get();
+    }
+
+
     // FIXME: CAS this
     inline
     FileItem

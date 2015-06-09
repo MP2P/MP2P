@@ -16,9 +16,9 @@ namespace network
     {
       static const fromto_type fromto = 0;
 
-      // 0-0 : error ~ Error message <ERR>
-      static const what_type error_w = 0;
-      struct error
+      // 0-0 : error ~ ACK message <ERR>
+      static const what_type ack_w = 0;
+      struct ack
       {
         masks::ack_type err;
       } __attribute__ ((packed));
@@ -62,9 +62,9 @@ namespace network
       static const fromto_type fromto = 1;
 
 
-      // 1-0 : error ~ Error message <ERR>
-      static const what_type error_w = 0;
-      struct error
+      // 1-0 : ack ~ ACK message <ERR>
+      static const what_type ack_w = 0;
+      struct ack
       {
         masks::ack_type err;
       } __attribute__ ((packed));
@@ -91,9 +91,9 @@ namespace network
       static const fromto_type fromto = 2;
 
 
-      // 2-0 : error ~ Error message <ERR>
-      static const what_type error_w = 0;
-      struct error
+      // 2-0 : ack ~ ACK message <ERR>
+      static const what_type ack_w = 0;
+      struct ack
       {
         masks::ack_type err;
       } __attribute__ ((packed));
@@ -122,9 +122,9 @@ namespace network
       static const fromto_type fromto = 3;
 
 
-      // 3-0 : error ~ Error message <ERR>
-      static const what_type error_w = 0;
-      struct error
+      // 3-0 : ack ~ ACK message <ERR>
+      static const what_type ack_w = 0;
+      struct ack
       {
         masks::ack_type err;
       } __attribute__ ((packed));
@@ -153,9 +153,9 @@ namespace network
       static const fromto_type fromto = 4;
 
 
-      // 4-0 : error ~ Error message <ERR>
-      static const what_type error_w = 0;
-      struct error
+      // 4-0 : ack ~ ACK message <ERR>
+      static const what_type ack_w = 0;
+      struct ack
       {
         masks::ack_type err;
       } __attribute__ ((packed));
@@ -182,7 +182,6 @@ namespace network
       struct part_loc
       {
         PARTID partid;
-        stid_type stid;
         ADDR addr;
       } __attribute__((packed));
 
@@ -199,9 +198,9 @@ namespace network
       static const fromto_type fromto = 5;
 
 
-      // 5-0 : error ~ Error message <ERR>
-      static const what_type error_w = 0;
-      struct error
+      // 5-0 : ack ~ ACK message <ERR>
+      static const what_type ack_w = 0;
+      struct ack
       {
         masks::ack_type err;
       } __attribute__ ((packed));
@@ -219,6 +218,7 @@ namespace network
       static const what_type part_ack_w = 2;
       struct part_ack
       {
+        stid_type stid;
         PARTID partid;
         avspace_type avspace;
       } __attribute__ ((packed));
@@ -236,9 +236,9 @@ namespace network
       static const fromto_type fromto = 6;
 
 
-      // 6-0 : error ~ Error message <ERR>
-      static const what_type error_w = 0;
-      struct error
+      // 6-0 : ack ~ ACK message <ERR>
+      static const what_type ack_w = 0;
+      struct ack
       {
         masks::ack_type err;
       } __attribute__ ((packed));
@@ -249,9 +249,9 @@ namespace network
       static const fromto_type fromto = 7;
 
 
-      // 7-0 : error ~ Error message <ERR>
-      static const what_type error_w = 0;
-      struct error
+      // 7-0 : ack ~ ACK message <ERR>
+      static const what_type ack_w = 0;
+      struct ack
       {
         masks::ack_type err;
       } __attribute__ ((packed));

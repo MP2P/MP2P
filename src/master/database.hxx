@@ -137,7 +137,7 @@ namespace DB
   }
 
   inline
-  PartItem::PartItem(const PARTID& partid, std::string& hash,
+  PartItem::PartItem(const PARTID& partid, std::string hash,
                      const std::vector<stid_type>& locations)
       : partid_{partid.fid, partid.partnum}, locations_{locations}
   {

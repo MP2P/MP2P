@@ -106,7 +106,7 @@ namespace master
       case c_m::fromto:
         switch (packet.what_get())
         {
-          case c_m::error_w:
+          case c_m::ack_w:
             //return 10001; // Error
             return 2; //FIXME
           case c_m::up_req_w:
@@ -122,7 +122,7 @@ namespace master
       case s_m::fromto:
         switch (packet.what_get())
         {
-          case s_m::error_w:
+          case s_m::ack_w:
             //return 10501; // Error
             return 4; //FIXME
           case s_m::del_ack_w:

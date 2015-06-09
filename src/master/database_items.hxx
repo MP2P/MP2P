@@ -85,10 +85,17 @@ namespace DB
   }
 
   inline
-  std::vector<stid_type>
-  PartItem::locations_get() const
+  std::vector<stid_type>&
+  PartItem::locations_get()
   {
     return locations_;
+  }
+
+  inline
+  void
+  PartItem::add_stid(stid_type id)
+  {
+    locations_.push_back(id);
   }
 
   inline

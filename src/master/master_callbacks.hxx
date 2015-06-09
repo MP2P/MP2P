@@ -24,7 +24,13 @@ namespace master
     // Compute the number of parts.
     uint32_t nb_parts = DB::tools::number_of_parts(req->fsize);
     if (nb_parts == 0)
+    {
+      const m_c::ack response{1};
+      Packet to_send{m_s::fromto, m_s::ack_w};
+      to_send.add_message(&response, sizeof (m_c::ack), copy::Yes);
+      session.send(to_send);
       return 1;
+    }
 
     // Create file in DB
     DB::FileItem fi = DB::tools::create_new_file(fname,
@@ -35,9 +41,17 @@ namespace master
     // Compute STPFIELD(s) depending on file parts.
     std::vector<STPFIELD> fields = DB::tools::get_stpfields_for_upload(fi);
 
-    if (fields.size() == 0)
+    if (fields.size() < req->rdcy)
     {
-      utils::Logger::cerr() << "Could not find any Storage to send parts to...";
+      utils::Logger::cerr() << "Client is asking for a redundancy of "
+                               + std::to_string(req->rdcy)
+                               + " but there is only "
+                               + std::to_string(fields.size())
+                               + " storages available.";
+      const m_c::ack response{11};
+      Packet to_send{m_s::fromto, m_s::ack_w};
+      to_send.add_message(&response, sizeof (m_c::ack), copy::Yes);
+      session.send(to_send);
       return 1;
     }
 
@@ -127,17 +141,61 @@ namespace master
   inline masks::ack_type
   sm_part_ack(Packet& packet, Session& session)
   {
-//    const s_m::part_ack* req = reinterpret_cast<s_m::part_ack*>
-//                               (packet.message_seq_get().front().data());
+    const s_m::part_ack* req = reinterpret_cast<s_m::part_ack*>
+                               (packet.message_seq_get().front().data());
+
+    std::string json = DB::Connector::get_instance().cmd_get("files");
+    DB::MetaOnFilesItem mof = DB::MetaOnFilesItem::deserialize(json);
+    std::string fname = mof.file_name_by_id(req->partid.fid);
+    json = DB::Connector::get_instance().cmd_get("file." + fname);
+    DB::FileItem fi = DB::FileItem::deserialize(json);
+
+    auto it = fi.parts_get().begin();
+    for (; it != fi.parts_get().end(); ++it)
+    {
+      if (it->num_get() == req->partid.partnum)
+      {
+        it->add_stid(req->stid);
+      }
+    }
+    if (it == fi.parts_get().end())
+    {
+      fi.parts_get().push_back(DB::PartItem(req->partid, "                    ",
+                                            {req->stid}));
+      it = std::prev(fi.parts_get().end());
+    }
 
 
+    assert(it->num_get() == req->partid.partnum);
 
-
-
-    // FIXME : Look in the database if the redundancy is enough.
-    // if not, send a request to the storage to upload
-    // the file to other storages
-    return (packet.size_get() && session.length_get());
+    if (it->locations_get().size() >= fi.redundancy_get()) // >= -> Why not?
+    {
+      const m_s::ack response{0};
+      Packet to_send{m_s::fromto, m_s::ack_w};
+      to_send.add_message(&response, sizeof (m_s::ack), copy::Yes);
+      session.send(to_send);
+    }
+    else // Replication request
+    {
+      auto storages = DB::tools::get_all_storages();
+      std::random_shuffle(storages.begin(),
+                          storages.end()); // Good repartition over storages
+      for (auto st : storages)
+      {
+        if (std::find(it->locations_get().begin(), it->locations_get().end(),
+                      st.id_get()) != it->locations_get().end())
+          continue;
+        else
+        {
+          const m_s::part_loc response{req->partid, st.addr_get()};
+          Packet to_send{m_s::fromto, m_s::part_loc_w};
+          to_send.add_message(&response, sizeof(m_s::part_loc), copy::Yes);
+          session.send(to_send);
+          break;
+        }
+      }
+    }
+    return 1;
   }
 
   inline masks::ack_type

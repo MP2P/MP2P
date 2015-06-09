@@ -44,7 +44,7 @@ namespace storage
                                   conf.master_port};
 
     Packet p{s_m::fromto, s_m::part_ack_w};
-    const s_m::part_ack response{part->partid, 10};
+    const s_m::part_ack response{Storage::id, part->partid, 10};
     p.add_message(&response, sizeof (s_m::part_ack), copy::Yes);
     master_session.send(p);
 

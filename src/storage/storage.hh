@@ -28,11 +28,12 @@ namespace storage
 
   class Storage
   {
+  public:
+    static uint32_t id;
   private:
     boost::asio::io_service io_service_; // Does not need instantiation
     network::Server server_;
     std::vector<std::thread> threads_;
-    uint32_t id_;
 
     network::masks::ack_type recv_dispatcher(network::Packet packet,
                                         network::Session& session);

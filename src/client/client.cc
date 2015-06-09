@@ -41,9 +41,11 @@ namespace client
   }
 
   // FIXME : types
-  void Client::request_upload(const files::File& file,
-                              rdcy_type rdcy)
+  void Client::request_upload(const files::File& file, rdcy_type rdcy)
   {
+    if (rdcy == 0)
+      throw std::logic_error("Redundancy must be >= 1.");
+
     fsize_type fsize = file.size();
     const std::string& fname = file.filename_get();
 
