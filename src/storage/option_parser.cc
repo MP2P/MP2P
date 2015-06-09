@@ -172,7 +172,7 @@ namespace storage
       if (storage::conf.timeout == 0)
         storage::conf.timeout = DEFAULT_TIMEOUT;
       if (!boost::filesystem::exists(storage::conf.storage_path))
-        boost::filesystem::create_directory(storage::conf.storage_path);
+        boost::filesystem::create_directories(storage::conf.storage_path);
 
       // Just try to resolve hostnames (throw if it does not work).
       network::get_ipv6(storage::conf.hostname);
