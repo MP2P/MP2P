@@ -206,6 +206,23 @@ namespace DB
     static MetaOnFilesItem deserialize(std::string& json);
   };
 
+  class MetaOnStoragesItem : public Item
+  {
+  private:
+    uint64_t count_;
+    uint128_t available_space_;
+  public:
+    MetaOnStoragesItem(const uint64_t count, uint128_t available_space);
+
+    uint64_t count_get() const;
+    void count_set(uint64_t v);
+    uint128_t available_space_get() const;
+    void available_space_set(uint128_t v);
+
+    std::string serialize() const override;
+    static MetaOnStoragesItem deserialize(std::string& json);
+  };
+
   namespace tools
   {
     // FIXME: create a smart templated function that try to get a value from DB
@@ -217,7 +234,6 @@ namespace DB
 
     network::masks::partnum_type number_of_parts(fsize_type file_size);
     std::vector<StorageItem> get_all_storages();
-    ADDR get_storage_addr(stid_type id);
 
     FileItem create_new_file(std::string name, fsize_type file_size,
                              rdcy_type redundancy, std::string hash);

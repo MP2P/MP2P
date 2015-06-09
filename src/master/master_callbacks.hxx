@@ -165,7 +165,6 @@ namespace master
       it = std::prev(fi.parts_get().end());
     }
 
-
     assert(it->num_get() == req->partid.partnum);
 
     if (it->locations_get().size() >= fi.redundancy_get()) // >= -> Why not?
@@ -203,6 +202,8 @@ namespace master
   {
     const CharT* data = packet.message_seq_get().front().data();
     const auto* req = reinterpret_cast<const s_m::id_req*>(data);
+
+
 
     // FIXME : Query the database using the req->port
     (void)req->port;

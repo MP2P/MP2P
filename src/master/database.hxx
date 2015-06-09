@@ -159,6 +159,10 @@ namespace DB
                                    const std::unordered_map<fid_type, std::string>& name_by_id)
       : count_{count}, total_size_{total_size}, name_by_id_{name_by_id} {};
 
+  inline
+  MetaOnStoragesItem::MetaOnStoragesItem(const uint64_t count,
+                                         const uint128_t available_space)
+      : count_{count}, available_space_{available_space} {};
 
   // Item's serializers
   inline std::string
@@ -241,6 +245,17 @@ namespace DB
             ss << "," << "{\"id\":" << it->first << ",\"name\":"
                << utils::misc::string_from(it->second) << "}";
        ss << "]"
+    << "}";
+    return ss.str();
+  }
+
+  inline std::string
+  MetaOnStoragesItem::serialize() const
+  {
+    std::stringstream ss;
+    ss << "{"
+          << "\"count\":" << utils::misc::string_from(count_) << ','
+          << "\"available_space\":" << utils::misc::string_from(available_space_)
     << "}";
     return ss.str();
   }
@@ -347,5 +362,17 @@ namespace DB
                          v.second.get<std::string>("name"));
 
     return MetaOnFilesItem(count, total_size, name_by_id);
+  }
+
+  inline MetaOnStoragesItem
+  MetaOnStoragesItem::deserialize(std::string& json)
+  {
+    boost::property_tree::ptree pt;
+    std::istringstream is(json);
+    boost::property_tree::read_json(is, pt);
+
+    uint64_t count = pt.get<uint64_t>("count");
+    uint128_t available_space = pt.get<uint128_t>("available_space");
+    return MetaOnStoragesItem(count, available_space);
   }
 };

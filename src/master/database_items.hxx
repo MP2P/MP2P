@@ -188,4 +188,32 @@ namespace DB
   {
     return name_by_id_.at(id);
   }
+
+  inline
+  uint64_t
+  MetaOnStoragesItem::count_get() const
+  {
+    return count_;
+  }
+
+  inline
+  void
+  MetaOnStoragesItem::count_set(uint64_t v)
+  {
+    count_ = v;
+  }
+
+  inline
+  uint128_t
+  MetaOnStoragesItem::available_space_get() const
+  {
+    return available_space_;
+  }
+
+  inline
+  void
+  MetaOnStoragesItem::available_space_set(uint128_t v)
+  {
+    available_space_ = v;
+  }
 }

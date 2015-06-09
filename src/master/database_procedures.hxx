@@ -48,7 +48,7 @@ namespace DB
       return 0;
     }
 
-    // FIXME: cache this for x minutes(size_t size, size_t part_id, size_t parts)
+    // FIXME: cache this for x minutes
     inline
     std::vector<StorageItem>
     get_all_storages()
@@ -72,14 +72,6 @@ namespace DB
 
       return storages;
     }
-
-    ADDR get_storage_addr(stid_type id)
-    {
-      std::string json = DB::Connector::get_instance().cmd_get("st." + std::to_string(id));
-      DB::StorageItem si = DB::StorageItem::deserialize(json);
-      return si.addr_get();
-    }
-
 
     // FIXME: CAS this
     inline

@@ -91,16 +91,25 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]")
     for (uint16_t i = 0; i < 62; i += 3)
       tmp.insert({i, "filename" + std::to_string(i)});
 
-    DB::MetaOnFilesItem mof_item = DB::MetaOnFilesItem(62, 125588150,
-                                                       tmp);
-
+    DB::MetaOnFilesItem mof_item = DB::MetaOnFilesItem(62, 125588150, tmp);
     std::string s_mof_item = mof_item.serialize();
-
     mof_item = DB::MetaOnFilesItem::deserialize(s_mof_item);
 
     // Check the resulting MasterItem
     REQUIRE(mof_item.count_get() == 62);
     REQUIRE(mof_item.total_size_get() == 125588150);
     REQUIRE(mof_item.file_name_by_id(3) == "filename3");
+  }
+
+
+  SECTION("Create, serialize, deserialize a MetaOnStoragesItem")
+  {
+    DB::MetaOnStoragesItem mos_item = DB::MetaOnStoragesItem(62, 125588150);
+    std::string s_mos_item = mos_item.serialize();
+    mos_item = DB::MetaOnStoragesItem::deserialize(s_mos_item);
+
+    // Check the resulting MasterItem
+    REQUIRE(mos_item.count_get() == 62);
+    REQUIRE(mos_item.available_space_get() == 125588150);
   }
 }
