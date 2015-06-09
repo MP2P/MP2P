@@ -133,10 +133,10 @@ namespace client
           auto hash = files::hash_buffer_hex(part_buffer, part_size);
 
           Packet to_send{c_s::fromto, c_s::up_act_w};
-          to_send.add_message(&fid, sizeof (fid), copy::Yes);
-          to_send.add_message(&part_num, sizeof (part_num), copy::Yes);
+          to_send.add_message(&fid, sizeof (fid), copy::No);
+          to_send.add_message(&part_num, sizeof (part_num), copy::No);
 
-          to_send.add_message(hash.data(), hash.size(), copy::Yes);
+          to_send.add_message(hash.data(), hash.size(), copy::No);
 
           // FIXME : part_size may not fit in uint32_t
           to_send.add_message(part_buffer, part_size, copy::No);
@@ -152,7 +152,7 @@ namespace client
     // Prepare the request packet: contains only the filename.
     // There is no need for a custom structure
     Packet request{c_m::fromto, c_m::down_req_w};
-    request.add_message(filename.c_str(), filename.size(), copy::Yes);
+    request.add_message(filename.c_str(), filename.size(), copy::No);
 
     master_session_.blocking_send(request);
 
