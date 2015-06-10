@@ -53,9 +53,8 @@ mkdir -p build && cd build; cmake ..; make client-release -j;
 
 * C++ >= 14
 * Boost >= 1.55
-* libconfig >= 1.4.9
 * OpenSSL >= 1.0
-* libcouchbase >= 2.4.8
+* libcouchbase == 2.4.8
 
 ## Details
 
