@@ -30,9 +30,9 @@ namespace master
     {
       utils::Logger::cerr() << "Add some storages so that clients can upload!";
       const m_c::ack response{1};
-      Packet to_send{m_s::fromto, m_s::ack_w};
+      Packet to_send{m_c::fromto, m_c::ack_w};
       to_send.add_message(&response, sizeof (m_c::ack), copy::Yes);
-      session.send(to_send);
+      session.blocking_send(to_send);
       return 1;
     }
 
@@ -47,9 +47,9 @@ namespace master
                                + std::to_string(fields.size())
                                + " storages available.";
       const m_c::ack response{11};
-      Packet to_send{m_s::fromto, m_s::ack_w};
+      Packet to_send{m_c::fromto, m_c::ack_w};
       to_send.add_message(&response, sizeof (m_c::ack), copy::Yes);
-      session.send(to_send);
+      session.blocking_send(to_send);
       return 1;
     }
 
@@ -72,7 +72,7 @@ namespace master
                          copy::Yes);
 
     utils::Logger::cout() << "Responding with m_c::pieces_loc answers for " + fname;
-    session.send(response);
+    session.blocking_send(response);
 
     return 0;
   }
@@ -86,38 +86,79 @@ namespace master
 
     std::string fname(req->fname, packet.size_get());
 
-    fsize_type fsize = boost::filesystem::file_size(fname);
+    utils::Logger::cerr() << "Request to download file " + fname + ".";
 
-    // FIXME : Look into the database for the file.
-    // Get the address of each storage that contains the parts
-
-    size_t nb_servers = 1;
-
-    std::vector<STPFIELD> fields;
-    for (stid_type i = 0; i < nb_servers; ++i)
+    std::string json;
+    try
     {
-      // FIXME : Get storage's ADDR from db
-      auto ip = network::get_ipv6("0:0:0:0:0:0:0:1");
-
-      // FIXME : Ugly address initialization
-      ADDR addr;
-      memcpy(addr.ipv6, ip.to_bytes().data(), ipv6_type_size); // Copy IP
-      addr.port = 3728;
-
-      STPFIELD field = { addr, i };
-      fields.push_back(field);
+      json = DB::Connector::get_instance().cmd_get(fname);
+    }
+    catch (std::logic_error)
+    {
+      utils::Logger::cerr() << "File " + fname + " does not exists.";
+      const m_c::ack response{3};
+      Packet to_send{m_c::fromto, m_c::ack_w};
+      to_send.add_message(&response, sizeof (m_c::ack), copy::Yes);
+      session.blocking_send(to_send);
+      return 1;
     }
 
-    // FIXME : Get file_id from db
-    network::masks::fid_type file_id = 0; //fi.id_get();
+    DB::FileItem fi = DB::FileItem::deserialize(json);
+
+    auto storages = DB::tools::get_all_storages();
+
+    std::vector<STPFIELD> fields;
+
+    // For each part of the file
+    for (auto part = fi.parts_get().begin();  part != fi.parts_get().end(); ++part)
+    {
+      if (part->locations_get().size() == 0)
+      {
+        utils::Logger::cerr() << "File is not complete on our servers "
+                                     "(wait for full upload).";
+        const m_c::ack response{1};
+        Packet to_send{m_c::fromto, m_c::ack_w};
+        to_send.add_message(&response, sizeof (m_c::ack), copy::Yes);
+        session.blocking_send(to_send);
+        return 1;
+      }
+
+      // For each location of the part
+      ADDR addr;
+      addr.port = 0;
+      for (auto stid : part->locations_get())
+      {
+        auto st = storages.begin();
+        for (; st != storages.end(); ++st)
+        {
+          if (st->id_get() == stid)
+          {
+            try
+            {
+              addr = st->addr_get();
+              break;
+            }
+            catch (...) {}
+          }
+        }
+        if (addr.port != 0)
+          break;
+      }
+      fields.push_back({addr, part->num_get()});
+    }
+
+    std::cout << "fields_size = " << std::to_string(fields.size()) << std::endl;
+
+    fsize_type fsize = fi.file_size_get();
+    fid_type fid = fi.id_get();
 
     Packet response{m_c::fromto, m_c::down_pieces_loc_w};
     response.add_message(&fsize, sizeof (fsize_type), copy::Yes);
-    response.add_message(&file_id, sizeof (file_id), copy::Yes);
+    response.add_message(&fid, sizeof (fid_type), copy::Yes);
     response.add_message(&*fields.begin(),
                          fields.size() * sizeof (STPFIELD),
                          copy::Yes);
-    session.send(response);
+    session.blocking_send(response);
 
     return 0;
   }
@@ -164,12 +205,14 @@ namespace master
       it = std::prev(fi.parts_get().end());
     }
 
+    DB::Connector::get_instance().cmd_put("file." + fname, fi.serialize());
+
     if (it->locations_get().size() >= fi.redundancy_get()) // >= -> Why not?
     {
       const m_s::ack response{0};
       Packet to_send{m_s::fromto, m_s::ack_w};
       to_send.add_message(&response, sizeof (m_s::ack), copy::Yes);
-      session.send(to_send);
+      session.blocking_send(to_send);
     }
     else // Replication request
     {
@@ -186,7 +229,7 @@ namespace master
           const m_s::part_loc response{req->partid, st.addr_get()};
           Packet to_send{m_s::fromto, m_s::part_loc_w};
           to_send.add_message(&response, sizeof(m_s::part_loc), copy::Yes);
-          session.send(to_send);
+          session.blocking_send(to_send);
           break;
         }
       }
@@ -217,7 +260,7 @@ namespace master
     const m_s::fid_info response{si.id_get()};
     Packet to_send{m_s::fromto, m_s::fid_info_w};
     to_send.add_message(&response, sizeof (m_s::fid_info), copy::Yes);
-    session.send(to_send);
+    session.blocking_send(to_send);
 
     return 1; // Close the connection
   }

@@ -9,6 +9,11 @@ namespace network
     return socket_;
   }
 
+  inline boost::asio::ip::address Session::remote_address_get()
+  {
+    return socket_.remote_endpoint().address();
+  }
+
   inline std::array<char, sizeof (masks::PACKET_HEADER)>& Session::buff_get()
   {
     return buff_;

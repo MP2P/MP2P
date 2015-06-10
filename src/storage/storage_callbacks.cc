@@ -13,6 +13,13 @@ namespace storage
     CharT* data = packet.message_seq_get().front().data();
     const c_s::up_act* part = reinterpret_cast<const c_s::up_act*>(data);
 
+    std::string fid_partnum = "file_id=" + std::to_string(part->partid.fid)
+                              + " (part_id=" + std::to_string(part->partid.partnum)
+                              + ")";
+
+    utils::Logger::cout() << "Receiving " + fid_partnum + " from "
+                             + session.remote_address_get().to_string();
+
     // Check if the hash is correct
     {
       // Compute the hash of the received buffer
@@ -22,7 +29,7 @@ namespace storage
       // and kill the connection
       if(memcmp(hash.data(), part->sha1, 20))
       {
-        utils::Logger::cerr() << "Hash failed";
+        utils::Logger::cerr() << "Hash failed for " + fid_partnum;
         Packet p{s_c::fromto, s_c::fail_sha1_w};
         p.add_message(&part->partid, sizeof (PARTID), copy::No);
         // FIXME : Use an async_send, but close the session only after the async_send
@@ -36,13 +43,13 @@ namespace storage
                        + std::to_string(part->partid.fid)
                        + "." + std::to_string(part->partid.partnum));
 
-    file.write(part->data,
-               packet.size_get() - sizeof (c_s::up_act));
+    file.write(part->data, packet.size_get() - sizeof (c_s::up_act));
 
     auto master_session = Session{session.socket_get().get_io_service(),
                                   conf.master_hostname,
                                   conf.master_port};
 
+    utils::Logger::cout() << "Acknoledging master for " + fid_partnum;
     Packet p{s_m::fromto, s_m::part_ack_w};
     const s_m::part_ack response{Storage::id, part->partid, 10};
     p.add_message(&response, sizeof (s_m::part_ack), copy::Yes);

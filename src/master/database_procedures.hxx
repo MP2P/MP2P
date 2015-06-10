@@ -105,7 +105,7 @@ namespace DB
       mof.total_size_set(mof.total_size_get() + fi.file_size_get());
 
       // Add file in name_by_id list
-      mof.name_by_id_get().emplace(mof.count_get(), fi.name_get());
+      mof.name_by_id_get().emplace(fi.id_get(), fi.name_get());
 
       // Update metadata on files
       DB::Connector::get_instance().cmd_put("files", mof.serialize());

@@ -161,7 +161,7 @@ namespace client
       if (client::conf.action == action::upload)
         if (client::conf.redundancy == 0)
           throw std::logic_error("Redundancy must be 1 or more.");
-      if (client::conf.action != action::none)
+      if (client::conf.action == action::upload)
         if (!boost::filesystem::exists(client::conf.file_path))
           throw std::logic_error("File does not exists " + client::conf.file_path);
 

@@ -6,6 +6,7 @@
 using namespace network::masks;
 
 #include <map>
+#include <mutex>
 #include <string>
 #include <sstream>
 #include <string.h>
@@ -32,6 +33,7 @@ namespace DB
     void operator=(Database const&) = delete;
 
   public:
+    std::mutex mutex_;
     virtual ~Database() = default;
 
     // Db commands -> Throws when it fails

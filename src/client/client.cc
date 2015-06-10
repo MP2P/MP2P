@@ -168,20 +168,32 @@ namespace client
     Packet request{c_m::fromto, c_m::down_req_w};
     request.add_message(filename.c_str(), filename.size(), copy::No);
 
+    utils::Logger::cout() << "Requesting file " + filename + " to master.";
     master_session_.blocking_send(request);
 
-    // Wait for an answer from the master, then connect to each of the
-    // storages
+    // Wait for an answer from the master, then download all parts from storages
     master_session_.blocking_receive(
         [&filename, this](Packet p, Session& /*recv_session*/) -> ack_type
         {
           CharT* data = p.message_seq_get().front().data();
+
+          if (p.what_get() == 0)
+            throw std::logic_error("Master returned error: "
+                                   "File " + filename + " does not exists.");
+
           m_c::down_pieces_loc* pieces = reinterpret_cast<m_c::down_pieces_loc*>(data);
 
           // Get the number of STPFIELDS
           size_t list_size = (p.size_get()
                               - sizeof (fid_type) - sizeof (fsize_type))
                              / sizeof (STPFIELD);
+
+          std::cout << "list_size = " + std::to_string(list_size) << std::endl;
+
+          if (list_size == 0)
+          {
+            throw std::logic_error("No location were returned :/");
+          }
 
           // Get the size of a part
           auto part_size = pieces->fsize / list_size;
@@ -217,7 +229,12 @@ namespace client
     return [&file, this, addr, partid, part_size]()
     {
       auto host = network::binary_to_string_ipv6(addr.ipv6,
-                                               network::masks::ipv6_type_size);
+                                                 network::masks::ipv6_type_size);
+
+      utils::Logger::cout() << "Requesting part_id=" + std::to_string(partid.partnum)
+                               + " (file_id=" + std::to_string(partid.fid)
+                               + ") to storage " + host
+                               + ":" + std::to_string(addr.port) + ".";
 
       // Create the storage session
       Session storage{io_service_, host, addr.port};
