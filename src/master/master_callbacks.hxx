@@ -164,8 +164,6 @@ namespace master
       it = std::prev(fi.parts_get().end());
     }
 
-    assert(it->num_get() == req->partid.partnum);
-
     if (it->locations_get().size() >= fi.redundancy_get()) // >= -> Why not?
     {
       const m_s::ack response{0};

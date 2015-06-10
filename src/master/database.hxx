@@ -30,32 +30,41 @@ namespace DB
   }
 
   // Database commands
+  static std::mutex get_mutex;
   inline
   std::string
   CouchbaseDb::cmd_get(const std::string& key)
   {
+    get_mutex.lock();
     auto result = client_.get(key);
     if (!result.status().success())
       throw std::logic_error("Key " + key + " does not exists.");
+    get_mutex.unlock();
     return result.value();
   }
 
+  static std::mutex remove_mutex;
   inline
   void
   CouchbaseDb::cmd_remove(const std::string& key)
   {
+    remove_mutex.lock();
     client_.remove(key);
+    remove_mutex.unlock();
   }
 
+  static std::mutex put_mutex;
   inline
   void
   CouchbaseDb::cmd_put(const std::string& key, const std::string& value)
   {
+    put_mutex.lock();
     auto result = client_.upsert(key, value);
     if (!result.status().success())
       throw std::logic_error("Can't put " + key + ", error: " +
                              std::to_string(result.cas()));
     utils::Logger::cout() << "Upserted " + key;
+    put_mutex.unlock();
   }
 
   // Connector

@@ -4,9 +4,9 @@
 #provide a file as first argument.
 #2nd argument: whatever you want, this is just to specify that your commands should be done on every servers at the same time.
 
-IP0="192.168.1.40"
-IP1="192.168.1.41"
-IP2="192.168.1.42"
+IP0="192.168.1.11"
+IP1="192.168.1.12"
+IP2="192.168.1.13"
 
 PORT0="22"
 PORT1="22"
@@ -14,7 +14,7 @@ PORT2="22"
 
 read -s -p "Please enter your MP2P password:" PWD
 echo
-if [[ $(whoami) != "rusty" ]]; then
+if [[ $(whoami) == "rusty" ]]; then
   IP0="rusty.myftp.org"
   IP1="rusty.myftp.org"
   IP2="rusty.myftp.org"
