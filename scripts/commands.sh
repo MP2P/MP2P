@@ -14,14 +14,14 @@ PORT2="22"
 
 read -s -p "Please enter your MP2P password:" PWD
 echo
-if [[ $(whoami) == "rusty" ]]; then
-  IP0="rusty.myftp.org"
-  IP1="rusty.myftp.org"
-  IP2="rusty.myftp.org"
-  PORT0="40"
-  PORT1="41"
-  PORT2="42"
-fi
+#if [[ $(whoami) != "rusty" ]]; then
+  IP0="rpi.juliendubiel.net"
+  IP1="rpi.juliendubiel.net"
+  IP2="rpi.juliendubiel.net"
+  PORT0="4201"
+  PORT1="4202"
+  PORT2="4203"
+#fi
 
 if [ "$#" -eq 2 ] && [ -f "$1" ]; then
   echo Trying to connect to Raspberry Py 0...
