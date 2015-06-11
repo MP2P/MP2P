@@ -1,2 +1,2 @@
 cd /home/mp2p/MP2P/build
-nohup ./server &>>output &
+nohup ./storage-release &>>output &

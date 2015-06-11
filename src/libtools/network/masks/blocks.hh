@@ -22,21 +22,21 @@ namespace network
     // Basic blocks
     using ack_type = uint8_t;
     using avspace_type = uint64_t;
+    using data_type = const CharT; //FIXME: No pointer type?
     using fid_type = uint64_t;
     using fname_type = const CharT;
     using fromto_type = uint8_t;
     using fsize_type = uint64_t;
     using ipv6_type = CharT[ipv6_type_size];
+    using mtid_type = uint32_t; //FIXME: Useless?
     using partnum_type = uint32_t;
-    using partsize_type = uint64_t;
+    using partsize_type = uint64_t; //FIXME: What is this?
     using port_type = uint16_t;
     using rdcy_type = uint8_t;
     using sha1_type = unsigned char[sha1_type_size];
     using size_type = uint32_t;
     using stid_type = uint32_t;
-    using mtid_type = uint32_t; //FIXME: Useless?
     using what_type = uint8_t;
-    using data_type = const CharT;
 
     using message_type = utils::shared_buffer;
 
