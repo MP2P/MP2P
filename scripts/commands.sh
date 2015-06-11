@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #Write all the commands you want to execute in the command_list file, or alternatively,
 #provide a file as first argument.

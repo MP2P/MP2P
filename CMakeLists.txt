@@ -55,8 +55,8 @@ endif(${clangnotavailable} EQUAL 0)
 message(STATUS "Selected '${CMAKE_CXX_COMPILER}' as CMAKE_CXX_COMPILER.")
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -pedantic -Wall -Wextra -Werror -O3 -Wno-error=deprecated-declarations")
-set(SHARED_FLAGS "-std=c++1y -pedantic -Wall -Wextra -Werror -Wno-error=deprecated-declarations -Wno-error=sign-compare ${ADDITIONNAL_FLAGS}")
-set(DEBUG_FLAGS "-ggdb3 ${SHARED_FLAGS}")
+set(SHARED_FLAGS "-std=c++1y -pedantic -Wall -Wextra -Wno-error=deprecated-declarations -Wno-error=sign-compare ${ADDITIONNAL_FLAGS}")
+set(DEBUG_FLAGS "-ggdb3 -Werror ${SHARED_FLAGS}")
 set(OPTIMIZED_FLAGS "-O3 -DNDEBUG ${SHARED_FLAGS}")
 
 if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
