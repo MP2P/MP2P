@@ -167,7 +167,81 @@ namespace master
   inline masks::ack_type
   cm_del_req(Packet& packet, Session& session)
   {
-    return (packet.size_get() && session.length_get());
+    const c_m::del_req* req = reinterpret_cast<c_m::del_req*>
+        (packet.message_seq_get().front().data());
+
+
+
+    std::string fname(req->fname, packet.size_get());
+
+    utils::Logger::cerr() << "Request to delete file " + fname + ".";
+
+    std::string json;
+    try
+    {
+      json = DB::Connector::get_instance().cmd_get(fname);
+    }
+    catch (std::logic_error) //<FIXME>
+    {
+      utils::Logger::cerr() << "File " + fname + " does not exists.";
+      const m_c::ack response{3};
+      Packet to_send{m_c::fromto, m_c::ack_w};
+      to_send.add_message(&response, sizeof (m_c::ack), copy::Yes);
+      session.blocking_send(to_send);
+      return 1;
+    } //</FIXME>
+
+    DB::FileItem fi = DB::FileItem::deserialize(json);
+
+    auto storages = DB::tools::get_all_storages();
+
+    //std::vector<STPFIELD> fields;
+
+    // For each part of the file
+    for (auto part = fi.parts_get().begin();  part != fi.parts_get().end(); ++part)
+    {
+      if (part->locations_get().size() == 0)
+      {
+        utils::Logger::cerr() << "File is not complete on our servers "
+                                     "(wait for full upload).";
+        const m_c::ack response{1};
+        Packet to_send{m_c::fromto, m_c::ack_w};
+        to_send.add_message(&response, sizeof (m_c::ack), copy::Yes);
+        session.blocking_send(to_send);
+        return 1;
+      }
+
+      // For each location of the part
+      ADDR addr;
+      addr.port = 0;
+      for (auto stid : part->locations_get())
+      {
+        auto st = storages.begin();
+        for (; st != storages.end(); ++st)
+        {
+          if (st->id_get() == stid)
+          {
+            try
+            {
+              addr = st->addr_get();
+              break;
+            }
+            catch (...) {}
+          }
+        }
+        if (addr.port != 0)
+          break;
+      }
+      //fields.push_back({addr, part->num_get()});
+      //FIXME: Where do you send this?
+      Packet response{m_s::fromto, m_s::del_act_w};
+      //response.add_message(part->num_get(), sizeof (partnum_type), copy::Yes);
+      session.blocking_send(response);
+    }
+
+
+
+    return 0;
   }
 
   // Part deletetion succedeed!
