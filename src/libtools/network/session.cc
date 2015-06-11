@@ -144,7 +144,7 @@ namespace network
     std::ostringstream s;
     s << std::this_thread::get_id();
 
-    std::array<char, sizeof(masks::PACKET_HEADER)> packet_buff{};
+    std::array<char, sizeof(masks::PACKET_HEADER)> packet_buff;
 
     socket_.receive(boost::asio::buffer(&*packet_buff.begin(), packet_buff.size()));
 

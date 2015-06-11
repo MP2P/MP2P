@@ -37,20 +37,25 @@ execute_process(COMMAND which clang++ RESULT_VARIABLE clangnotavailable OUTPUT_Q
 #message("cavailable: ${cavailable}")
 if(${clangnotavailable} EQUAL 0)
   set(CMAKE_CXX_COMPILER "clang++")
+  set(ADDITIONNAL_FLAGS "-Wno-error=zero-length-array")
 else(${clangnotavailable} EQUAL 0)
   execute_process(COMMAND which clang++-3.5 RESULT_VARIABLE clang35notavailable OUTPUT_QUIET ERROR_QUIET)
   if(${clang35notavailable} EQUAL 0)
     set(CMAKE_CXX_COMPILER "clang++-3.5")
-  #else(${clangnotavailable} EQUAL 0)
-    #set(CMAKE_CXX_COMPILER "g++")
+    set(ADDITIONNAL_FLAGS "-Wno-error=zero-length-array")
+  else(${clang35notavailable} EQUAL 0)
+    set(CMAKE_CXX_COMPILER "g++")
+    set(ADDITIONNAL_FLAGS "")
   endif(${clang35notavailable} EQUAL 0)
     #set(CMAKE_CXX_COMPILER "g++")
 endif(${clangnotavailable} EQUAL 0)
 
-#message(STATUS "CMAKE_CXX_COMPILER:     " ${CMAKE_CXX_COMPILER})
+
+
+message(STATUS "Selected '${CMAKE_CXX_COMPILER}' as CMAKE_CXX_COMPILER.")
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -pedantic -Wall -Wextra -Werror -O3 -Wno-error=deprecated-declarations")
-set(SHARED_FLAGS "-std=c++1y -pedantic -Wall -Wextra -Werror -Wno-error=deprecated-declarations -Wno-error=sign-compare -Wno-error=zero-length-array")
+set(SHARED_FLAGS "-std=c++1y -pedantic -Wall -Wextra -Werror -Wno-error=deprecated-declarations -Wno-error=sign-compare ${ADDITIONNAL_FLAGS}")
 set(DEBUG_FLAGS "-ggdb3 ${SHARED_FLAGS}")
 set(OPTIMIZED_FLAGS "-O3 -DNDEBUG ${SHARED_FLAGS}")
 

@@ -10,8 +10,8 @@ namespace network
 {
   namespace masks
   {
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wzero-length-array"
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wpedantic"
 
     using CharT = char;
 
@@ -79,6 +79,6 @@ namespace network
       STPFIELD stplist[0];
     } __attribute__ ((packed));
 
-    #pragma clang diagnostic pop
+    #pragma GCC diagnostic pop
   }
 }
