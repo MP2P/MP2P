@@ -113,8 +113,6 @@ namespace storage
             std::ofstream id_file(storage::conf.id_path);
             id_file << response->stid;
 
-            io_service_.stop();
-
             return 1;
           }
       );
