@@ -190,6 +190,9 @@ namespace client
           // Get the size of a part
           auto part_size = pieces->fsize / list_size;
 
+          if (pieces->fsize > boost::filesystem::space(".").available)
+            throw std::logic_error("Not enough space available on filepath.");
+
           // Create an empty file, resized to the size of the expected file
           auto file = files::File::create_empty_file(filename + "-dl",
                                                      pieces->fsize);
