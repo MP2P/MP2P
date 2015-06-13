@@ -11,7 +11,7 @@ namespace network
   namespace masks
   {
     #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wpedantic"
+    #pragma GCC diagnostic ignored "-Wzero-length-array"
 
     using CharT = char;
 

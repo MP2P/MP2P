@@ -69,12 +69,6 @@ set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost COMPONENTS system iostreams filesystem program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
-
-# ********[04][d01] ADDING LIBCONFIG LIBRARY ******** #
-#set(LibConfig++_DIR /usr/include)
-#find_package(LibConfig++ REQUIRED)
-include_directories(${LIBCONFIG++_INCLUDE_DIR})
-
 # ********[04][d02] ADDING OPENSSL LIBRARY ********** #
 include_directories(${OPENSSL_INCLUDE_DIR})
 
