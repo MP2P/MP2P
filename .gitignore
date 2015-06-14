@@ -36,5 +36,3 @@ _build/
 
 # MISC
 *.conf
-
-src/libtools/network/masks/blocks.hh
