@@ -39,7 +39,7 @@ namespace network
   // Returns the first ip it resolved.
   inline
   boost::asio::ip::address one_ip_from_host(const std::string& host,
-                                            const std::string port /* == "" */)
+                                            const std::string port)
   {
     return endpoint_from_host(host, port).address();
   }

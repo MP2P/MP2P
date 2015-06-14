@@ -83,7 +83,7 @@ namespace network
             utils::Logger::cerr() << "Error while getting size: "
                                   + ec.message();
             // Kill the session if an error occured
-            kill();
+            kill(); // FIXME : Kill is not the right approach.
           }
         }
     );
@@ -104,14 +104,14 @@ namespace network
                    auto error = callback(p, *this);
                    length_ = 0;
                    if (error == 1)
-                     kill();
+                     kill(); // FIXME : Get rid of Kill
                    else
                     receive();
                  }
                  else
                  {
                    utils::Logger::cerr() << "Error: " + ec.message();
-                   kill();
+                   kill(); // FIXME : Get rid of Kill
                  }
                }
     );
@@ -157,7 +157,7 @@ namespace network
     socket_.receive(p.message_seq_get()[0]);
     auto error = callback(p, *this);
     if (error == 1)
-      kill();
+      kill(); // FIXME : Get rid of Kill
   }
 
   void Session::send(const Packet& packet)
@@ -182,13 +182,13 @@ namespace network
             auto error = callback(*p, *this);
             length_ = 0;
             if (error == 1)
-              kill();
+              kill(); // FIXME : Get rid of Kill
             // FIXME : What to do to keep the socket alive?
           }
           else
           {
             utils::Logger::cerr() << "Error while sending: " + ec.message();
-            kill();
+            kill(); // FIXME : Get rid of Kill
           }
         }
     );
@@ -201,7 +201,7 @@ namespace network
     write(socket_, seq);
     auto error = send_dispatcher_(packet, *this);
     if (error == 1)
-      kill();
+      kill(); // FIXME : Get rid of Kill
   }
 
   void Session::blocking_send(const Packet& packet, dispatcher_type callback)
@@ -211,7 +211,7 @@ namespace network
     write(socket_, seq);
     auto error = callback(packet, *this);
     if (error == 1)
-      kill();
+      kill(); // FIXME : Get rid of Kill
   }
 
   size_t Session::unique_id()
