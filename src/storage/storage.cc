@@ -13,6 +13,8 @@ namespace storage
 
   using copy = utils::shared_buffer::copy;
 
+  uint32_t Storage::id = 0;
+
   Storage::Storage()
       : server_{get_ipv6(storage::conf.hostname), storage::conf.port,
                 io_service_,
@@ -26,7 +28,6 @@ namespace storage
     utils::Logger::cout() << "Bind port = "
                           + std::to_string(storage::conf.port);
   }
-  uint32_t Storage::id = 0;
 
   Storage::~Storage()
   {
@@ -98,7 +99,7 @@ namespace storage
                                     conf.master_port};
 
       // Send a request for an id
-      s_m::id_req req{storage::conf.port, (avspace_type)Storage::how_much_space_available()};
+      s_m::id_req req{storage::conf.port, (avspace_type)Storage::space_available()};
       Packet to_send{s_m::fromto, s_m::id_req_w};
       to_send.add_message(&req, sizeof (s_m::id_req), copy::No);
       master_session.send(to_send);
@@ -180,7 +181,7 @@ namespace storage
     return 0;
   }
 
-  uint64_t Storage::how_much_space_available()
+  uint64_t Storage::space_available()
   {
     return boost::filesystem::space(storage::conf.storage_path).available;
   }
