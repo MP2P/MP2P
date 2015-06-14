@@ -114,7 +114,6 @@ namespace client
 
           return 0;
         });
-
   }
 
   // FIXME: types
@@ -190,10 +189,8 @@ namespace client
 
           std::cout << "list_size = " + std::to_string(list_size) << std::endl;
 
-          if (list_size == 0)
-          {
-            throw std::logic_error("No location were returned :/");
-          }
+          // list_size == 0 shouldn't happen.
+          assert(list_size);
 
           // Get the size of a part
           auto part_size = pieces->fsize / list_size;

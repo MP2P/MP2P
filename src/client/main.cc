@@ -20,11 +20,6 @@ int main(int argc, const char *argv[])
     std::cerr << "Initialization failed " << e.what() << std::endl;
     return 1;
   }
-  catch (...)
-  {
-    std::cerr << "Fatal error: could not initialize." << std::endl;
-    return 1;
-  }
 
   try
   {
@@ -49,11 +44,6 @@ int main(int argc, const char *argv[])
   catch (std::exception &e)
   {
     utils::Logger::cerr() << "Client failed: " + std::string(e.what());
-    return 1;
-  }
-  catch (...)
-  {
-    utils::Logger::cerr() << "Client: Fatal error.";
     return 1;
   }
   return 0;
