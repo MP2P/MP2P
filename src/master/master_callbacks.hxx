@@ -245,11 +245,11 @@ namespace master
   }
 
   // Part deletetion succedeed!
-  inline masks::ack_type
-  sm_del_ack(Packet& packet, Session& session)
-  {
-    return (packet.size_get() && session.length_get());
-  }
+  //inline masks::ack_type
+  //sm_del_ack(Packet& packet, Session& session)
+  //{
+    //return (packet.size_get() && session.length_get());
+  //}
 
   // Part successfully received!
   inline masks::ack_type

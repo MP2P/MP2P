@@ -23,7 +23,6 @@ namespace network
         masks::ack_type err;
       } __attribute__ ((packed));
 
-
       // 0-1 : up_req ~ Upload request <FSIZE|FNAME|RDCY>
       static const what_type up_req_w = 1;
       struct up_req
@@ -33,14 +32,12 @@ namespace network
         fname_type fname[0];
       } __attribute__ ((packed));
 
-
       // 0-2 : down_req ~ Download request <FNAME>
       static const what_type down_req_w = 2;
       struct down_req
       {
         fname_type fname[0];
       } __attribute__ ((packed));
-
 
       // 0-3 : del_req ~ Delete request <FNAME>
       static const what_type del_req_w = 3;
@@ -61,7 +58,6 @@ namespace network
     {
       static const fromto_type fromto = 1;
 
-
       // 1-0 : ack ~ ACK message <ERR>
       static const what_type ack_w = 0;
       struct ack
@@ -76,7 +72,6 @@ namespace network
         FDETAILS fdetails;
       } __attribute__ ((packed));
 
-
       // 1-2 : down_pieces_loc ~ The pieces locations <FSIZE<FID<<STID|UINT16>,...>,...>>
       static const what_type down_pieces_loc_w = 2;
       struct down_pieces_loc
@@ -90,14 +85,12 @@ namespace network
     {
       static const fromto_type fromto = 2;
 
-
       // 2-0 : ack ~ ACK message <ERR>
       static const what_type ack_w = 0;
       struct ack
       {
         masks::ack_type err;
       } __attribute__ ((packed));
-
 
       // 2-1 : up_act ~ The client sends a piece <PARTID|SHA1|DATA>
       static const what_type up_act_w = 1;
@@ -107,7 +100,6 @@ namespace network
         sha1_type sha1;
         data_type data[0];
       } __attribute__ ((packed));
-
 
       // 2-2 down_act ~ The client wants a piece <PARTID>
       static const what_type down_act_w = 2;
@@ -121,7 +113,6 @@ namespace network
     {
       static const fromto_type fromto = 3;
 
-
       // 3-0 : ack ~ ACK message <ERR>
       static const what_type ack_w = 0;
       struct ack
@@ -129,14 +120,12 @@ namespace network
         masks::ack_type err;
       } __attribute__ ((packed));
 
-
       // 3-1 : fail_sha1 ~ Upload failed <PARTID>
-      static const what_type fail_sha1_w = 1;
-      struct fail_sha1
-      {
-        PARTID partid;
-      } __attribute__ ((packed));
-
+      //static const what_type fail_sha1_w = 1;
+      //struct fail_sha1
+      //{
+        //PARTID partid;
+      //} __attribute__ ((packed));
 
       // 3-2 : up_act ~ The storage sends a piece <PARTID|SHA1|DATA>
       static const what_type up_act_w = 2;
@@ -152,14 +141,12 @@ namespace network
     {
       static const fromto_type fromto = 4;
 
-
       // 4-0 : ack ~ ACK message <ERR>
       static const what_type ack_w = 0;
       struct ack
       {
         masks::ack_type err;
       } __attribute__ ((packed));
-
 
       // 4-1 del_act : The Master deletes a piece <PARTID>
       static const what_type del_act_w = 1;
@@ -168,14 +155,12 @@ namespace network
         PARTID partid;
       } __attribute__((packed));
 
-
       // 4-2 part_ack : Successfully received part acknowledgment <PARTID>
       static const what_type part_ack_w = 2;
       struct part_ack
       {
         PARTID partid;
       } __attribute__((packed));
-
 
       // 4-3 part_loc : Send this part to this storage <PARTID|SHA1|DATA>
       static const what_type part_loc_w = 3;
@@ -197,7 +182,6 @@ namespace network
     {
       static const fromto_type fromto = 5;
 
-
       // 5-0 : ack ~ ACK message <ERR>
       static const what_type ack_w = 0;
       struct ack
@@ -205,14 +189,12 @@ namespace network
         masks::ack_type err;
       } __attribute__ ((packed));
 
-
       // 5-1 : del_ack ~ Successfully delete part <PARTID>
-      static const what_type del_ack_w = 1;
-      struct del_ack
-      {
-        PARTID partid;
-      } __attribute((packed));
-
+      //static const what_type del_ack_w = 1;
+      //struct del_ack
+      //{
+        //PARTID partid;
+      //} __attribute((packed));
 
       // 5-2 : part_ack ~ Successfully received part <PARTID|AVSPACE>
       static const what_type part_ack_w = 2;
@@ -236,7 +218,6 @@ namespace network
     {
       static const fromto_type fromto = 6;
 
-
       // 6-0 : ack ~ ACK message <ERR>
       static const what_type ack_w = 0;
       struct ack
@@ -249,14 +230,12 @@ namespace network
     {
       static const fromto_type fromto = 7;
 
-
       // 7-0 : ack ~ ACK message <ERR>
       static const what_type ack_w = 0;
       struct ack
       {
         masks::ack_type err;
       } __attribute__ ((packed));
-
 
       // 7-1 : up_act ~ Storage sends a piece <PARTID|SHA1|DATA>
       static const what_type up_act_w = 1;

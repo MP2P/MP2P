@@ -125,8 +125,8 @@ namespace master
           case s_m::ack_w:
             //return 10501; // Error
             return 4; //FIXME
-          case s_m::del_ack_w:
-            return sm_del_ack(packet, session);
+          //case s_m::del_ack_w:
+            //return sm_del_ack(packet, session);
           case s_m::part_ack_w:
             return sm_part_ack(packet, session);
           case s_m::id_req_w:

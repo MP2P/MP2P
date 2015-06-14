@@ -25,12 +25,15 @@ namespace storage
       // Compute the hash of the received buffer
       auto hash = files::hash_buffer_hex(part->data,
                                      packet.size_get() - sizeof (c_s::up_act));
+      //FIXME: send a s_c_ack error to the client.
       // If the hash is not correct, send a s_c_fail_sha1 to the client
       // and kill the connection
       if(memcmp(hash.data(), part->sha1, 20))
       {
         utils::Logger::cerr() << "Hash failed for " + fid_partnum;
-        Packet p{s_c::fromto, s_c::fail_sha1_w};
+        //FIXME
+        //Packet p{s_c::fromto, s_c::fail_sha1_w};
+        Packet p{s_c::fromto, s_c::ack_w};
         p.add_message(&part->partid, sizeof (PARTID), copy::No);
         // FIXME : Use an async_send, but close the session only after the async_send
         session.blocking_send(p);
