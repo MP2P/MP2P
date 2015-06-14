@@ -20,17 +20,10 @@ int main(int argc, const char *argv[])
     std::cerr << "Initialization failed " << e.what() << std::endl;
     return 1;
   }
-  catch (...)
-  {
-    std::cerr << "Fatal error: could not initialize." << std::endl;
-    return 1;
-  }
 
   try
   {
     Client client{client::conf.master_hostname, client::conf.master_port};
-
-    client.run();
 
     if (client::conf.action == action::upload)
     {
@@ -43,17 +36,10 @@ int main(int argc, const char *argv[])
     {
       client.request_download(client::conf.file_path);
     }
-
-    client.stop();
   }
   catch (std::exception &e)
   {
     utils::Logger::cerr() << "Client failed: " + std::string(e.what());
-    return 1;
-  }
-  catch (...)
-  {
-    utils::Logger::cerr() << "Client: Fatal error.";
     return 1;
   }
   return 0;

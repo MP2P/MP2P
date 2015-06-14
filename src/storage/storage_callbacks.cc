@@ -32,7 +32,6 @@ namespace storage
       {
         utils::Logger::cerr() << "Hash failed for " + fid_partnum;
         //FIXME
-        //Packet p{s_c::fromto, s_c::fail_sha1_w};
         Packet p{s_c::fromto, s_c::ack_w};
         p.add_message(&part->partid, sizeof (PARTID), copy::No);
         // FIXME : Use an async_send, but close the session only after the async_send

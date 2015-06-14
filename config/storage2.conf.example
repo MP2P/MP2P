@@ -1,0 +1,13 @@
+{
+    "concurrency": 4,
+    "hostname": "localhost",
+    "port": 3729,
+    "timeout": 300,
+    "master":
+    {
+      "hostname": "localhost",
+      "port": 3727
+    },
+    "storage_path": "stock_dir",
+    "id_path": "storage2.id"
+}

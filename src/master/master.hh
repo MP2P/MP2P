@@ -37,7 +37,7 @@ namespace master
   class Master
   {
   private:
-    boost::asio::io_service io_service_; // Does not need instantiation
+    boost::asio::io_service io_service_;
     network::Server server_;
     std::vector<std::thread> threads_;
 
@@ -61,7 +61,6 @@ namespace master
   network::masks::ack_type cm_up_req(network::Packet& packet, network::Session& session);
   network::masks::ack_type cm_down_req(network::Packet& packet, network::Session& session);
   network::masks::ack_type cm_del_req(network::Packet& packet, network::Session& session);
-  //network::masks::ack_type sm_del_ack(network::Packet& packet, network::Session& session);
   network::masks::ack_type sm_part_ack(network::Packet& packet, network::Session& session);
   network::masks::ack_type sm_id_req(network::Packet& packet, network::Session& session);
 }

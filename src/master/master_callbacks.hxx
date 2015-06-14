@@ -8,7 +8,6 @@ namespace master
   inline masks::ack_type
   cm_up_req(Packet& packet, Session& session)
   {
-
     const c_m::up_req* req = reinterpret_cast<c_m::up_req*>
         (packet.message_seq_get().front().data());
 
@@ -181,7 +180,7 @@ namespace master
     {
       json = DB::Connector::get_instance().cmd_get(fname);
     }
-    catch (std::logic_error) //<FIXME>
+    catch (std::logic_error&) //<FIXME>
     {
       utils::Logger::cerr() << "File " + fname + " does not exists.";
       const m_c::ack response{3};
@@ -194,8 +193,6 @@ namespace master
     DB::FileItem fi = DB::FileItem::deserialize(json);
 
     auto storages = DB::tools::get_all_storages();
-
-    //std::vector<STPFIELD> fields;
 
     // For each part of the file
     for (auto part = fi.parts_get().begin();  part != fi.parts_get().end(); ++part)
@@ -239,17 +236,8 @@ namespace master
       session.blocking_send(response);
     }
 
-
-
     return 0;
   }
-
-  // Part deletetion succedeed!
-  //inline masks::ack_type
-  //sm_del_ack(Packet& packet, Session& session)
-  //{
-    //return (packet.size_get() && session.length_get());
-  //}
 
   // Part successfully received!
   inline masks::ack_type
@@ -317,7 +305,6 @@ namespace master
   {
     const CharT* data = packet.message_seq_get().front().data();
     const auto* req = reinterpret_cast<const s_m::id_req*>(data);
-
 
     // FIXME: CAS this
     std::string json = DB::Connector::get_instance().cmd_get("storages");

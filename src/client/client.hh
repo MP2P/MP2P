@@ -36,21 +36,8 @@ namespace client
     network::Session master_session_;
     std::vector<std::thread> threads_;
 
-  public:
-    Client(const std::string& host, uint16_t port);
-
-    // Run the io service
-    void run();
-
-    // Stop the server
-    void stop();
-
     // Join all threads
     void join_all_threads();
-
-    // Send a c_m::up_req to the master
-    void request_upload(const files::File& file,
-                        network::masks::rdcy_type rdcy);
 
     // Send parts to storages
     // In the range [begin_id, end_id)
@@ -61,15 +48,23 @@ namespace client
                size_t total_parts,
                size_t begin_id, size_t end_id);
 
-    // Send a c_m::down_req to the master
-    void request_download(const std::string& filename);
-
     // Recieve a part into file
     std::function<void()>
     recv_part(files::File& file,
               network::masks::ADDR addr,
               network::masks::PARTID partid,
               size_t part_size);
-  };
 
+  public:
+    Client(const std::string& host, uint16_t port);
+
+    ~Client();
+
+    // Send a c_m::up_req to the master
+    void request_upload(const files::File& file,
+                        network::masks::rdcy_type rdcy);
+
+    // Send a c_m::down_req to the master
+    void request_download(const std::string& filename);
+  };
 }

@@ -43,9 +43,9 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]")
     DB::PartItem res_part_item = *file_item.parts_get().begin();
 
     // Check the resulting FileItem
-    REQUIRE(file_item.id_get() == 1);
+    REQUIRE(file_item.id_get() == 1ULL);
     REQUIRE(file_item.name_get() == "filename.txt");
-    REQUIRE(file_item.file_size_get() == 15000);
+    REQUIRE(file_item.file_size_get() == 15000ULL);
     REQUIRE(file_item.redundancy_get() == 3);
     REQUIRE(file_item.current_redundancy_get() == 1);
     res_has = std::string(reinterpret_cast<const char*>(file_item.hash_get()));
@@ -81,7 +81,7 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]")
     REQUIRE(storage_item.id_get() == 4242);
     REQUIRE(storage_item.host_addr_get() == host_addr);
     REQUIRE(storage_item.port_get() == 3728);
-    REQUIRE(storage_item.available_space_get() == 10000000042);
+    REQUIRE(storage_item.available_space_get() == 10000000042ULL);
   }
 
 

@@ -107,7 +107,6 @@ namespace master
         switch (packet.what_get())
         {
           case c_m::ack_w:
-            //return 10001; // Error
             return 2; //FIXME
           case c_m::up_req_w:
             return cm_up_req(packet, session);
@@ -116,30 +115,24 @@ namespace master
           case c_m::del_req_w:
             return cm_del_req(packet, session);
           default:
-            //return 10001;
             return 3; //FIXME
         }
       case s_m::fromto:
         switch (packet.what_get())
         {
           case s_m::ack_w:
-            //return 10501; // Error
             return 4; //FIXME
-          //case s_m::del_ack_w:
-            //return sm_del_ack(packet, session);
           case s_m::part_ack_w:
             return sm_part_ack(packet, session);
           case s_m::id_req_w:
             return sm_id_req(packet, session);
           default:
-            //return 10501;
             return 5; //FIXME
         }
       case m_m::fromto:
         switch (packet.what_get())
         {
           default:
-            //return 10601; // Error
             return 6; //FIXME
         }
       default:

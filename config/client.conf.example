@@ -1,5 +1,8 @@
 {
   "concurrency": 4,
-  "master_hostname": "localhost",
-  "master_port": 3727
+  "master":
+  {
+    "hostname": "localhost",
+    "port": 3727
+  }
 }

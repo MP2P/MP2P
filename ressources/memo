@@ -1,17 +1,6 @@
 # Protocol
-* What if a Storage server changes IP? (for the master)
-* A client deletes a file while a Storage is offline. What appends at this time, and when the Storage goes up again?
-* If there are more parts than servers, we do not send a list with two times the same server. The client will cycle the Storage server list given by the master.
 * When a Storage server is "permanently" removed (or it's data erased), we must remove the database entry in the masters, and replicate the parts that were stored on that server to some other servers.
 * Client upload when Storage is down?
-* Storage ping Masters?
-* How do the Storage know the Master list (or at least one Master)?
 
 # General
-* Catch - unit tests
-* Coding style - indent 2 spaces?
-* Logging - log files for client, server, everything
 * Doxygen - Doxyfile
-* Debug / release version? Release always on master. Debug on dev?
-* Travis.ci? Master always builds?
-* Couchbase C++ wrapper. please.

@@ -28,11 +28,6 @@ int main(int argc, const char *argv[])
     std::cerr << "Initialization failed " << e.what() << std::endl;
     return 1;
   }
-  catch (...)
-  {
-    std::cerr << "Fatal error: could not initialize." << std::endl;
-    return 1;
-  }
 
   try
   {
@@ -47,10 +42,6 @@ int main(int argc, const char *argv[])
     utils::Logger::cerr() << "Master exception: " + std::string(e.what());
     return 1;
   }
-  catch (...)
-  {
-    utils::Logger::cerr() << "Master: Fatal error.";
-    return 1;
-  }
+
   return 0;
 };

@@ -44,7 +44,6 @@ namespace utils
   /*----------.
   | logger.cc |
   `----------*/
-  void print_debug(const std::string& info);
 
   class Active
   {
@@ -81,14 +80,10 @@ namespace utils
       template <typename T>
       Logger& operator<<(T t);
 
-      //template <typename T>
-      //std::ostringstream& operator<<(T t);
-
     private:
       std::ostream& stream_;
       Active a_;
   };
-  //void print(std::ostream& out, std::mutex& wmutex, const std::string& msg);
 
   namespace misc
   {
@@ -120,5 +115,4 @@ namespace utils
 }
 
 #include "misc.hxx"
-//#include "config.hxx"
 #include "logger.hxx"
