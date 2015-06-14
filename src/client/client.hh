@@ -58,11 +58,7 @@ namespace client
   public:
     Client(const std::string& host, uint16_t port);
 
-    // Run the io service
-    void run();
-
-    // Stop the server
-    void stop();
+    ~Client();
 
     // Send a c_m::up_req to the master
     void request_upload(const files::File& file,

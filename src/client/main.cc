@@ -25,8 +25,6 @@ int main(int argc, const char *argv[])
   {
     Client client{client::conf.master_hostname, client::conf.master_port};
 
-    client.run();
-
     if (client::conf.action == action::upload)
     {
       // Prepare file
@@ -38,8 +36,6 @@ int main(int argc, const char *argv[])
     {
       client.request_download(client::conf.file_path);
     }
-
-    client.stop();
   }
   catch (std::exception &e)
   {

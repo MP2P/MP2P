@@ -14,16 +14,11 @@ namespace client
   Client::Client(const std::string& host, uint16_t port)
     : master_session_{io_service_, host, port}
   {
-  }
-
-  void
-  Client::run()
-  {
+    // Run the network service, right away
     io_service_.run();
   }
 
-  void
-  Client::stop()
+  Client::~Client()
   {
     join_all_threads();
   }
