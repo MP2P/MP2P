@@ -20,19 +20,13 @@ namespace client
 
   Client::~Client()
   {
-    join_all_threads();
+    end_all_tasks();
   }
 
   void
-  Client::join_all_threads()
+  Client::end_all_tasks()
   {
-    std::for_each(threads_.begin(), threads_.end(),
-        [](auto& thread)
-        {
-          if (thread.joinable())
-            thread.join();
-        }
-    );
+    tasks_.clear(); // Force the destruction of all the futures
   }
 
   // FIXME : types
@@ -84,18 +78,21 @@ namespace client
           for (size_t i = 0; i < list_size; ++i)
           {
             STPFIELD& field = pieces->fdetails.stplist[i];
-            threads_.emplace_back(
-                       send_parts(pieces->fdetails.fid,
-                                  file, field.addr,
-                                  total_parts,
-                                  parts - field.nb, parts)
+            tasks_.emplace_back(std::async(std::launch::async,
+                                send_parts(
+                                pieces->fdetails.fid,
+                                file,
+                                field.addr,
+                                total_parts,
+                                parts - field.nb,
+                                parts))
             );
             parts -= field.nb;
           }
 
           utils::Logger::cout() << "Upload started...";
 
-          join_all_threads();
+          end_all_tasks();
 
           auto end = std::chrono::steady_clock::now();
 
@@ -119,7 +116,6 @@ namespace client
                      size_t total_parts,
                      size_t begin_id, size_t end_id)
   {
-    // Create an unique thread per session
     return [&file, this, addr, total_parts, begin_id, end_id, fid]()
     {
         auto host = network::binary_to_string_ipv6(addr.ipv6,
@@ -200,13 +196,15 @@ namespace client
             // Recieve a part directly into the file
             STPFIELD& field = pieces->fdetails.stplist[i];
             PARTID partid{ pieces->fdetails.fid, field.nb };
-            threads_.emplace_back(recv_part(file,
-                                  field.addr,
-                                  partid,
-                                  part_size));
+            tasks_.emplace_back(std::async(std::launch::async,
+                                recv_part(
+                                file,
+                                field.addr,
+                                partid,
+                                part_size))
+            );
           }
-
-          join_all_threads();
+          end_all_tasks();
 
           return 0;
         });
@@ -243,7 +241,7 @@ namespace client
             CharT* data = p.message_seq_get().front().data();
             s_c::up_act* upload = reinterpret_cast<s_c::up_act*>(data);
 
-            // Write the data to the file
+            // FIXME : DEBUGGING. REMOVE THIS ASAP
             std::cout << "File.data(): " << (void*)file.data() << " - "
                       << (void*)(file.data() + file.file_.size()) << std::endl;
             std::cout << "File.data() i want: "
@@ -253,9 +251,12 @@ namespace client
             auto ptr = (void*)(file.data() + upload->partid.partnum * part_size);
             std::cout << (ptr > bptr && ptr < eptr) << std::endl;
             std::cout << "partid : " << upload->partid.partnum << std::endl;
-            //memcpy(file.data() + upload->partid.partnum * part_size,
-             //      upload->data,
-              //     p.size_get() - sizeof (PARTID) - sizeof (sha1_type));
+            // FIXME : DEBUGGING. REMOVE THIS ASAP
+
+            // Write the data to the file
+            memcpy(file.data() + upload->partid.partnum * part_size,
+                   upload->data,
+                   p.size_get() - sizeof (PARTID) - sizeof (sha1_type));
             return 0;
           }
       );

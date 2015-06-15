@@ -4,6 +4,7 @@
 #include <utils.hh>
 #include <experimental/optional>
 #include <tuple>
+#include <future>
 
 namespace client
 {
@@ -34,10 +35,10 @@ namespace client
   private:
     boost::asio::io_service io_service_; // Default constructor is enough
     network::Session master_session_;
-    std::vector<std::thread> threads_;
+    std::vector<std::future<void>> tasks_;
 
-    // Join all threads
-    void join_all_threads();
+    // End all std::async tasks
+    void end_all_tasks();
 
     // Send parts to storages
     // In the range [begin_id, end_id)
