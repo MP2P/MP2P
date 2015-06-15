@@ -120,13 +120,6 @@ namespace network
         masks::ack_type err;
       } __attribute__ ((packed));
 
-      // 3-1 : fail_sha1 ~ Upload failed <PARTID>
-      //static const what_type fail_sha1_w = 1;
-      //struct fail_sha1
-      //{
-        //PARTID partid;
-      //} __attribute__ ((packed));
-
       // 3-2 : up_act ~ The storage sends a piece <PARTID|SHA1|DATA>
       static const what_type up_act_w = 2;
       struct up_act
@@ -188,13 +181,6 @@ namespace network
       {
         masks::ack_type err;
       } __attribute__ ((packed));
-
-      // 5-1 : del_ack ~ Successfully delete part <PARTID>
-      //static const what_type del_ack_w = 1;
-      //struct del_ack
-      //{
-        //PARTID partid;
-      //} __attribute((packed));
 
       // 5-2 : part_ack ~ Successfully received part <PARTID|AVSPACE>
       static const what_type part_ack_w = 2;
