@@ -69,21 +69,14 @@ namespace files
   File::File(const std::string& filename, size_t size)
     : filepath_{filename}
   {
-    // Create a file on disk
-    int fd = ::open(filename.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0644);
-    if (fd == -1)
-      throw std::logic_error(strerror(errno)); // FIXME : who frees strerror?
-    close(fd);
-
-    // Resize the file
-    boost::filesystem::resize_file(filename, size);
+    boost::iostreams::mapped_file_params params{filename};
+    params.mode = std::ios_base::in | std::ios_base::out;
+    params.offset = 0;
+    params.length = size;
+    params.new_file_size = size;
 
     // Map the file
-    file_ = boost::iostreams::mapped_file{filepath_,
-                                          std::ios_base::binary
-                                          | std::ios_base::in
-                                          | std::ios_base::out,
-                                          size};
+    file_ = boost::iostreams::mapped_file{params};
   }
 
   File File::create_empty_file(const std::string& filename, size_t size)
