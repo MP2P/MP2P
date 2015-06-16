@@ -244,9 +244,18 @@ namespace client
             s_c::up_act* upload = reinterpret_cast<s_c::up_act*>(data);
 
             // Write the data to the file
-            memcpy(file.data() + upload->partid.partnum * part_size,
-                   upload->data,
-                   p.size_get() - sizeof (PARTID) - sizeof (sha1_type));
+            std::cout << "File.data(): " << (void*)file.data() << " - "
+                      << (void*)(file.data() + file.file_.size()) << std::endl;
+            std::cout << "File.data() i want: "
+                      << (void*)(file.data() + upload->partid.partnum * part_size) << std::endl;
+            auto bptr = (void*)file.data();
+            auto eptr = (void*)(file.data() + file.file_.size());
+            auto ptr = (void*)(file.data() + upload->partid.partnum * part_size);
+            std::cout << (ptr > bptr && ptr < eptr) << std::endl;
+            std::cout << "partid : " << upload->partid.partnum << std::endl;
+            //memcpy(file.data() + upload->partid.partnum * part_size,
+             //      upload->data,
+              //     p.size_get() - sizeof (PARTID) - sizeof (sha1_type));
             return 0;
           }
       );
