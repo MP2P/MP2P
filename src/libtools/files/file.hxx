@@ -29,7 +29,7 @@ namespace files
 
   inline const char* File::data() const
   {
-    return file_.data();
+    return file_.const_data();
   }
 
 }
