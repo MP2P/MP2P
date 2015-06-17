@@ -147,7 +147,7 @@ namespace network
 
     std::array<char, sizeof(masks::PACKET_HEADER)> packet_buff;
 
-    socket_.receive(boost::asio::buffer(&*packet_buff.begin(), packet_buff.size()));
+    read(socket_, boost::asio::buffer(&*packet_buff.begin(), packet_buff.size()));
 
     const auto* header =
         reinterpret_cast<const PACKET_HEADER*>(packet_buff.data());
@@ -155,7 +155,7 @@ namespace network
                              + std::to_string(header->size);
     Packet p{header->type.fromto, header->type.what,
              empty_message(header->size)};
-    socket_.receive(p.message_seq_get()[0]);
+    read(socket_, p.message_seq_get()[0], transfer_exactly(header->size));
     auto error = callback(p, *this);
     if (error == 1)
       kill(); // FIXME : Get rid of Kill
