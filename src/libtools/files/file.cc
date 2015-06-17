@@ -70,9 +70,7 @@ namespace files
     : filepath_{filename}
   {
     boost::iostreams::mapped_file_params params{filename};
-    params.mode = std::ios_base::in | std::ios_base::out;
-    params.offset = 0;
-    params.length = size;
+    params.flags = boost::iostreams::mapped_file_base::readwrite;
     params.new_file_size = size;
 
     // Map the file
