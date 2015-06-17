@@ -176,6 +176,9 @@ namespace network
     // Send a packet using a custom dispatcher
     void blocking_send(const Packet& packet, dispatcher_type callback);
 
+    masks::ack_type send_ack(const Packet& packet, masks::ack_type value,
+                             std::string msg);
+
     // Creates an unique id for a socket.
     // It's using an atomic integer
     static size_t unique_id();

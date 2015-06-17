@@ -1,3 +1,4 @@
+#include <masks/messages.hh>
 #include <network.hh>
 #include <shared-buffer.hh>
 
@@ -225,5 +226,35 @@ namespace network
     utils::Logger::cout() << "Closed session";
     socket_.close(); // Close the socket
     delete_dispatcher_(*this); // Ask the owner to delete
+  }
+
+  masks::ack_type
+  Session::send_ack(const Packet& packet, masks::ack_type value, std::string msg)
+  {
+    utils::Logger::cerr() << msg;
+
+    const fromto_type fromto_src = packet.fromto_get();
+    fromto_type fromto_dst;
+    if (fromto_src == masks::c_m::fromto)
+      fromto_dst = masks::m_c::fromto;
+    else if (fromto_src == masks::m_c::fromto)
+      fromto_dst = masks::c_m::fromto;
+    else if (fromto_src == masks::c_s::fromto)
+      fromto_dst = masks::s_c::fromto;
+    else if (fromto_src == masks::s_c::fromto)
+      fromto_dst = masks::c_s::fromto;
+    else if (fromto_src == masks::s_m::fromto)
+      fromto_dst = masks::m_s::fromto;
+    else if (fromto_src == masks::m_s::fromto)
+      fromto_dst = masks::s_m::fromto;
+    else
+      fromto_dst = fromto_src; // m_m - s_s
+
+    const m_c::ack response{value};
+    Packet to_send{fromto_dst, m_c::ack_w};
+    to_send.add_message(&response, sizeof (m_c::ack),
+                        utils::shared_buffer::copy::Yes);
+    this->blocking_send(to_send);
+    return value > 0 ? 1 : 0;
   }
 }

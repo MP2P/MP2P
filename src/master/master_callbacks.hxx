@@ -26,31 +26,18 @@ namespace master
     // Compute the number of parts.
     uint32_t nb_parts = DB::tools::number_of_parts(fi.file_size_get());
     if (nb_parts == 0)
-    {
-      utils::Logger::cerr() << "Add some storages so that clients can upload!";
-      const m_c::ack response{1};
-      Packet to_send{m_c::fromto, m_c::ack_w};
-      to_send.add_message(&response, sizeof (m_c::ack), copy::Yes);
-      session.blocking_send(to_send);
-      return 1;
-    }
+      return session.send_ack(packet, 1, "Add some storages so that clients can"
+                                         " upload!");
 
     // Compute STPFIELD(s) depending on file parts.
     std::vector<STPFIELD> fields = DB::tools::get_stpfields_for_upload(fi.file_size_get());
 
     if (fields.size() < fi.redundancy_get())
-    {
-      utils::Logger::cerr() << "Client is asking for a redundancy of "
-                               + std::to_string(fi.redundancy_get())
-                               + " but there is only "
-                               + std::to_string(fields.size())
-                               + " storages available.";
-      const m_c::ack response{11};
-      Packet to_send{m_c::fromto, m_c::ack_w};
-      to_send.add_message(&response, sizeof (m_c::ack), copy::Yes);
-      session.blocking_send(to_send);
-      return 1;
-    }
+      return session.send_ack(packet, 11, "Client is asking for a redundancy of "
+                                         + std::to_string(fi.redundancy_get())
+                                         + " but there is only "
+                                         + std::to_string(fields.size())
+                                         + " storages available.");
 
     // After all checks, we can now create the file in DB
     DB::tools::create_new_file(fi);
@@ -94,12 +81,7 @@ namespace master
     }
     catch (std::logic_error)
     {
-      utils::Logger::cerr() << "File " + fname + " does not exists.";
-      const m_c::ack response{3};
-      Packet to_send{m_c::fromto, m_c::ack_w};
-      to_send.add_message(&response, sizeof (m_c::ack), copy::Yes);
-      session.blocking_send(to_send);
-      return 1;
+      return session.send_ack(packet, 3, "File " + fname + " does not exists.");
     }
 
     DB::FileItem fi = DB::FileItem::deserialize(json);
@@ -112,15 +94,8 @@ namespace master
     for (auto part = fi.parts_get().begin();  part != fi.parts_get().end(); ++part)
     {
       if (part->locations_get().size() == 0)
-      {
-        utils::Logger::cerr() << "File is not complete on our servers "
-                                     "(wait for full upload).";
-        const m_c::ack response{1};
-        Packet to_send{m_c::fromto, m_c::ack_w};
-        to_send.add_message(&response, sizeof (m_c::ack), copy::Yes);
-        session.blocking_send(to_send);
-        return 1;
-      }
+        return session.send_ack(packet, 1, "File is not complete on our servers"
+                                           " (wait for full upload).");
 
       // For each location of the part
       ADDR addr;
@@ -180,15 +155,10 @@ namespace master
     {
       json = DB::Connector::get_instance().cmd_get(fname);
     }
-    catch (std::logic_error&) //<FIXME>
+    catch (std::logic_error&)
     {
-      utils::Logger::cerr() << "File " + fname + " does not exists.";
-      const m_c::ack response{3};
-      Packet to_send{m_c::fromto, m_c::ack_w};
-      to_send.add_message(&response, sizeof (m_c::ack), copy::Yes);
-      session.blocking_send(to_send);
-      return 1;
-    } //</FIXME>
+      return session.send_ack(packet, 3,"File " + fname + " does not exists.");
+    }
 
     DB::FileItem fi = DB::FileItem::deserialize(json);
 
@@ -198,15 +168,8 @@ namespace master
     for (auto part = fi.parts_get().begin();  part != fi.parts_get().end(); ++part)
     {
       if (part->locations_get().size() == 0)
-      {
-        utils::Logger::cerr() << "File is not complete on our servers "
-                                     "(wait for full upload).";
-        const m_c::ack response{1};
-        Packet to_send{m_c::fromto, m_c::ack_w};
-        to_send.add_message(&response, sizeof (m_c::ack), copy::Yes);
-        session.blocking_send(to_send);
-        return 1;
-      }
+        return session.send_ack(packet, 1, "File is not complete on our servers"
+                                           " (wait for full upload).");
 
       // For each location of the part
       ADDR addr;
@@ -239,10 +202,14 @@ namespace master
     return 0;
   }
 
+
+  static std::mutex mutex_part_ack;
+
   // Part successfully received!
   inline masks::ack_type
   sm_part_ack(Packet& packet, Session& session)
   {
+    std::lock_guard<std::mutex> lock(mutex_part_ack);
     const s_m::part_ack* req = reinterpret_cast<s_m::part_ack*>
                                (packet.message_seq_get().front().data());
 
