@@ -241,18 +241,6 @@ namespace client
             CharT* data = p.message_seq_get().front().data();
             s_c::up_act* upload = reinterpret_cast<s_c::up_act*>(data);
 
-            // FIXME : DEBUGGING. REMOVE THIS ASAP
-            std::cout << "File.data(): " << (void*)file.data() << " - "
-                      << (void*)(file.data() + file.file_.size()) << std::endl;
-            std::cout << "File.data() i want: "
-                      << (void*)(file.data() + upload->partid.partnum * part_size) << std::endl;
-            auto bptr = (void*)file.data();
-            auto eptr = (void*)(file.data() + file.file_.size());
-            auto ptr = (void*)(file.data() + upload->partid.partnum * part_size);
-            std::cout << (ptr > bptr && ptr < eptr) << std::endl;
-            std::cout << "partid : " << upload->partid.partnum << std::endl;
-            // FIXME : DEBUGGING. REMOVE THIS ASAP
-
             // Write the data to the file
             memcpy(file.data() + upload->partid.partnum * part_size,
                    upload->data,
