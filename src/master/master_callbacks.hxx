@@ -77,7 +77,7 @@ namespace master
     std::string json;
     try
     {
-      json = DB::Connector::get_instance().cmd_get(fname);
+      json = DB::Connector::get_instance().cmd_get("file." + fname);
     }
     catch (std::logic_error)
     {
@@ -120,8 +120,6 @@ namespace master
       }
       fields.push_back({addr, part->num_get()});
     }
-
-    std::cout << "fields_size = " << std::to_string(fields.size()) << std::endl;
 
     fsize_type fsize = fi.file_size_get();
     fid_type fid = fi.id_get();

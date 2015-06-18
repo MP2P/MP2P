@@ -118,12 +118,17 @@ namespace DB
     std::vector<STPFIELD>
     get_stpfields_for_upload(fsize_type file_size)
     {
+      std::vector<STPFIELD> fields;
+
       if (!iterator_initialized)
       {
         auto tmp = get_all_storages();
 
         if (tmp.size() == 0)
-          throw std::logic_error("There is no storage in DB. Add at least one.");
+        {
+          utils::Logger::cerr() << "There is no storage in DB. Add at least one.";
+          return fields;
+        }
 
         storages.assign(tmp.begin(), tmp.end());
         std::srand(std::time(0));
@@ -193,7 +198,6 @@ namespace DB
         ++current_round_robin;
       }
 
-      std::vector<STPFIELD> fields;
       for (auto it : tmp_values)
         fields.push_back({it.first.addr_get(), it.second});
       return fields;
