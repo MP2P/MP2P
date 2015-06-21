@@ -96,7 +96,7 @@ TEST_CASE("Items can be serialized & deserialized", "[db-items]")
     mof_item = DB::MetaOnFilesItem::deserialize(s_mof_item);
 
     // Check the resulting MasterItem
-    REQUIRE(mof_item.count_get() == 62);
+    REQUIRE(mof_item.count_get() == 62ULL);
     REQUIRE(mof_item.total_size_get() == 125588150);
     REQUIRE(mof_item.file_name_by_id(3) == "filename3");
   }
