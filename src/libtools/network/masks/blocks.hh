@@ -1,10 +1,8 @@
 #pragma once
 
-#include <cstdint>
-#include <ostream>
-#include <vector>
-#include <boost/asio/buffer.hpp>
 #include <shared-buffer.hh>
+
+#include <cstdint>
 
 namespace network
 {
@@ -20,7 +18,6 @@ namespace network
     static const size_t sha1_type_size = 20;
 
     // Basic blocks
-    using ack_type = uint8_t;
     using avspace_type = uint64_t;
     using data_type = const CharT; //FIXME: No pointer type?
     using fid_type = uint64_t;

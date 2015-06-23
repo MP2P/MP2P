@@ -1,4 +1,5 @@
 #include <network.hh>
+#include <masks/messages.hh>
 
 namespace network
 {
@@ -73,5 +74,26 @@ namespace network
     << ", w: " << (int)p.what_get()
     << "}";
     return output;
+  }
+
+  masks::fromto_type fromto_inverse(masks::fromto_type fromto)
+  {
+    switch (fromto)
+    {
+      case masks::c_m::fromto:
+        return m_c::fromto;
+      case m_c::fromto:
+        return c_m::fromto;
+      case c_s::fromto:
+        return s_c::fromto;
+      case s_c::fromto:
+        return c_s::fromto;
+      case s_m::fromto:
+        return m_s::fromto;
+      case m_s::fromto:
+        return s_m::fromto;
+      default:
+        assert(!"Invalid fromto");
+    }
   }
 }

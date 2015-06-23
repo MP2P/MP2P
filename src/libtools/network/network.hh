@@ -1,23 +1,54 @@
 #pragma once
 
-#include <memory>
-#include <atomic>
-#include <unordered_map>
-#include <iostream>
-#include <thread>
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
-#include <glob.h>
-
 #include <masks/blocks.hh>
 #include <utils.hh>
 #include <files.hh>
 
+#include <memory>
+#include <unordered_map>
+#include <iosfwd>
+#include <boost/asio.hpp>
+
 namespace network
 {
-  /*----------.
-  | packet.cc |
-  `----------*/
+  /*------.
+  | Error |
+  `------*/
+
+  // Error codes according to the protocol
+  enum class error_code : uint8_t
+  {
+    success        = 0,  // Success
+    error          = 1,  // Unknown error
+    file_not_found = 3,  // File not found
+    redundancy     = 11  // Not enough storages
+  };
+
+  // Keep the connection alive
+  enum class keep_alive
+  {
+    Yes,
+    No
+  };
+
+  using ack_type = std::pair<error_code, keep_alive>;
+
+  // Used for std::get from ack_type
+  // Example: std::get<error_code>(ack)
+  // Results in a more verbose and documented code
+  enum ack_result
+  {
+    error_code = 0,
+    keep_alive = 1
+  };
+
+  /*-------.
+  | Packet |
+  `-------*/
+
+  // Forward declaration
+  class Session;
+
   class Packet
   {
 
@@ -92,7 +123,11 @@ namespace network
   private:
     masks::PACKET_HEADER header_;
     message_container message_seq_;
+
   };
+
+  // FromTo to ToFrom
+  masks::fromto_type fromto_inverse(masks::fromto_type fromto);
 
   // Create an empty message of a precise type.
   masks::message_type empty_message(masks::size_type size);
@@ -100,13 +135,12 @@ namespace network
   // Print a packet's header on an output stream
   std::ostream& operator<<(std::ostream& output, const Packet& packet);
 
-  class Session;
+  /*--------.
+  | Session |
+  `--------*/
 
-  using dispatcher_type = std::function<masks::ack_type(Packet, Session&)>;
+  using dispatcher_type = std::function<ack_type(Packet, Session&)>;
 
-  /*-----------.
-  | session.cc |
-  `-----------*/
   class Session
   {
 
@@ -127,9 +161,11 @@ namespace network
             const std::string& host,
             uint16_t port,
             dispatcher_type recv_dispatcher
-              = [](Packet, Session&) -> masks::ack_type { return 0; },
+              = [](Packet, Session&) -> ack_type
+              { return std::make_pair(error_code::success, keep_alive::Yes); },
             dispatcher_type send_dispatcher
-              = [](Packet, Session&) -> masks::ack_type { return 0; },
+              = [](Packet, Session&) -> ack_type
+              { return std::make_pair(error_code::success, keep_alive::Yes); },
             std::function<void(Session&)> delete_dispatcher
               = [](Session&) { },
             size_t id = unique_id());
@@ -176,9 +212,6 @@ namespace network
     // Send a packet using a custom dispatcher
     void blocking_send(const Packet& packet, dispatcher_type callback);
 
-    masks::ack_type send_ack(const Packet& packet, masks::ack_type value,
-                             std::string msg);
-
     // Creates an unique id for a socket.
     // It's using an atomic integer
     static size_t unique_id();
@@ -210,42 +243,78 @@ namespace network
     // and a message size
     void receive_header(std::function<void(const Packet&,
                                            dispatcher_type)> receive_body,
-                        dispatcher_type callback);
+                                           dispatcher_type callback);
 
     // Recieve the message according to the packet
     void receive_message(const Packet& p, dispatcher_type dispatcher);
+
+    // Send acknowledge (error, or not) to the session according
+    // to the packet's header
+    void send_ack(Session& session, const Packet& packet, enum error_code ack);
+
+    // Process the result of a receive method
+    // Send ack and kill if the keep_alive == no
+    void process_result(ack_type result,
+                        const Packet& p,
+                        std::function<void()> receive);
   };
 
   // Compare two Sessions according to their id
   bool operator==(const Session& lhs, const Session& rhs);
 
-  /*----------.
-  | server.cc |
-  `----------*/
+  /*-------.
+  | Server |
+  `-------*/
+
   class Server
   {
-  private:
-    boost::asio::ip::tcp::acceptor acceptor_;
-    boost::asio::ip::tcp::socket socket_;
-    dispatcher_type recv_dispatcher_;
-    dispatcher_type send_dispatcher_;
-    std::unordered_map<size_t, Session> sessions_;
-
   public:
-    Server(boost::asio::ip::address_v6 addr, uint16_t port,
+    // Create a server binding addr:port using io_service.
+    // Callback recv_dispatcher after a recieve
+    // Same for send.
+    Server(boost::asio::ip::address_v6 addr,
+           uint16_t port,
            boost::asio::io_service& io_service,
            dispatcher_type recv_dispatcher,
            dispatcher_type send_dispatcher);
 
+    // Stop the acceptor
+    // FIXME : Is this really necessary? What about RAII?
     ~Server();
 
-    void listen(); // Listen to accept connections
+    // Listen asynchronously for new connections
+    void listen();
+
+    // Stop the acceptor
+    // FIXME : Is this really necessary? What about RAII?
     void stop();
 
     bool is_running();
 
+    // Delete the session from the map
+    // This allows the memory to be freed, as well as the socket to be closed
     void delete_dispatcher(Session& session);
+
+  private:
+    // The acceptor used to accept new connections and create sessions
+    boost::asio::ip::tcp::acceptor acceptor_;
+
+    // The socket used for listening for new connections
+    boost::asio::ip::tcp::socket socket_;
+
+    // The recieve callback
+    dispatcher_type recv_dispatcher_;
+
+    // The send callback
+    dispatcher_type send_dispatcher_;
+
+    // Container for the current sessions, based on their ID
+    std::unordered_map<size_t, Session> sessions_;
   };
+
+  /*-----.
+  | Misc |
+  `-----*/
 
   boost::asio::ip::tcp::resolver::iterator
       resolve_host(const std::string& host, std::string port = "");
@@ -273,8 +342,10 @@ namespace network
   network::masks::partsize_type get_part_size(network::masks::fsize_type fsize,
                                               network::masks::partnum_type partnum,
                                               network::masks::partnum_type parts);
+
+  network::ack_type make_error(enum error_code error, const std::string& msg);
 }
 
-#include "tools.hxx"
+#include "misc.hxx"
 #include "packet.hxx"
 #include "session.hxx"

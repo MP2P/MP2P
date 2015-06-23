@@ -6,6 +6,7 @@ namespace network
 {
   using namespace boost::asio;
   using namespace network::masks;
+  using copy = utils::shared_buffer::copy;
 
   Session::Session(ip::tcp::socket&& socket,
                    dispatcher_type recv_dispatcher,
@@ -94,27 +95,25 @@ namespace network
                                 dispatcher_type callback)
   {
     async_read(socket_,
-               p.message_seq_get()[0],
-               transfer_exactly(p.size_get()),
-               [this, p, callback](boost::system::error_code ec,
-                                   std::size_t length)
-               {
-                 if (!ec)
-                 {
-                   length_ = length;
-                   auto error = callback(p, *this);
-                   length_ = 0;
-                   if (error == 1)
-                     kill(); // FIXME : Get rid of Kill
-                   else
-                    receive();
-                 }
-                 else
-                 {
-                   utils::Logger::cerr() << "Error: " + ec.message();
-                   kill(); // FIXME : Get rid of Kill
-                 }
-               }
+        p.message_seq_get()[0],
+        transfer_exactly(p.size_get()),
+        [this, p, callback](boost::system::error_code ec,
+                            std::size_t length)
+        {
+          if (!ec)
+          {
+            length_ = length;
+            auto result = callback(p, *this);
+            length_ = 0;
+
+            process_result(result, p, [this](){ receive(); });
+          }
+          else
+          {
+            utils::Logger::cerr() << "Error: " + ec.message();
+            kill(); // FIXME : Get rid of Kill
+          }
+        }
     );
   }
 
@@ -156,9 +155,9 @@ namespace network
     Packet p{header->type.fromto, header->type.what,
              empty_message(header->size)};
     read(socket_, p.message_seq_get()[0], transfer_exactly(header->size));
-    auto error = callback(p, *this);
-    if (error == 1)
-      kill(); // FIXME : Get rid of Kill
+
+    auto result = callback(p, *this);
+    process_result(result, p, [this, callback](){ blocking_receive(callback); });
   }
 
   void Session::send(const Packet& packet)
@@ -180,11 +179,11 @@ namespace network
           if (!ec)
           {
             length_ = length;
-            auto error = callback(*p, *this);
+            auto result = callback(*p, *this);
             length_ = 0;
-            if (error == 1)
-              kill(); // FIXME : Get rid of Kill
-            // FIXME : What to do to keep the socket alive?
+
+            process_result(result, *p,
+                           [this, p, callback](){ send(*p, callback); });
           }
           else
           {
@@ -197,12 +196,7 @@ namespace network
 
   void Session::blocking_send(const Packet& packet)
   {
-    auto seq = packet.message_seq_get();
-    seq.insert(seq.begin(), packet.serialize_header());
-    write(socket_, seq);
-    auto error = send_dispatcher_(packet, *this);
-    if (error == 1)
-      kill(); // FIXME : Get rid of Kill
+    blocking_send(packet, send_dispatcher_);
   }
 
   void Session::blocking_send(const Packet& packet, dispatcher_type callback)
@@ -210,9 +204,9 @@ namespace network
     auto seq = packet.message_seq_get();
     seq.insert(seq.begin(), packet.serialize_header());
     write(socket_, seq);
-    auto error = callback(packet, *this);
-    if (error == 1)
-      kill(); // FIXME : Get rid of Kill
+    auto result = callback(packet, *this);
+    process_result(result, packet,
+                   [this, &packet, callback](){ blocking_send(packet, callback); });
   }
 
   size_t Session::unique_id()
@@ -228,33 +222,17 @@ namespace network
     delete_dispatcher_(*this); // Ask the owner to delete
   }
 
-  masks::ack_type
-  Session::send_ack(const Packet& packet, masks::ack_type value, std::string msg)
+  void Session::send_ack(Session& session,
+                         const Packet& packet,
+                         enum error_code ack)
   {
-    utils::Logger::cerr() << msg;
-
     const fromto_type fromto_src = packet.fromto_get();
-    fromto_type fromto_dst;
-    if (fromto_src == masks::c_m::fromto)
-      fromto_dst = masks::m_c::fromto;
-    else if (fromto_src == masks::m_c::fromto)
-      fromto_dst = masks::c_m::fromto;
-    else if (fromto_src == masks::c_s::fromto)
-      fromto_dst = masks::s_c::fromto;
-    else if (fromto_src == masks::s_c::fromto)
-      fromto_dst = masks::c_s::fromto;
-    else if (fromto_src == masks::s_m::fromto)
-      fromto_dst = masks::m_s::fromto;
-    else if (fromto_src == masks::m_s::fromto)
-      fromto_dst = masks::s_m::fromto;
-    else
-      fromto_dst = fromto_src; // m_m - s_s
 
-    const m_c::ack response{value};
-    Packet to_send{fromto_dst, m_c::ack_w};
-    to_send.add_message(&response, sizeof (m_c::ack),
-                        utils::shared_buffer::copy::Yes);
-    this->blocking_send(to_send);
-    return value > 0 ? 1 : 0;
+    const fromto_type fromto_dst = fromto_inverse(fromto_src);
+
+    const masks::ack response{ack};
+    Packet to_send{fromto_dst, ack_w};
+    to_send.add_message(&response, sizeof (response), copy::No);
+    session.blocking_send(to_send);
   }
 }

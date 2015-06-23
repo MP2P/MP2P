@@ -1,5 +1,7 @@
 #include "shared-buffer.hh"
 
+#include <memory>
+
 namespace utils
 {
   shared_buffer::shared_buffer(size_t size)

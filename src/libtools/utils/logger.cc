@@ -1,17 +1,19 @@
 #include <utils.hh>
 
+#include <chrono>
+
 namespace utils
 {
   Active::Active()
-    : done_{false}
+    : done_{false},
+      thd_{[this]{ Run(); }}
   {
-    thd_ = std::unique_ptr<std::thread>(new std::thread( [=]{this->Run();} ));
   }
 
   Active::~Active()
   {
     Send([&]{ done_ = true; });;
-    thd_->join();
+    thd_.join();
   }
 
   void Active::Send(Message m)
@@ -25,9 +27,7 @@ namespace utils
     {
       Message msg;
       if (mq_.try_dequeue(msg))
-      {
         msg();
-      }
       else
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }

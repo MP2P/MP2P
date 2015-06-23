@@ -18,11 +18,6 @@ namespace client
     io_service_.run();
   }
 
-  Client::~Client()
-  {
-    end_all_tasks();
-  }
-
   void
   Client::end_all_tasks()
   {
@@ -104,7 +99,7 @@ namespace client
                                    + boost::lexical_cast<std::string>(file.size() / duration)
                                    + "Kio/s).";
 
-          return 0;
+          return std::make_pair(error_code::success, keep_alive::Yes);
         });
   }
 
@@ -209,7 +204,7 @@ namespace client
           }
           end_all_tasks();
 
-          return 0;
+          return std::make_pair(error_code::success, keep_alive::Yes);
         });
   }
 
@@ -248,7 +243,7 @@ namespace client
             memcpy(file.data() + upload->partid.partnum * part_size,
                    upload->data,
                    p.size_get() - sizeof (PARTID) - sizeof (sha1_type));
-            return 0;
+            return std::make_pair(error_code::success, keep_alive::Yes);
           }
       );
     };

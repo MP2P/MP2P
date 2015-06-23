@@ -1,13 +1,15 @@
 #include "storage.hh"
 #include <masks/messages.hh>
 
+#include <fstream>
+
 namespace storage
 {
   using namespace network;
   using namespace network::masks;
   using copy = utils::shared_buffer::copy;
 
-  network::masks::ack_type
+  network::ack_type
   cs_up_act(network::Packet& packet, network::Session& session)
   {
     CharT* data = packet.message_seq_get().front().data();
@@ -36,7 +38,7 @@ namespace storage
         p.add_message(&part->partid, sizeof (PARTID), copy::No);
         // FIXME : Use an async_send, but close the session only after the async_send
         session.blocking_send(p);
-        return 1;
+        return std::make_pair(error_code::success, keep_alive::No);
       }
     }
 
@@ -57,10 +59,10 @@ namespace storage
     p.add_message(&response, sizeof (s_m::part_ack), copy::Yes);
     master_session.send(p);
 
-    return 0;
+    return std::make_pair(error_code::success, keep_alive::Yes);
   }
 
-  network::masks::ack_type
+  network::ack_type
   cs_down_act(network::Packet& packet, network::Session& session)
   {
     CharT* data = packet.message_seq_get().front().data();
@@ -82,6 +84,6 @@ namespace storage
     // Add the data
     p.add_message(part.data(), part.size(), copy::No);
     session.blocking_send(p);
-    return 0;
+    return std::make_pair(error_code::success, keep_alive::Yes);
   }
 }
