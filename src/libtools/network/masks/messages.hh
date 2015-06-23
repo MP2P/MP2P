@@ -53,7 +53,7 @@ namespace network
       {
         fname_type fname[0];
       } __attribute__ ((packed));
-    }
+    } // Namespace c_m
 
     namespace m_c
     {
@@ -77,7 +77,7 @@ namespace network
         fsize_type fsize;
         FDETAILS fdetails;
       } __attribute__ ((packed));
-    }
+    } // Namespace m_c
 
     namespace c_s
     {
@@ -102,7 +102,7 @@ namespace network
       {
         PARTID partid;
       } __attribute__ ((packed));
-    }
+    } // Namespace c_s
 
     namespace s_c
     {
@@ -120,7 +120,7 @@ namespace network
         sha1_type sha1;
         data_type data[0];
       } __attribute__ ((packed));
-    }
+    } // Namespace s_c
 
     namespace m_s
     {
@@ -158,7 +158,7 @@ namespace network
       {
         stid_type stid;
       } __attribute__((packed));
-    }
+    } // Namespace m_s
 
     namespace s_m
     {
@@ -184,7 +184,7 @@ namespace network
         port_type port;
         avspace_type avspace;
       } __attribute__ ((packed));
-    }
+    } // Namespace s_m
 
     namespace m_m
     {
@@ -193,7 +193,7 @@ namespace network
       // X-0 : error ~ ACK message <ERR>
       static const what_type ack_w = masks::ack_w;
       using ack = masks::ack;
-    }
+    } // Namespace m_m
 
     namespace s_s
     {
@@ -211,7 +211,7 @@ namespace network
         sha1_type sha1;
         data_type data[0];
       } __attribute__ ((packed));
-    }
+    } // Namespace s_s
 
     #pragma clang diagnostic pop
 

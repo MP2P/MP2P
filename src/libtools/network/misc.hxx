@@ -1,3 +1,9 @@
+#pragma once
+
+#include <network.hh>
+
+#include <boost/lexical_cast.hpp>
+
 namespace network
 {
   inline

@@ -1,7 +1,6 @@
-#include <ostream>
+#include "storage.hh"
 
 #include <utils.hh>
-#include "storage.hh"
 
 int main(int argc, const char* argv[])
 {

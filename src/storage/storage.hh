@@ -1,13 +1,17 @@
 #pragma once
 
+#include <network.hh>
+
 #include <thread>
 #include <vector>
 #include <boost/asio.hpp>
 
-#include <network.hh>
-
 namespace storage
 {
+  /*--------.
+  | Options |
+  `--------*/
+
   struct Conf
   {
     std::string config_path;
@@ -25,6 +29,10 @@ namespace storage
   extern struct Conf conf;
 
   void parse_options(int argc, const char *argv[]);
+
+  /*--------.
+  | Storage |
+  `---------*/
 
   class Storage
   {

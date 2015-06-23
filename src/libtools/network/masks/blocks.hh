@@ -1,10 +1,8 @@
 #pragma once
 
-#include <cstdint>
-#include <ostream>
-#include <vector>
-#include <boost/asio/buffer.hpp>
 #include <shared-buffer.hh>
+
+#include <cstdint>
 
 namespace network
 {

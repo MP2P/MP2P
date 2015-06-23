@@ -1,6 +1,8 @@
 #include "storage.hh"
 #include <masks/messages.hh>
 
+#include <fstream>
+
 namespace storage
 {
   using namespace network;

@@ -1,24 +1,27 @@
 #pragma once
 
-#include <memory>
-#include <atomic>
-#include <unordered_map>
-#include <iostream>
-#include <thread>
-#include <boost/asio.hpp>
-#include <glob.h>
-
 #include <masks/blocks.hh>
 #include <utils.hh>
 #include <files.hh>
 
+#include <memory>
+#include <unordered_map>
+#include <iosfwd>
+#include <boost/asio.hpp>
+
 namespace network
 {
+  /*------.
+  | Error |
+  `------*/
+
   // Error codes according to the protocol
   enum class error_code : uint8_t
   {
-    success = 0,
-    error = 1
+    success        = 0,  // Success
+    error          = 1,  // Unknown error
+    file_not_found = 3,  // File not found
+    redundancy     = 11  // Not enough storages
   };
 
   // Keep the connection alive
@@ -39,10 +42,11 @@ namespace network
     keep_alive = 1
   };
 
-  /*----------.
-  | packet.cc |
-  `----------*/
+  /*-------.
+  | Packet |
+  `-------*/
 
+  // Forward declaration
   class Session;
 
   class Packet
@@ -131,12 +135,12 @@ namespace network
   // Print a packet's header on an output stream
   std::ostream& operator<<(std::ostream& output, const Packet& packet);
 
+  /*--------.
+  | Session |
+  `--------*/
 
   using dispatcher_type = std::function<ack_type(Packet, Session&)>;
 
-  /*-----------.
-  | session.cc |
-  `-----------*/
   class Session
   {
 
@@ -258,33 +262,59 @@ namespace network
   // Compare two Sessions according to their id
   bool operator==(const Session& lhs, const Session& rhs);
 
-  /*----------.
-  | server.cc |
-  `----------*/
+  /*-------.
+  | Server |
+  `-------*/
+
   class Server
   {
-  private:
-    boost::asio::ip::tcp::acceptor acceptor_;
-    boost::asio::ip::tcp::socket socket_;
-    dispatcher_type recv_dispatcher_;
-    dispatcher_type send_dispatcher_;
-    std::unordered_map<size_t, Session> sessions_;
-
   public:
-    Server(boost::asio::ip::address_v6 addr, uint16_t port,
+    // Create a server binding addr:port using io_service.
+    // Callback recv_dispatcher after a recieve
+    // Same for send.
+    Server(boost::asio::ip::address_v6 addr,
+           uint16_t port,
            boost::asio::io_service& io_service,
            dispatcher_type recv_dispatcher,
            dispatcher_type send_dispatcher);
 
+    // Stop the acceptor
+    // FIXME : Is this really necessary? What about RAII?
     ~Server();
 
-    void listen(); // Listen to accept connections
+    // Listen asynchronously for new connections
+    void listen();
+
+    // Stop the acceptor
+    // FIXME : Is this really necessary? What about RAII?
     void stop();
 
     bool is_running();
 
+    // Delete the session from the map
+    // This allows the memory to be freed, as well as the socket to be closed
     void delete_dispatcher(Session& session);
+
+  private:
+    // The acceptor used to accept new connections and create sessions
+    boost::asio::ip::tcp::acceptor acceptor_;
+
+    // The socket used for listening for new connections
+    boost::asio::ip::tcp::socket socket_;
+
+    // The recieve callback
+    dispatcher_type recv_dispatcher_;
+
+    // The send callback
+    dispatcher_type send_dispatcher_;
+
+    // Container for the current sessions, based on their ID
+    std::unordered_map<size_t, Session> sessions_;
   };
+
+  /*-----.
+  | Misc |
+  `-----*/
 
   boost::asio::ip::tcp::resolver::iterator
       resolve_host(const std::string& host, std::string port = "");
@@ -316,6 +346,6 @@ namespace network
   network::ack_type make_error(enum error_code error, const std::string& msg);
 }
 
-#include "tools.hxx"
+#include "misc.hxx"
 #include "packet.hxx"
 #include "session.hxx"

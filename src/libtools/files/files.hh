@@ -1,17 +1,17 @@
 #pragma once
 
-#include <vector>
-#include <iostream>
-#include <fstream>
 #include <string>
 #include <boost/iostreams/device/mapped_file.hpp>
 
 namespace files
 {
+  /*-----.
+  | File |
+  `-----*/
+
   class File
   {
     public:
-
       // Constructor for a file not hashed
       File(const std::string& filepath);
 

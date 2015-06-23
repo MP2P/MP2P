@@ -1,13 +1,15 @@
 #pragma once
 
 #include <network.hh>
-#include <utils.hh>
-#include <experimental/optional>
-#include <tuple>
+
 #include <future>
 
 namespace client
 {
+  /*--------.
+  | Options |
+  `--------*/
+
   enum action
   {
     none,
@@ -30,11 +32,31 @@ namespace client
 
   void parse_options(int argc, const char *argv[]);
 
+  /*-------.
+  | Client |
+  `-------*/
+
   class Client
   {
+  public:
+    Client(const std::string& host, uint16_t port);
+
+    // Send a c_m::up_req to the master
+    void request_upload(const files::File& file,
+                        network::masks::rdcy_type rdcy);
+
+    // Send a c_m::down_req to the master
+    void request_download(const std::string& filename);
+
   private:
-    boost::asio::io_service io_service_; // Default constructor is enough
+    // One io_service per app
+    boost::asio::io_service io_service_;
+
+    // Session connected to the master
+    // FIXME : Create the session whenever needed
     network::Session master_session_;
+
+    // Current asynchronous tasks
     std::vector<std::future<void>> tasks_;
 
     // End all std::async tasks
@@ -55,17 +77,5 @@ namespace client
               network::masks::ADDR addr,
               network::masks::PARTID partid,
               size_t part_size);
-
-  public:
-    Client(const std::string& host, uint16_t port);
-
-    ~Client();
-
-    // Send a c_m::up_req to the master
-    void request_upload(const files::File& file,
-                        network::masks::rdcy_type rdcy);
-
-    // Send a c_m::down_req to the master
-    void request_download(const std::string& filename);
   };
 }

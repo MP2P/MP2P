@@ -2,6 +2,10 @@
 
 #include <utils.hh>
 
+#include <iostream>
+#include <chrono>
+#include <iomanip>
+
 namespace utils
 {
   template <typename T>
@@ -9,14 +13,12 @@ namespace utils
   {
     a_.Send( [=]
       {
-        time_t now = time(0);
-        struct tm tstruct;
-        char buf[80];
-        tstruct = *localtime(&now);
-        //strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
-        strftime(buf, sizeof(buf), "%X", &tstruct);
+        auto now = std::chrono::system_clock::now();
+        auto now_c = std::chrono::system_clock::to_time_t(now);
         color::g(stream_);
-        stream_ << "<" << buf << "> ";
+        stream_ << "<"
+                << std::put_time(std::localtime(&now_c), "%T")
+                << "> ";
         color::w(stream_);
         stream_ << t << std::endl;
       }

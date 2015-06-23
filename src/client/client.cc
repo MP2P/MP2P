@@ -18,11 +18,6 @@ namespace client
     io_service_.run();
   }
 
-  Client::~Client()
-  {
-    end_all_tasks();
-  }
-
   void
   Client::end_all_tasks()
   {
