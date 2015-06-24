@@ -95,15 +95,15 @@ namespace master
 
   // Handle the session after filling the buffer
   // Errors are defined in the ressources/errors file.
-  inline ack_type
+  inline keep_alive
   Master::recv_dispatcher(Packet packet, Session& session)
   {
     if (packet.size_get() < 1)
-      return std::make_pair(error_code::error, keep_alive::No);
+      return keep_alive::No; // FIXME : Error
 
     // FIXME : Customize for handlers. For now, no action is required
     if (packet.what_get() == ack_w)
-      return std::make_pair(error_code::ignore, keep_alive::No);
+      return keep_alive::No;
 
     switch (packet.fromto_get())
     {
@@ -117,7 +117,7 @@ namespace master
           case c_m::del_req_w:
             return cm_del_req(packet, session);
           default:
-            return std::make_pair(error_code::error, keep_alive::No); // FIXME
+            return keep_alive::No; // FIXME
         }
       case s_m::fromto:
         switch (packet.what_get())
@@ -127,24 +127,24 @@ namespace master
           case s_m::id_req_w:
             return sm_id_req(packet, session);
           default:
-            return std::make_pair(error_code::error, keep_alive::No); // FIXME
+            return keep_alive::No; // FIXME
         }
       case m_m::fromto:
         switch (packet.what_get())
         {
           default:
-            return std::make_pair(error_code::error, keep_alive::No); // FIXME
+            return keep_alive::No; // FIXME
         }
       default:
-        return std::make_pair(error_code::error, keep_alive::No);
+        return keep_alive::No; // FIXME
     }
   }
 
-  inline ack_type
+  inline keep_alive
   Master::send_dispatcher(Packet packet, Session& session)
   {
     (void)session;
     (void)packet;
-    return std::make_pair(error_code::ignore, keep_alive::No);
+    return keep_alive::No;
   }
 }

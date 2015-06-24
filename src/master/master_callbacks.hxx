@@ -6,7 +6,7 @@ namespace master
   using namespace network;
 
   // May I upload a file?
-  inline ack_type
+  inline keep_alive
   cm_up_req(Packet& packet, Session& session)
   {
     const c_m::up_req* req = reinterpret_cast<c_m::up_req*>
@@ -27,14 +27,13 @@ namespace master
     // Compute the number of parts.
     uint32_t nb_parts = DB::tools::number_of_parts(fi.file_size_get());
     if (nb_parts == 0)
-      return make_error(error_code::error,
-                        "Add some storages so that clients can upload!");
+      throw std::logic_error("Add some storages so that clients can upload!");
 
     // Compute STPFIELD(s) depending on file parts.
     std::vector<STPFIELD> fields = DB::tools::get_stpfields_for_upload(fi.file_size_get());
 
     if (fields.size() < fi.redundancy_get())
-      return make_error(error_code::error /*11 FIXME */, "Client is asking for a redundancy of "
+      throw std::logic_error("Client is asking for a redundancy of "
                             + std::to_string(fi.redundancy_get())
                             + " but there is only "
                             + std::to_string(fields.size())
@@ -61,11 +60,11 @@ namespace master
     utils::Logger::cout() << "Responding with m_c::pieces_loc answers for " + fname;
     session.blocking_send(response);
 
-    return std::make_pair(error_code::ignore, keep_alive::No);
+    return keep_alive::No;
   }
 
   // May I download this file?
-  inline ack_type
+  inline keep_alive
   cm_down_req(Packet& packet, Session& session)
   {
     const c_m::down_req* req = reinterpret_cast<c_m::down_req*>
@@ -82,7 +81,7 @@ namespace master
     }
     catch (std::logic_error)
     {
-      return make_error(error_code::error/*3 FIXME */, "File " + fname + " does not exists.");
+      throw std::logic_error("File " + fname + " does not exists.");
     }
 
     DB::FileItem fi = DB::FileItem::deserialize(json);
@@ -95,8 +94,8 @@ namespace master
     for (auto part = fi.parts_get().begin();  part != fi.parts_get().end(); ++part)
     {
       if (part->locations_get().size() == 0)
-        return make_error(error_code::error, "File is not complete on our"
-                                             "servers (wait for full upload).");
+        throw std::logic_error("File is not complete on our"
+                               "servers (wait for full upload).");
 
       // For each location of the part
       ADDR addr;
@@ -133,11 +132,11 @@ namespace master
                          copy::Yes);
     session.blocking_send(response);
 
-    return std::make_pair(error_code::ignore, keep_alive::Yes);
+    return keep_alive::No; // FIXME : Maybe needs a Yes
   }
 
   // Can you delete this file?
-  inline ack_type
+  inline keep_alive
   cm_del_req(Packet& packet, Session& session)
   {
     const c_m::del_req* req = reinterpret_cast<c_m::del_req*>
@@ -156,7 +155,7 @@ namespace master
     }
     catch (std::logic_error&)
     {
-      return make_error(error_code::error/* 3 FIXME */, "File " + fname + " does not exists.");
+      throw std::logic_error("File " + fname + " does not exists.");
     }
 
     DB::FileItem fi = DB::FileItem::deserialize(json);
@@ -167,8 +166,8 @@ namespace master
     for (auto part = fi.parts_get().begin();  part != fi.parts_get().end(); ++part)
     {
       if (part->locations_get().size() == 0)
-        return make_error(error_code::error, "File is not complete on our servers"
-                                             " (wait for full upload).");
+        throw std::logic_error("File is not complete on our servers"
+                               " (wait for full upload).");
 
       // For each location of the part
       ADDR addr;
@@ -198,7 +197,7 @@ namespace master
       session.blocking_send(response);
     }
 
-    return std::make_pair(error_code::ignore, keep_alive::Yes);
+    return keep_alive::No; // FIXME : maybe needs a yes
   }
 
 
@@ -206,7 +205,7 @@ namespace master
   static std::mutex mutex_part_ack;
 
   // Part successfully received!
-  inline ack_type
+  inline keep_alive
   sm_part_ack(Packet& packet, Session& session)
   {
     std::lock_guard<std::mutex> lock(mutex_part_ack);
@@ -237,7 +236,7 @@ namespace master
     DB::Connector::get_instance().cmd_put("file." + fname, fi.serialize());
 
     if (it->locations_get().size() >= fi.redundancy_get()) // >= -> Why not?
-      return std::make_pair(error_code::success, keep_alive::No);
+      return keep_alive::No;
     else // Replication request
     {
       auto storages = DB::tools::get_all_storages();
@@ -259,11 +258,11 @@ namespace master
       }
     }
     //return 1; // FIXME : Why 1?
-    return std::make_pair(error_code::ignore, keep_alive::No);
+    return keep_alive::No;
   }
 
   // A new storage poped, and he wants a unique id
-  inline ack_type
+  inline keep_alive
   sm_id_req(Packet& packet, Session& session)
   {
     const CharT* data = packet.message_seq_get().front().data();
@@ -286,6 +285,6 @@ namespace master
     to_send.add_message(&response, sizeof (m_s::fid_info), copy::Yes);
     session.blocking_send(to_send);
 
-    return std::make_pair(error_code::ignore, keep_alive::No);
+    return keep_alive::No;
   }
 }
