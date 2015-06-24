@@ -21,7 +21,8 @@ namespace network
     success        = 0,  // Success
     error          = 1,  // Unknown error
     file_not_found = 3,  // File not found
-    redundancy     = 11  // Not enough storages
+    redundancy     = 11, // Not enough storages
+    ignore         = 255 // Ignore ack, don't ack an ack
   };
 
   // Keep the connection alive
@@ -162,10 +163,10 @@ namespace network
             uint16_t port,
             dispatcher_type recv_dispatcher
               = [](Packet, Session&) -> ack_type
-              { return std::make_pair(error_code::success, keep_alive::Yes); },
+              { return std::make_pair(error_code::ignore, keep_alive::No); },
             dispatcher_type send_dispatcher
               = [](Packet, Session&) -> ack_type
-              { return std::make_pair(error_code::success, keep_alive::Yes); },
+              { return std::make_pair(error_code::ignore, keep_alive::No); },
             std::function<void(Session&)> delete_dispatcher
               = [](Session&) { },
             size_t id = unique_id());

@@ -203,10 +203,18 @@ namespace network
   {
     auto seq = packet.message_seq_get();
     seq.insert(seq.begin(), packet.serialize_header());
-    write(socket_, seq);
-    auto result = callback(packet, *this);
-    process_result(result, packet,
-                   [this, &packet, callback](){ blocking_send(packet, callback); });
+    try
+    {
+      write(socket_, seq);
+      auto result = callback(packet, *this);
+      process_result(result, packet,
+                     [this, &packet, callback](){ blocking_send(packet, callback); });
+    }
+    catch (std::exception& e)
+    {
+      utils::Logger::cerr() << "Error while sending: " + std::string(e.what());
+      kill();
+    }
   }
 
   size_t Session::unique_id()

@@ -115,7 +115,7 @@ namespace storage
             std::ofstream id_file(storage::conf.id_path);
             id_file << response->stid;
 
-            return std::make_pair(error_code::success, keep_alive::Yes);
+            return std::make_pair(error_code::success, keep_alive::No);
           }
       );
 
@@ -157,6 +157,10 @@ namespace storage
     if (packet.size_get() < 1)
       return std::make_pair(error_code::error, keep_alive::No);
 
+    // FIXME : Customize for handlers. For now, no action is required
+    if (packet.what_get() == ack_w)
+      return std::make_pair(error_code::ignore, keep_alive::No);
+
     switch (packet.fromto_get())
     {
       case c_s::fromto:
@@ -179,7 +183,7 @@ namespace storage
   {
     (void)packet;
     (void)session;
-    return std::make_pair(error_code::success, keep_alive::Yes); // FIXME
+    return std::make_pair(error_code::ignore, keep_alive::No); // FIXME
   }
 
   uint64_t Storage::space_available()

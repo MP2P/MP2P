@@ -84,6 +84,6 @@ namespace storage
     // Add the data
     p.add_message(part.data(), part.size(), copy::No);
     session.blocking_send(p);
-    return std::make_pair(error_code::success, keep_alive::Yes);
+    return std::make_pair(error_code::ignore, keep_alive::Yes);
   }
 }

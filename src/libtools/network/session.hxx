@@ -33,6 +33,10 @@ namespace network
                                       const Packet& p,
                                       std::function<void()> callback)
   {
+    // Ignore the result
+    if (std::get<error_code>(result) == error_code::ignore)
+      return;
+
     // Send error or success, always ACK.
     send_ack(*this, p, std::get<error_code>(result));
 

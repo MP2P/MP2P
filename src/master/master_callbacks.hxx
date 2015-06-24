@@ -61,7 +61,7 @@ namespace master
     utils::Logger::cout() << "Responding with m_c::pieces_loc answers for " + fname;
     session.blocking_send(response);
 
-    return std::make_pair(error_code::success, keep_alive::No);
+    return std::make_pair(error_code::ignore, keep_alive::No);
   }
 
   // May I download this file?
@@ -133,7 +133,7 @@ namespace master
                          copy::Yes);
     session.blocking_send(response);
 
-    return std::make_pair(error_code::success, keep_alive::Yes);
+    return std::make_pair(error_code::ignore, keep_alive::Yes);
   }
 
   // Can you delete this file?
@@ -198,10 +198,11 @@ namespace master
       session.blocking_send(response);
     }
 
-    return std::make_pair(error_code::success, keep_alive::Yes);
+    return std::make_pair(error_code::ignore, keep_alive::Yes);
   }
 
 
+  // FIXME : ...
   static std::mutex mutex_part_ack;
 
   // Part successfully received!
@@ -257,9 +258,8 @@ namespace master
         }
       }
     }
-    //return 1;
-    // FIXME : Why 1?
-    return std::make_pair(error_code::success, keep_alive::No);
+    //return 1; // FIXME : Why 1?
+    return std::make_pair(error_code::ignore, keep_alive::No);
   }
 
   // A new storage poped, and he wants a unique id
@@ -286,6 +286,6 @@ namespace master
     to_send.add_message(&response, sizeof (m_s::fid_info), copy::Yes);
     session.blocking_send(to_send);
 
-    return std::make_pair(error_code::success, keep_alive::No);
+    return std::make_pair(error_code::ignore, keep_alive::No);
   }
 }

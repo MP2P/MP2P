@@ -11,6 +11,25 @@ namespace client
   using namespace utils;
   using copy = utils::shared_buffer::copy;
 
+  namespace // Anonymous namespace
+  {
+    void check_for_errors(const Packet& p)
+    {
+      if (p.what_get() != 0)
+        return;
+
+      const CharT* data = p.message_seq_get().front().data();
+      const ack* ack_code = reinterpret_cast<const ack*>(data);
+      if (*ack_code != error_code::success)
+      {
+        // FIXME : Set the text
+        std::ostringstream ss;
+        ss << "Error " << (int)*ack_code << " was returned.";
+        throw std::logic_error(ss.str());
+      }
+    }
+  }
+
   Client::Client(const std::string& host, uint16_t port)
     : master_session_{io_service_, host, port}
   {
@@ -99,7 +118,7 @@ namespace client
                                    + boost::lexical_cast<std::string>(file.size() / duration)
                                    + "Kio/s).";
 
-          return std::make_pair(error_code::success, keep_alive::Yes);
+          return std::make_pair(error_code::success, keep_alive::No);
         });
   }
 
@@ -163,8 +182,7 @@ namespace client
           CharT* data = p.message_seq_get().front().data();
 
           if (p.what_get() == 0)
-            throw std::logic_error("Master returned error: "
-                                   "File " + filename + " does not exists.");
+            check_for_errors(p);
 
           m_c::down_pieces_loc* pieces = reinterpret_cast<m_c::down_pieces_loc*>(data);
 
@@ -243,7 +261,7 @@ namespace client
             memcpy(file.data() + upload->partid.partnum * part_size,
                    upload->data,
                    p.size_get() - sizeof (PARTID) - sizeof (sha1_type));
-            return std::make_pair(error_code::success, keep_alive::Yes);
+            return std::make_pair(error_code::success, keep_alive::No);
           }
       );
     };
