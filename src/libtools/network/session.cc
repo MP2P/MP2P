@@ -17,6 +17,9 @@ namespace network
         delete_dispatcher_{delete_dispatcher},
         id_{id}
   {
+    std::ostringstream s;
+    s << std::this_thread::get_id();
+    utils::Logger::cout() << "[" + std::to_string(id_) + "] " + "Opened session (tid=" + s.str() + ")";
   }
 
   Session::Session(io_service& io_service,
@@ -32,7 +35,7 @@ namespace network
   {
     ip::tcp::endpoint endpoint = network::endpoint_from_host(host, port);
 
-    utils::Logger::cout() << "Opening session (" + host + " - "
+    utils::Logger::cout() << "[" + std::to_string(id_) + "] " + "Opening session (" + host + " - "
                              + std::to_string(port) + ")";
 
     boost::system::error_code ec;
@@ -43,8 +46,47 @@ namespace network
 
     std::ostringstream s;
     s << std::this_thread::get_id();
-    utils::Logger::cout() << "Opened session (tid=" + s.str() + ")";
+    utils::Logger::cout() << "[" + std::to_string(id_) + "] " + "Opened session (tid=" + s.str() + ")";
   }
+
+  Session::~Session()
+  {
+    // If the id == 0, then it means it was a moved-from object,
+    // that became temporary, so there is no connection related to it.
+    // Therefore, the client should not be notified of this destruction.
+    if (id_ > 0)
+      utils::Logger::cout() << "[" + std::to_string(id_) + "] " + "Closed session";
+  }
+
+  Session::Session(Session&& other)
+    : socket_{std::move(other.socket_)},
+      buff_(std::move(other.buff_)),
+      length_{std::move(other.length_)},
+      recv_dispatcher_{std::move(other.recv_dispatcher_)},
+      delete_dispatcher_{std::move(other.delete_dispatcher_)},
+      id_{std::move(other.id_)}
+  {
+    // Reset the id of the old session to 0.
+    // This prevents incoherence in the book-keeping of the sessions.
+    other.id_ = 0;
+  }
+
+  Session& Session::operator=(Session&& other)
+  {
+    socket_ = std::move(other.socket_);
+    buff_ = std::move(other.buff_);
+    length_ = std::move(other.length_);
+    recv_dispatcher_ = std::move(other.recv_dispatcher_);
+    delete_dispatcher_ = std::move(other.delete_dispatcher_);
+    id_ = std::move(other.id_);
+
+    // Reset the id of the old session to 0.
+    // This prevents incoherence in the book-keeping of the sessions.
+    other.id_ = 0;
+
+    return *this;
+  }
+
 
   void Session::receive_header(std::function<void(const Packet&,
                                                   dispatcher_type)> receive_body,
@@ -61,7 +103,7 @@ namespace network
             const auto* header =
               reinterpret_cast<const PACKET_HEADER*>(buff_.data());
 
-            utils::Logger::cout() << "Receiving a message of size: "
+            utils::Logger::cout() << "[" + std::to_string(id_) + "] " + "Receiving a message of size: "
                                      + std::to_string(header->size);
 
             // We're not using the constructor of packet with the full header
@@ -78,7 +120,7 @@ namespace network
           }
           else if (ec != boost::asio::error::eof)
           {
-            utils::Logger::cerr() << "Error while getting size: "
+            utils::Logger::cerr() << "[" + std::to_string(id_) + "] " + "Error while getting size: "
                                   + ec.message();
             // Kill the session if an error occured
             kill(); // FIXME : Kill is not the right approach.
@@ -109,7 +151,7 @@ namespace network
           }
           else
           {
-            utils::Logger::cerr() << "Error: " + ec.message();
+            utils::Logger::cerr() << "[" + std::to_string(id_) + "] " + "Error: " + ec.message();
             kill(); // FIXME : Get rid of Kill
           }
         }
@@ -151,14 +193,14 @@ namespace network
     }
     catch (std::exception& e)
     {
-      utils::Logger::cerr() << "Error while getting size: " + std::string(e.what());
+      utils::Logger::cerr() << "[" + std::to_string(id_) + "] " + "Error while getting size: " + std::string(e.what());
       kill(); // FIXME
       return;
     }
 
     const auto* header =
         reinterpret_cast<const PACKET_HEADER*>(packet_buff.data());
-    utils::Logger::cout() << "Receiving a message of size: "
+    utils::Logger::cout() << "[" + std::to_string(id_) + "] " + "Receiving a message of size: "
                              + std::to_string(header->size);
     Packet p{header->type.fromto, header->type.what,
              empty_message(header->size)};
@@ -168,7 +210,7 @@ namespace network
     }
     catch (std::exception& e)
     {
-      utils::Logger::cerr() << "Error: " + std::string(e.what());
+      utils::Logger::cerr() << "[" + std::to_string(id_) + "] " + "Error: " + std::string(e.what());
       kill(); // FIXME
       return;
     }
@@ -208,7 +250,7 @@ namespace network
           }
           else
           {
-            utils::Logger::cerr() << "Error while sending: " + ec.message();
+            utils::Logger::cerr() << "[" + std::to_string(id_) + "] " + "Error while sending: " + ec.message();
             kill(); // FIXME : Get rid of Kill
           }
         }
@@ -234,20 +276,19 @@ namespace network
     }
     catch (std::exception& e)
     {
-      utils::Logger::cerr() << "Error while sending: " + std::string(e.what());
+      utils::Logger::cerr() << "[" + std::to_string(id_) + "] " + "Error while sending: " + std::string(e.what());
       kill();
     }
   }
 
   size_t Session::unique_id()
   {
-    static std::atomic_size_t id;
+    static std::atomic_size_t id{1};
     return id++;
   }
 
   void Session::kill()
   {
-    utils::Logger::cout() << "Closed session";
     socket_.close(); // Close the socket // FIXME : RAII?
     delete_dispatcher_(*this); // Ask the owner to delete
   }

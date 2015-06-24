@@ -160,6 +160,13 @@ namespace network
               = [](Session&) { },
             size_t id = unique_id());
 
+    // Moving a session should reset its id.
+    Session(Session&& other);
+    Session& operator=(Session&& other);
+
+    // Used for debug
+    ~Session();
+
     // Kill the session. Close the socket and remove from parent container
     void kill();
 
@@ -223,7 +230,7 @@ namespace network
     std::function<void(Session&)> delete_dispatcher_;
 
     // The unique id of the session
-    const size_t id_;
+    size_t id_;
 
 
     // Recieve the header, then call the callback with a packet

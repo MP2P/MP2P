@@ -153,13 +153,13 @@ namespace client
           // FIXME : part_size may not fit in uint32_t
           to_send.add_message(part_buffer, part_size, copy::No);
 
-          utils::Logger::cout() << "Sending part to storage";
+          utils::Logger::cout() << "[" + std::to_string(storage.id_get()) + "] " + "Sending part to storage";
 
           storage.blocking_send(to_send);
 
           recv_ack(storage);
 
-          utils::Logger::cout() << "Storage received part";
+          utils::Logger::cout() << "[" + std::to_string(storage.id_get()) + "] " + "Storage received part";
         }
     };
   }
@@ -172,7 +172,7 @@ namespace client
     Packet request{c_m::fromto, c_m::down_req_w};
     request.add_message(filename.c_str(), filename.size(), copy::No);
 
-    utils::Logger::cout() << "Requesting file " + filename + " to master.";
+    utils::Logger::cout() << "[" + std::to_string(master_session_.id_get()) + "] " + "Requesting file " + filename + " to master.";
     master_session_.blocking_send(request);
 
     // Wait for an answer from the master, then download all parts from storages
@@ -190,7 +190,7 @@ namespace client
                               - sizeof (fid_type) - sizeof (fsize_type))
                              / sizeof (STPFIELD);
 
-          std::cout << "list_size = " + std::to_string(list_size) << std::endl;
+          utils::Logger::cout() << "list_size = " + std::to_string(list_size);
 
           if (list_size == 0) // FIXME : Find one way to treat errors the same
             throw std::logic_error("Invalid packet from master");
