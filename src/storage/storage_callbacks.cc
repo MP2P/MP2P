@@ -79,10 +79,14 @@ namespace storage
     p.add_message(hash.data(), hash.size(), copy::No);
     // Add the data
     p.add_message(part.data(), part.size(), copy::No);
+
+    utils::Logger::cout() << "[" + std::to_string(session.id_get()) + "] "
+                             "Sending part";
+
     session.blocking_send(p);
 
     recv_ack(session); // Throws if an error occurs
 
-    return keep_alive::Yes;
+    return keep_alive::No;
   }
 }
