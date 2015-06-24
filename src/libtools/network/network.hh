@@ -21,6 +21,8 @@ namespace network
     success        = 0,  // Success
     error          = 1,  // Unknown error
     file_not_found = 3,  // File not found
+    hash_failed    = 4,  // File hash failed
+    invalid_packet = 5,  // Invalid packet
     redundancy     = 11  // Not enough storages
   };
 
@@ -230,14 +232,19 @@ namespace network
     // Recieve the message according to the packet
     void receive_message(const Packet& p, dispatcher_type dispatcher);
 
-    // Send acknowledge (error, or not) to the session according
-    // to the packet's header
-    void send_ack(Session& session, const Packet& packet, enum error_code ack);
-
+    
   };
 
   // Compare two Sessions according to their id
   bool operator==(const Session& lhs, const Session& rhs);
+
+  // Send acknowledge (error, or not) to the session according
+  // to the packet's header
+  void send_ack(Session& session, const Packet& packet, enum error_code ack);
+
+  // Receive acknowledge from the session
+  // Throws if any error occurs
+  void recv_ack(Session& session);
 
   /*-------.
   | Server |

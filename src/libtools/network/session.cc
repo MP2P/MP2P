@@ -250,7 +250,7 @@ namespace network
     delete_dispatcher_(*this); // Ask the owner to delete
   }
 
-  void Session::send_ack(Session& session,
+  void send_ack(Session& session,
                          const Packet& packet,
                          enum error_code ack)
   {
@@ -262,5 +262,26 @@ namespace network
     Packet to_send{fromto_dst, ack_w};
     to_send.add_message(&response, sizeof (response), copy::No);
     session.blocking_send(to_send);
+  }
+
+  void recv_ack(Session& session)
+  {
+    session.blocking_receive(
+        [](auto p, auto& session)
+        {
+          CharT* data = p.message_seq_get().front().data();
+          const ack* ack_code = reinterpret_cast<const ack*>(data);
+
+          if (*ack_code != error_code::success)
+          {
+            std::ostringstream ss;
+            ss << "Error : " << (int)*ack_code;
+            session.kill(); // FIXME
+            throw std::logic_error(ss.str());
+          }
+
+          return keep_alive::No;
+        }
+    );
   }
 }
