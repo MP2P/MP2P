@@ -42,7 +42,6 @@ namespace master
     std::vector<std::thread> threads_;
 
     network::keep_alive recv_dispatcher(network::Packet packet, network::Session &session);
-    network::keep_alive send_dispatcher(network::Packet packet, network::Session &session);
 
     // Causes the server to stop its running threads if any.0
     void stop();

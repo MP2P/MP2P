@@ -10,8 +10,8 @@ namespace master
   Master::Master()
       : server_{get_ipv6(master::conf.hostname), master::conf.port,
                 io_service_,
-                std::bind(&Master::recv_dispatcher, this, std::placeholders::_1, std::placeholders::_2),
-                std::bind(&Master::send_dispatcher, this, std::placeholders::_1, std::placeholders::_2)}
+                std::bind(&Master::recv_dispatcher, this,
+                          std::placeholders::_1, std::placeholders::_2)}
   {
     utils::Logger::cout() << "Concurency level = " + std::to_string(master::conf.concurrency);
     utils::Logger::cout() << "Bind port = " + std::to_string(master::conf.port);
@@ -138,13 +138,5 @@ namespace master
       default:
         return keep_alive::No; // FIXME
     }
-  }
-
-  inline keep_alive
-  Master::send_dispatcher(Packet packet, Session& session)
-  {
-    (void)session;
-    (void)packet;
-    return keep_alive::No;
   }
 }

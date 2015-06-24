@@ -140,7 +140,6 @@ namespace network
     // from the container containing it.
     Session(boost::asio::ip::tcp::socket&& socket,
             dispatcher_type recv_dispatcher,
-            dispatcher_type send_dispatcher,
             std::function<void(Session&)> delete_dispatcher,
             size_t id = unique_id());
 
@@ -150,9 +149,6 @@ namespace network
             const std::string& host,
             uint16_t port,
             dispatcher_type recv_dispatcher
-              = [](Packet, Session&)
-              { return keep_alive::No; },
-            dispatcher_type send_dispatcher
               = [](Packet, Session&)
               { return keep_alive::No; },
             std::function<void(Session&)> delete_dispatcher
@@ -218,9 +214,6 @@ namespace network
     // The dispatcher to call right after a complete recieve
     dispatcher_type recv_dispatcher_;
 
-    // The dispatcher to call right after a complete send
-    dispatcher_type send_dispatcher_;
-
     // The function to call to remove this session from the parent container
     std::function<void(Session&)> delete_dispatcher_;
 
@@ -259,8 +252,7 @@ namespace network
     Server(boost::asio::ip::address_v6 addr,
            uint16_t port,
            boost::asio::io_service& io_service,
-           dispatcher_type recv_dispatcher,
-           dispatcher_type send_dispatcher);
+           dispatcher_type recv_dispatcher);
 
     // Stop the acceptor
     // FIXME : Is this really necessary? What about RAII?
@@ -288,9 +280,6 @@ namespace network
 
     // The recieve callback
     dispatcher_type recv_dispatcher_;
-
-    // The send callback
-    dispatcher_type send_dispatcher_;
 
     // Container for the current sessions, based on their ID
     std::unordered_map<size_t, Session> sessions_;

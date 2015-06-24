@@ -20,8 +20,6 @@ namespace storage
       : server_{get_ipv6(storage::conf.hostname), storage::conf.port,
                 io_service_,
                 std::bind(&Storage::recv_dispatcher, this,
-                          std::placeholders::_1, std::placeholders::_2),
-                std::bind(&Storage::send_dispatcher, this,
                           std::placeholders::_1, std::placeholders::_2)}
   {
     utils::Logger::cout() << "Concurency level = "
@@ -176,14 +174,6 @@ namespace storage
       default:
         return keep_alive::No; // FIXME
     }
-  }
-
-  keep_alive
-  Storage::send_dispatcher(Packet packet, Session& session)
-  {
-    (void)packet;
-    (void)session;
-    return keep_alive::No; // FIXME
   }
 
   uint64_t Storage::space_available()

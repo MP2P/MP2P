@@ -6,12 +6,10 @@ namespace network
 
   Server::Server(boost::asio::ip::address_v6 addr, uint16_t port,
                  io_service &io_service,
-                 dispatcher_type recv_dispatcher,
-                 dispatcher_type send_dispatcher)
+                 dispatcher_type recv_dispatcher)
       : acceptor_{io_service},
         socket_{io_service},
-        recv_dispatcher_{recv_dispatcher},
-        send_dispatcher_{send_dispatcher}
+        recv_dispatcher_{recv_dispatcher}
   {
     // Use of ipv6 by default, with IPV6_V6ONLY disabled, it will listen to
     // both ipv4 & ipv6.
@@ -59,7 +57,7 @@ namespace network
 
             size_t id = Session::unique_id();
             sessions_.emplace(id,
-              Session{std::move(socket_), recv_dispatcher_, send_dispatcher_,
+              Session{std::move(socket_), recv_dispatcher_,
                 std::bind(&Server::delete_dispatcher, this, std::placeholders::_1),
                 id
               }

@@ -10,12 +10,10 @@ namespace network
 
   Session::Session(ip::tcp::socket&& socket,
                    dispatcher_type recv_dispatcher,
-                   dispatcher_type send_dispatcher,
                    std::function<void(Session&)> delete_dispatcher,
                    size_t id)
       : socket_{std::forward<ip::tcp::socket>(socket)},
         recv_dispatcher_{recv_dispatcher},
-        send_dispatcher_{send_dispatcher},
         delete_dispatcher_{delete_dispatcher},
         id_{id}
   {
@@ -25,12 +23,10 @@ namespace network
                    const std::string& host,
                    uint16_t port,
                    dispatcher_type recv_dispatcher,
-                   dispatcher_type send_dispatcher,
                    std::function<void(Session&)> delete_dispatcher,
                    size_t id)
     : socket_{io_service},
       recv_dispatcher_{recv_dispatcher},
-      send_dispatcher_{send_dispatcher},
       delete_dispatcher_{delete_dispatcher},
       id_{id}
   {
@@ -187,7 +183,7 @@ namespace network
 
   void Session::send(const Packet& packet)
   {
-    send(packet, send_dispatcher_);
+    send(packet, [](auto, auto&){ return keep_alive::No; });
   }
 
   void Session::send(const Packet& packet, dispatcher_type callback)
@@ -204,10 +200,9 @@ namespace network
           if (!ec)
           {
             length_ = length;
-            auto result = callback(*p, *this);
+            callback(*p, *this);
             length_ = 0;
 
-            (void)result; // FIXME
             kill(); // FIXME
           }
           else
@@ -221,7 +216,7 @@ namespace network
 
   void Session::blocking_send(const Packet& packet)
   {
-    blocking_send(packet, send_dispatcher_);
+    blocking_send(packet, [](auto, auto&){ return keep_alive::No; });
   }
 
   void Session::blocking_send(const Packet& packet, dispatcher_type callback)
