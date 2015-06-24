@@ -29,31 +29,8 @@ namespace network
     return length_;
   }
 
-  inline void Session::process_result(ack_type result,
-                                      const Packet& p,
-                                      std::function<void()> callback)
-  {
-    // Ignore the result
-    if (std::get<error_code>(result) == error_code::ignore)
-      return;
-
-    // Send error or success, always ACK.
-    send_ack(*this, p, std::get<error_code>(result));
-
-    if (std::get<keep_alive>(result) == keep_alive::No)
-      kill(); // FIXME : Get rid of Kill
-    else
-      callback();
-  }
-
   inline bool operator==(const Session& lhs, const Session& rhs)
   {
     return lhs.id_get() == rhs.id_get();
-  }
-
-  inline ack_type make_error(enum error_code error, const std::string& msg)
-  {
-    utils::Logger::cerr() << msg;
-    return std::make_pair(error, keep_alive::No);
   }
 }

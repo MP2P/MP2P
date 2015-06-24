@@ -21,8 +21,7 @@ namespace network
     success        = 0,  // Success
     error          = 1,  // Unknown error
     file_not_found = 3,  // File not found
-    redundancy     = 11, // Not enough storages
-    ignore         = 255 // Ignore ack, don't ack an ack
+    redundancy     = 11  // Not enough storages
   };
 
   // Keep the connection alive
@@ -30,17 +29,6 @@ namespace network
   {
     Yes,
     No
-  };
-
-  using ack_type = std::pair<error_code, keep_alive>;
-
-  // Used for std::get from ack_type
-  // Example: std::get<error_code>(ack)
-  // Results in a more verbose and documented code
-  enum ack_result
-  {
-    error_code = 0,
-    keep_alive = 1
   };
 
   /*-------.
@@ -140,7 +128,7 @@ namespace network
   | Session |
   `--------*/
 
-  using dispatcher_type = std::function<ack_type(Packet, Session&)>;
+  using dispatcher_type = std::function<keep_alive(Packet, Session&)>;
 
   class Session
   {
@@ -162,11 +150,11 @@ namespace network
             const std::string& host,
             uint16_t port,
             dispatcher_type recv_dispatcher
-              = [](Packet, Session&) -> ack_type
-              { return std::make_pair(error_code::ignore, keep_alive::No); },
+              = [](Packet, Session&)
+              { return keep_alive::No; },
             dispatcher_type send_dispatcher
-              = [](Packet, Session&) -> ack_type
-              { return std::make_pair(error_code::ignore, keep_alive::No); },
+              = [](Packet, Session&)
+              { return keep_alive::No; },
             std::function<void(Session&)> delete_dispatcher
               = [](Session&) { },
             size_t id = unique_id());
@@ -253,11 +241,6 @@ namespace network
     // to the packet's header
     void send_ack(Session& session, const Packet& packet, enum error_code ack);
 
-    // Process the result of a receive method
-    // Send ack and kill if the keep_alive == no
-    void process_result(ack_type result,
-                        const Packet& p,
-                        std::function<void()> receive);
   };
 
   // Compare two Sessions according to their id
@@ -343,8 +326,6 @@ namespace network
   network::masks::partsize_type get_part_size(network::masks::fsize_type fsize,
                                               network::masks::partnum_type partnum,
                                               network::masks::partnum_type parts);
-
-  network::ack_type make_error(enum error_code error, const std::string& msg);
 }
 
 #include "misc.hxx"

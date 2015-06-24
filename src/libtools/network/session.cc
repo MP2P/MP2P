@@ -106,7 +106,10 @@ namespace network
             auto result = callback(p, *this);
             length_ = 0;
 
-            process_result(result, p, [this](){ receive(); });
+            if (result == keep_alive::Yes)
+              receive();
+            else
+              kill();
           }
           else
           {
@@ -146,7 +149,16 @@ namespace network
 
     std::array<char, sizeof(masks::PACKET_HEADER)> packet_buff;
 
-    read(socket_, boost::asio::buffer(&*packet_buff.begin(), packet_buff.size()));
+    try
+    {
+      read(socket_, boost::asio::buffer(&*packet_buff.begin(), packet_buff.size()));
+    }
+    catch (std::exception& e)
+    {
+      utils::Logger::cerr() << "Error while getting size: " + std::string(e.what());
+      kill(); // FIXME
+      return;
+    }
 
     const auto* header =
         reinterpret_cast<const PACKET_HEADER*>(packet_buff.data());
@@ -154,10 +166,23 @@ namespace network
                              + std::to_string(header->size);
     Packet p{header->type.fromto, header->type.what,
              empty_message(header->size)};
-    read(socket_, p.message_seq_get()[0], transfer_exactly(header->size));
+    try
+    {
+      read(socket_, p.message_seq_get()[0], transfer_exactly(header->size));
+    }
+    catch (std::exception& e)
+    {
+      utils::Logger::cerr() << "Error: " + std::string(e.what());
+      kill(); // FIXME
+      return;
+    }
 
     auto result = callback(p, *this);
-    process_result(result, p, [this, callback](){ blocking_receive(callback); });
+
+    if (result == keep_alive::Yes)
+      blocking_receive(callback);
+    else
+      kill(); // FIXME
   }
 
   void Session::send(const Packet& packet)
@@ -182,8 +207,8 @@ namespace network
             auto result = callback(*p, *this);
             length_ = 0;
 
-            process_result(result, *p,
-                           [this, p, callback](){ send(*p, callback); });
+            (void)result; // FIXME
+            kill(); // FIXME
           }
           else
           {
@@ -207,8 +232,8 @@ namespace network
     {
       write(socket_, seq);
       auto result = callback(packet, *this);
-      process_result(result, packet,
-                     [this, &packet, callback](){ blocking_send(packet, callback); });
+
+      (void)result; // FIXME
     }
     catch (std::exception& e)
     {
@@ -226,7 +251,7 @@ namespace network
   void Session::kill()
   {
     utils::Logger::cout() << "Closed session";
-    socket_.close(); // Close the socket
+    socket_.close(); // Close the socket // FIXME : RAII?
     delete_dispatcher_(*this); // Ask the owner to delete
   }
 
