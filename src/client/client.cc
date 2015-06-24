@@ -260,7 +260,7 @@ namespace client
             memcpy(file.data() + upload->partid.partnum * part_size,
                    upload->data,
                    p.size_get() - sizeof (PARTID) - sizeof (sha1_type));
-            return keep_alive::Yes;
+            return keep_alive::No;
           }
       );
     };
