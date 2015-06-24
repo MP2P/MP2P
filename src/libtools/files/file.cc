@@ -67,6 +67,17 @@ namespace files
 
     // Map the file
     file_ = boost::iostreams::mapped_file{params};
+
+
+    // Fix permissions added by boost::mapped_file.
+    // 644 should be the right ones.
+
+    using p = boost::filesystem::perms;
+    auto permissions = p::owner_read | p::group_read | p::others_read
+                       | p::owner_write;
+
+    // Set the permissions
+    boost::filesystem::permissions(filename, permissions);
   }
 
   File File::create_empty_file(const std::string& filename, size_t size)
