@@ -11,6 +11,21 @@ namespace client
   using namespace utils;
   using copy = utils::shared_buffer::copy;
 
+  namespace
+  {
+    void process_error(const Packet& p, std::string from)
+    {
+      const CharT* data = p.message_seq_get().front().data();
+      const ack* ack_code = reinterpret_cast<const ack*>(data);
+
+      // FIXME : Error message
+      std::ostringstream ss;
+      ss << "Error received from " << from << " : " << (int)*ack_code;
+
+      throw std::logic_error(ss.str());
+    }
+  }
+
   Client::Client(const std::string& host, uint16_t port)
     : master_session_{io_service_, host, port}
   {
@@ -37,7 +52,6 @@ namespace client
 
     Packet req_packet{0, 1};
     req_packet.add_message(&request, sizeof (request), copy::No);
-
     req_packet.add_message(fname.c_str(), fname.size(), copy::No);
     master_session_.blocking_send(req_packet);
 
@@ -45,7 +59,7 @@ namespace client
         [&file, this](Packet p, Session& /*recv_session*/)
         {
           if (p.what_get() == 0)
-            throw std::logic_error("Error received from Master");
+            process_error(p, "master");
 
           CharT* data = p.message_seq_get().front().data();
           m_c::up_pieces_loc* pieces = reinterpret_cast<m_c::up_pieces_loc*>(data);
@@ -69,6 +83,7 @@ namespace client
 
           size_t parts = total_parts;
 
+          utils::Logger::cout() << "Upload started...";
           auto begin = std::chrono::steady_clock::now();
           for (size_t i = 0; i < list_size; ++i)
           {
@@ -84,8 +99,6 @@ namespace client
             );
             parts -= field.nb;
           }
-
-          utils::Logger::cout() << "Upload started...";
 
           end_all_tasks();
 
@@ -141,6 +154,8 @@ namespace client
           to_send.add_message(part_buffer, part_size, copy::No);
 
           storage.blocking_send(to_send);
+
+          recv_ack(storage);
         }
     };
   }
@@ -160,11 +175,10 @@ namespace client
     master_session_.blocking_receive(
         [&filename, this](Packet p, Session& /*recv_session*/)
         {
-          CharT* data = p.message_seq_get().front().data();
-
           if (p.what_get() == 0)
-            throw std::logic_error("Error occured");
+            process_error(p, "master");
 
+          CharT* data = p.message_seq_get().front().data();
           m_c::down_pieces_loc* pieces = reinterpret_cast<m_c::down_pieces_loc*>(data);
 
           // Get the number of STPFIELDS
@@ -174,8 +188,8 @@ namespace client
 
           std::cout << "list_size = " + std::to_string(list_size) << std::endl;
 
-          // list_size == 0 shouldn't happen.
-          assert(list_size);
+          if (list_size == 0) // FIXME : Find one way to treat errors the same
+            throw std::logic_error("Invalid packet from master");
 
           // Get the size of a part
           auto part_size = pieces->fsize / list_size;

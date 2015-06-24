@@ -19,7 +19,7 @@ namespace master
     );
 
     auto fi = DB::FileItem(0, fname, req->fsize, req->rdcy, 0,
-                           "                    ", 0, {});
+                           "                    ", 0, {}); // FIXME : Hash me maybe ?
 
     utils::Logger::cerr() << "Request to upload file " + fi.name_get()
                              + " of size " + std::to_string(fi.file_size_get()) + ".";

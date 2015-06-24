@@ -183,7 +183,7 @@ namespace network
 
   void Session::send(const Packet& packet)
   {
-    send(packet, [](auto, auto&){ return keep_alive::No; });
+    send(packet, [](auto, auto&){ return keep_alive::Yes; });
   }
 
   void Session::send(const Packet& packet, dispatcher_type callback)
@@ -200,10 +200,11 @@ namespace network
           if (!ec)
           {
             length_ = length;
-            callback(*p, *this);
+            auto result = callback(*p, *this);
             length_ = 0;
 
-            kill(); // FIXME
+            if (result == keep_alive::No)
+              kill(); // FIXME
           }
           else
           {
@@ -216,7 +217,7 @@ namespace network
 
   void Session::blocking_send(const Packet& packet)
   {
-    blocking_send(packet, [](auto, auto&){ return keep_alive::No; });
+    blocking_send(packet, [](auto, auto&){ return keep_alive::Yes; });
   }
 
   void Session::blocking_send(const Packet& packet, dispatcher_type callback)
@@ -228,7 +229,8 @@ namespace network
       write(socket_, seq);
       auto result = callback(packet, *this);
 
-      (void)result; // FIXME
+      if (result == keep_alive::No)
+        kill();
     }
     catch (std::exception& e)
     {
