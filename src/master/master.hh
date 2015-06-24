@@ -57,6 +57,12 @@ namespace master
     void catch_stop();
   };
 
+  // Send an error and log it
+  network::keep_alive send_error(network::Session& session,
+                                 const network::Packet& p,
+                                 enum network::error_code error,
+                                 std::string msg = "Unknown error occured.");
+
   network::keep_alive cm_up_req(network::Packet& packet, network::Session& session);
   network::keep_alive cm_down_req(network::Packet& packet, network::Session& session);
   network::keep_alive cm_del_req(network::Packet& packet, network::Session& session);

@@ -99,7 +99,8 @@ namespace master
   Master::recv_dispatcher(Packet packet, Session& session)
   {
     if (packet.size_get() < 1)
-      return keep_alive::No; // FIXME : Error
+      return send_error(session, packet, error_code::invalid_packet,
+                        "Recieved an invalid packet");
 
     // FIXME : Customize for handlers. For now, no action is required
     if (packet.what_get() == ack_w)
@@ -117,7 +118,7 @@ namespace master
           case c_m::del_req_w:
             return cm_del_req(packet, session);
           default:
-            return keep_alive::No; // FIXME
+            break;
         }
       case s_m::fromto:
         switch (packet.what_get())
@@ -127,16 +128,28 @@ namespace master
           case s_m::id_req_w:
             return sm_id_req(packet, session);
           default:
-            return keep_alive::No; // FIXME
+            break;
         }
       case m_m::fromto:
         switch (packet.what_get())
         {
           default:
-            return keep_alive::No; // FIXME
+            break;
         }
       default:
-        return keep_alive::No; // FIXME
+        break;
     }
+
+    return keep_alive::No; // FIXME
+  }
+
+  network::keep_alive send_error(network::Session& session,
+                                 const Packet& p,
+                                 enum network::error_code error,
+                                 std::string msg)
+  {
+    utils::Logger::cerr() << msg;
+    send_ack(session, p, error);
+    return keep_alive::No;
   }
 }

@@ -27,17 +27,19 @@ namespace master
     // Compute the number of parts.
     uint32_t nb_parts = DB::tools::number_of_parts(fi.file_size_get());
     if (nb_parts == 0)
-      throw std::logic_error("Add some storages so that clients can upload!");
+      return send_error(session, packet, error_code::missing_storage,
+                        "Add some storages so that clients can upload!");
 
     // Compute STPFIELD(s) depending on file parts.
     std::vector<STPFIELD> fields = DB::tools::get_stpfields_for_upload(fi.file_size_get());
 
     if (fields.size() < fi.redundancy_get())
-      throw std::logic_error("Client is asking for a redundancy of "
-                            + std::to_string(fi.redundancy_get())
-                            + " but there is only "
-                            + std::to_string(fields.size())
-                            + " storages available.");
+      return send_error(session, packet, error_code::redundancy,
+                        "Client is asking for a redundancy of "
+                         + std::to_string(fi.redundancy_get())
+                         + " but there is only "
+                         + std::to_string(fields.size())
+                         + " storages available.");
 
     // After all checks, we can now create the file in DB
     DB::tools::create_new_file(fi);
@@ -81,7 +83,8 @@ namespace master
     }
     catch (std::logic_error)
     {
-      throw std::logic_error("File " + fname + " does not exists.");
+      return send_error(session, packet, error_code::file_not_found,
+                        "File " + fname + " does not exist.");
     }
 
     DB::FileItem fi = DB::FileItem::deserialize(json);
@@ -94,8 +97,9 @@ namespace master
     for (auto part = fi.parts_get().begin();  part != fi.parts_get().end(); ++part)
     {
       if (part->locations_get().size() == 0)
-        throw std::logic_error("File is not complete on our"
-                               "servers (wait for full upload).");
+        return send_error(session, packet, error_code::incomplete_file,
+                          "File is not complete on our"
+                          "servers (wait for full upload).");
 
       // For each location of the part
       ADDR addr;
@@ -132,7 +136,7 @@ namespace master
                          copy::Yes);
     session.blocking_send(response);
 
-    return keep_alive::No; // FIXME : Maybe needs a Yes
+    return keep_alive::No;
   }
 
   // Can you delete this file?
@@ -141,8 +145,6 @@ namespace master
   {
     const c_m::del_req* req = reinterpret_cast<c_m::del_req*>
         (packet.message_seq_get().front().data());
-
-
 
     std::string fname(req->fname, packet.size_get());
 
@@ -155,7 +157,8 @@ namespace master
     }
     catch (std::logic_error&)
     {
-      throw std::logic_error("File " + fname + " does not exists.");
+      return send_error(session, packet, error_code::file_not_found,
+                        "File " + fname + " does not exist.");
     }
 
     DB::FileItem fi = DB::FileItem::deserialize(json);
@@ -166,8 +169,9 @@ namespace master
     for (auto part = fi.parts_get().begin();  part != fi.parts_get().end(); ++part)
     {
       if (part->locations_get().size() == 0)
-        throw std::logic_error("File is not complete on our servers"
-                               " (wait for full upload).");
+        return send_error(session, packet, error_code::incomplete_file,
+                          "File is not complete on our"
+                          "servers (wait for full upload).");
 
       // For each location of the part
       ADDR addr;
@@ -197,7 +201,7 @@ namespace master
       session.blocking_send(response);
     }
 
-    return keep_alive::No; // FIXME : maybe needs a yes
+    return keep_alive::No;
   }
 
 
@@ -236,7 +240,10 @@ namespace master
     DB::Connector::get_instance().cmd_put("file." + fname, fi.serialize());
 
     if (it->locations_get().size() >= fi.redundancy_get()) // >= -> Why not?
+    {
+      send_ack(session, packet, error_code::success);
       return keep_alive::No;
+    }
     else // Replication request
     {
       auto storages = DB::tools::get_all_storages();
