@@ -11,25 +11,6 @@ namespace client
   using namespace utils;
   using copy = utils::shared_buffer::copy;
 
-  namespace // Anonymous namespace
-  {
-    void check_for_errors(const Packet& p)
-    {
-      if (p.what_get() != 0)
-        return;
-
-      const CharT* data = p.message_seq_get().front().data();
-      const ack* ack_code = reinterpret_cast<const ack*>(data);
-      if (*ack_code != error_code::success)
-      {
-        // FIXME : Set the text
-        std::ostringstream ss;
-        ss << "Error " << (int)*ack_code << " was returned.";
-        throw std::logic_error(ss.str());
-      }
-    }
-  }
-
   Client::Client(const std::string& host, uint16_t port)
     : master_session_{io_service_, host, port}
   {
@@ -61,7 +42,7 @@ namespace client
     master_session_.blocking_send(req_packet);
 
     master_session_.blocking_receive(
-        [&file, this](Packet p, Session& /*recv_session*/) -> ack_type
+        [&file, this](Packet p, Session& /*recv_session*/)
         {
           if (p.what_get() == 0)
             throw std::logic_error("Error received from Master");
@@ -118,7 +99,7 @@ namespace client
                                    + boost::lexical_cast<std::string>(file.size() / duration)
                                    + "Kio/s).";
 
-          return std::make_pair(error_code::success, keep_alive::No);
+          return keep_alive::No;
         });
   }
 
@@ -177,12 +158,12 @@ namespace client
 
     // Wait for an answer from the master, then download all parts from storages
     master_session_.blocking_receive(
-        [&filename, this](Packet p, Session& /*recv_session*/) -> ack_type
+        [&filename, this](Packet p, Session& /*recv_session*/)
         {
           CharT* data = p.message_seq_get().front().data();
 
           if (p.what_get() == 0)
-            check_for_errors(p);
+            throw std::logic_error("Error occured");
 
           m_c::down_pieces_loc* pieces = reinterpret_cast<m_c::down_pieces_loc*>(data);
 
@@ -206,7 +187,6 @@ namespace client
           auto file = files::File::create_empty_file(filename + "-dl",
                                                      pieces->fsize);
 
-
           for (size_t i = 0; i < list_size; ++i)
           {
             // Recieve a part directly into the file
@@ -220,9 +200,10 @@ namespace client
                                 part_size))
             );
           }
+
           end_all_tasks();
 
-          return std::make_pair(error_code::success, keep_alive::Yes);
+          return keep_alive::No;
         });
   }
 
@@ -252,7 +233,7 @@ namespace client
 
       // Receive a part
       storage.blocking_receive(
-          [&file, part_size](Packet p, Session&) -> ack_type
+          [&file, part_size](Packet p, Session&)
           {
             CharT* data = p.message_seq_get().front().data();
             s_c::up_act* upload = reinterpret_cast<s_c::up_act*>(data);
@@ -261,7 +242,7 @@ namespace client
             memcpy(file.data() + upload->partid.partnum * part_size,
                    upload->data,
                    p.size_get() - sizeof (PARTID) - sizeof (sha1_type));
-            return std::make_pair(error_code::success, keep_alive::No);
+            return keep_alive::No;
           }
       );
     };
