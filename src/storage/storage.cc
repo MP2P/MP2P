@@ -153,7 +153,8 @@ namespace storage
   Storage::recv_dispatcher(Packet packet, Session& session)
   {
     if (packet.size_get() < 1)
-      return keep_alive::No;
+      return send_error(session, packet, error_code::invalid_packet,
+                        "Recieved an invalid packet");
 
     // FIXME : Customize for handlers. For now, no action is required
     if (packet.what_get() == ack_w)
@@ -169,15 +170,27 @@ namespace storage
           case c_s::down_act_w:
             return cs_down_act(packet, session);
           default:
-            return keep_alive::No; // FIXME
+            break;
         }
       default:
-        return keep_alive::No; // FIXME
+        break;
     }
+
+    return keep_alive::No;
   }
 
   uint64_t Storage::space_available()
   {
     return boost::filesystem::space(storage::conf.storage_path).available;
+  }
+
+  network::keep_alive send_error(network::Session& session,
+                                 const Packet& p,
+                                 enum network::error_code error,
+                                 std::string msg)
+  {
+    utils::Logger::cerr() << msg;
+    send_ack(session, p, error);
+    return keep_alive::No;
   }
 }

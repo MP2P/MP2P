@@ -27,19 +27,11 @@ namespace storage
       // Compute the hash of the received buffer
       auto hash = files::hash_buffer_hex(part->data,
                                      packet.size_get() - sizeof (c_s::up_act));
-      //FIXME: send a s_c_ack error to the client.
-      // If the hash is not correct, send a s_c_fail_sha1 to the client
-      // and kill the connection
+      // If the hash is not correct, send an error to the client
+      // and kills the connection
       if(memcmp(hash.data(), part->sha1, 20))
-      {
-        utils::Logger::cerr() << "Hash failed for " + fid_partnum;
-        //FIXME
-        Packet p{s_c::fromto, s_c::ack_w};
-        p.add_message(&part->partid, sizeof (PARTID), copy::No);
-        // FIXME : Use an async_send, but close the session only after the async_send
-        session.blocking_send(p);
-        return keep_alive::No;
-      }
+        return send_error(session, packet, error_code::hash_failed,
+                          "Hash failed for " + fid_partnum);
     }
 
     // Save the file to disk
@@ -49,6 +41,7 @@ namespace storage
 
     file.write(part->data, packet.size_get() - sizeof (c_s::up_act));
 
+    // First, ACK the master that the file has been received
     auto master_session = Session{session.socket_get().get_io_service(),
                                   conf.master_hostname,
                                   conf.master_port};
@@ -59,7 +52,10 @@ namespace storage
     p.add_message(&response, sizeof (s_m::part_ack), copy::Yes);
     master_session.send(p);
 
-    return keep_alive::Yes;
+    // Then, ACK the client as well
+    send_ack(session, packet, error_code::success);
+
+    return keep_alive::No;
   }
 
   network::keep_alive
@@ -84,6 +80,9 @@ namespace storage
     // Add the data
     p.add_message(part.data(), part.size(), copy::No);
     session.blocking_send(p);
-    return keep_alive::No; // FIXME : Maybe it should be Yes
+
+    recv_ack(session); // Throws if an error occurs
+
+    return keep_alive::No;
   }
 }

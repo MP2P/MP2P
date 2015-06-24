@@ -65,6 +65,12 @@ namespace storage
     static uint64_t space_available();
   };
 
+  // Send an error and log it
+  network::keep_alive send_error(network::Session& session,
+                                 const network::Packet& p,
+                                 enum network::error_code error,
+                                 std::string msg = "Unknown error occured.");
+
   network::keep_alive cs_up_act(network::Packet& packet,
                                 network::Session& session);
 
