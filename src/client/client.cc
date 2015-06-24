@@ -251,7 +251,7 @@ namespace client
 
       // Receive a part
       storage.blocking_receive(
-          [&file, part_size](Packet p, Session&)
+          [&file, part_size](Packet p, Session& session)
           {
             CharT* data = p.message_seq_get().front().data();
             s_c::up_act* upload = reinterpret_cast<s_c::up_act*>(data);
@@ -260,6 +260,10 @@ namespace client
             memcpy(file.data() + upload->partid.partnum * part_size,
                    upload->data,
                    p.size_get() - sizeof (PARTID) - sizeof (sha1_type));
+
+            // Send ack if the file is received correctly
+            send_ack(session, p, error_code::success);
+
             return keep_alive::No;
           }
       );
