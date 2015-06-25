@@ -116,10 +116,6 @@ namespace storage
             return keep_alive::No;
           }
       );
-
-      // The io_service is ran after the IO operations have been "commited"
-      io_service_.run();
-
     }
     else
       id_file >> id;
