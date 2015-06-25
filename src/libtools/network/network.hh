@@ -33,8 +33,7 @@ namespace network
   enum class keep_alive
   {
     Yes,
-    No,
-    Ignore
+    No
   };
 
   /*-------.

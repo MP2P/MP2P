@@ -211,7 +211,7 @@ namespace network
 
   void send(std::shared_ptr<Session> s, const Packet& packet)
   {
-    send(s, packet, [](auto, auto&){ return keep_alive::Ignore; });
+    send(s, packet, [](auto, auto&){ return keep_alive::No; });
   }
 
   void send(std::shared_ptr<Session> s, const Packet& packet, dispatcher_type callback)
@@ -244,7 +244,7 @@ namespace network
 
   void blocking_send(std::shared_ptr<Session> s, const Packet& packet)
   {
-    blocking_send(s, packet, [](auto, auto&){ return keep_alive::Ignore; });
+    blocking_send(s, packet, [](auto, auto&){ return keep_alive::No; });
   }
 
   void blocking_send(std::shared_ptr<Session> s, const Packet& packet, dispatcher_type callback)
@@ -301,7 +301,7 @@ namespace network
           throw std::logic_error(ss.str());
         }
 
-        return keep_alive::Ignore;
+        return keep_alive::No;
       }
     );
   }
