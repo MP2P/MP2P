@@ -9,7 +9,7 @@ namespace network
     return socket_;
   }
 
-  inline boost::asio::ip::address Session::remote_address_get()
+  inline boost::asio::ip::address Session::remote_address_get() const
   {
     return socket_.remote_endpoint().address();
   }

@@ -175,7 +175,7 @@ namespace network
     boost::asio::ip::tcp::socket& socket_get();
 
     // Get the address of the remote client
-    boost::asio::ip::address remote_address_get();
+    boost::asio::ip::address remote_address_get() const;
 
     // Get the buffer containing the header
     std::array<char, sizeof(masks::PACKET_HEADER)>& buff_get();
