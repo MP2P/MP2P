@@ -56,15 +56,24 @@ namespace network
                                       + s.str() + ").";
 
             size_t id = Session::unique_id();
-            sessions_.emplace(id,
-              Session{std::move(socket_), recv_dispatcher_,
-                std::bind(&Server::delete_dispatcher, this, std::placeholders::_1),
-                id
-              }
-            );
+            {
+              /* FIXME : A lock might be in need for this operation.
+               * Since the listening happens on multiple threads, concurrent
+               * writing to the map may occur.
+               * Let's say, the map needs to be resized, all the old sessions
+               * are invalidated.
+               * std::lock_guard<std::mutex> lock(m_);
+               */
+              sessions_.emplace(id,
+                Session{std::move(socket_), recv_dispatcher_,
+                  std::bind(&Server::delete_dispatcher, this, std::placeholders::_1),
+                  id
+                }
+              );
 
-            auto& inserted = sessions_.at(id);
-            inserted.receive();
+              auto& inserted = sessions_.at(id);
+              inserted.receive();
+            }
 
             // At the end of each request & treatment, we call listen again.
             listen();
@@ -75,6 +84,11 @@ namespace network
 
   void Server::delete_dispatcher(Session& session)
   {
+    utils::Logger::cout() << "Removing [" + std::to_string(session.id_get())
+                             + "] from map";
+    /* FIXME : See Server::listen
+     * std::lock_guard<std::mutex> lock(m_);
+     */
     sessions_.erase(session.id_get());
   }
 }

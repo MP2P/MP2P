@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <iosfwd>
 #include <boost/asio.hpp>
+#include <mutex>
 
 namespace network
 {
@@ -300,6 +301,10 @@ namespace network
 
     // Container for the current sessions, based on their ID
     std::unordered_map<size_t, Session> sessions_;
+
+    /* FIXME : See Server::listen implementation
+     * std::mutex m_;
+     */
   };
 
   /*-----.
