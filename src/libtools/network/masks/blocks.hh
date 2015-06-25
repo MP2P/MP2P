@@ -19,7 +19,7 @@ namespace network
 
     // Basic blocks
     using avspace_type = uint64_t;
-    using data_type = const CharT; //FIXME: No pointer type?
+    using data_type = const CharT;
     using fid_type = uint64_t;
     using fname_type = const CharT;
     using fromto_type = uint8_t;

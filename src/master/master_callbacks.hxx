@@ -264,7 +264,7 @@ namespace master
         }
       }
     }
-    //return 1; // FIXME : Why 1?
+
     return keep_alive::No;
   }
 

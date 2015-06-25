@@ -161,10 +161,6 @@ namespace network
               { return keep_alive::No; },
             size_t id = unique_id());
 
-    // Moving a session should reset its id.
-    Session(Session&& other);
-    Session& operator=(Session&& other);
-
     // Used for debug
     ~Session();
 
@@ -288,10 +284,6 @@ namespace network
 
     // The recieve callback
     dispatcher_type dispatcher_;
-
-    /* FIXME : See Server::listen implementation
-     * std::mutex m_;
-     */
   };
 
   /*-----.

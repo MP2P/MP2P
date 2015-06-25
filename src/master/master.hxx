@@ -140,7 +140,7 @@ namespace master
         break;
     }
 
-    return keep_alive::No; // FIXME
+    return keep_alive::No;
   }
 
   network::keep_alive send_error(network::Session& session,

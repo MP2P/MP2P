@@ -47,36 +47,7 @@ namespace network
 
   Session::~Session()
   {
-    // If the id == 0, then it means it was a moved-from object,
-    // that became temporary, so there is no connection related to it.
-    // Therefore, the client should not be notified of this destruction.
-    if (id_ > 0)
-      utils::Logger::cout() << "[" + std::to_string(id_) + "] " + "Closed session";
-  }
-
-  Session::Session(Session&& other)
-    : socket_{std::move(other.socket_)},
-      buff_(std::move(other.buff_)),
-      dispatcher_{std::move(other.dispatcher_)},
-      id_{std::move(other.id_)}
-  {
-    // Reset the id of the old session to 0.
-    // This prevents incoherence in the book-keeping of the sessions.
-    other.id_ = 0;
-  }
-
-  Session& Session::operator=(Session&& other)
-  {
-    socket_ = std::move(other.socket_);
-    buff_ = std::move(other.buff_);
-    dispatcher_ = std::move(other.dispatcher_);
-    id_ = std::move(other.id_);
-
-    // Reset the id of the old session to 0.
-    // This prevents incoherence in the book-keeping of the sessions.
-    other.id_ = 0;
-
-    return *this;
+    utils::Logger::cout() << "[" + std::to_string(id_) + "] " + "Closed session";
   }
 
   void receive_header(std::shared_ptr<Session> s, std::function<void(const Packet&,
@@ -179,7 +150,6 @@ namespace network
     catch (std::exception& e)
     {
       utils::Logger::cerr() << "[" + std::to_string(s->id_get()) + "] " + "Error while getting size: " + std::string(e.what());
-      //kill(); // FIXME
       return;
     }
 
@@ -196,7 +166,6 @@ namespace network
     catch (std::exception& e)
     {
       utils::Logger::cerr() << "[" + std::to_string(s->id_get()) + "] " + "Error: " + std::string(e.what());
-      //kill(); // FIXME
       return;
     }
 
@@ -204,8 +173,6 @@ namespace network
 
     if (result == keep_alive::Yes)
       blocking_receive(s, callback);
-    //else if (result == keep_alive::No)
-     // kill(); // FIXME
   }
 
 
@@ -227,17 +194,9 @@ namespace network
                          std::size_t /* length */)
         {
           if (!ec)
-          {
-            /*auto result = */callback(*p, *s);
-
-            //if (result == keep_alive::No)
-             // kill(); // FIXME
-          }
+            callback(*p, *s);
           else
-          {
             utils::Logger::cerr() << "[" + std::to_string(s->id_get()) + "] " + "Error while sending: " + ec.message();
-            //kill(); // FIXME : Get rid of Kill
-          }
         }
     );
   }
@@ -254,15 +213,11 @@ namespace network
     try
     {
       write(s->socket_get(), seq);
-      /*auto result = */callback(packet, *s);
-
-      //if (result == keep_alive::No)
-       // kill();
+      callback(packet, *s);
     }
     catch (std::exception& e)
     {
       utils::Logger::cerr() << "[" + std::to_string(s->id_get()) + "] " + "Error while sending: " + std::string(e.what());
-      //kill();
     }
   }
 
