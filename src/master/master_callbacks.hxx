@@ -60,7 +60,7 @@ namespace master
                          copy::Yes);
 
     utils::Logger::cout() << "Responding with m_c::pieces_loc answers for " + fname;
-    session.blocking_send(response);
+    blocking_send(session.ptr(), response);
 
     return keep_alive::No;
   }
@@ -134,7 +134,7 @@ namespace master
     response.add_message(&*fields.begin(),
                          fields.size() * sizeof (STPFIELD),
                          copy::Yes);
-    session.blocking_send(response);
+    blocking_send(session.ptr(), response);
 
     return keep_alive::No;
   }
@@ -198,7 +198,7 @@ namespace master
       //FIXME: Where do you send this?
       Packet response{m_s::fromto, m_s::del_act_w};
       //response.add_message(part->num_get(), sizeof (partnum_type), copy::Yes);
-      session.blocking_send(response);
+      blocking_send(session.ptr(), response);
     }
 
     return keep_alive::No;
@@ -259,7 +259,7 @@ namespace master
           const m_s::part_loc response{req->partid, st.addr_get()};
           Packet to_send{m_s::fromto, m_s::part_loc_w};
           to_send.add_message(&response, sizeof(m_s::part_loc), copy::Yes);
-          session.blocking_send(to_send);
+          blocking_send(session.ptr(), to_send);
           break;
         }
       }
@@ -290,7 +290,7 @@ namespace master
     const m_s::fid_info response{si.id_get()};
     Packet to_send{m_s::fromto, m_s::fid_info_w};
     to_send.add_message(&response, sizeof (m_s::fid_info), copy::Yes);
-    session.blocking_send(to_send);
+    blocking_send(session.ptr(), to_send);
 
     return keep_alive::No;
   }

@@ -93,17 +93,17 @@ namespace storage
     if (!id_file)
     {
 
-      auto master_session = Session{io_service_,
-                                    conf.master_hostname,
-                                    conf.master_port};
+      auto master_session = Session::create(io_service_,
+                                            conf.master_hostname,
+                                            conf.master_port);
 
       // Send a request for an id
       s_m::id_req req{storage::conf.port, (avspace_type)Storage::space_available()};
       Packet to_send{s_m::fromto, s_m::id_req_w};
       to_send.add_message(&req, sizeof (s_m::id_req), copy::No);
-      master_session.send(to_send);
+      send(master_session, to_send);
 
-      master_session.blocking_receive(
+      blocking_receive(master_session,
           [this](Packet p, Session&)
           {
             const CharT* data = p.message_seq_get().front().data();

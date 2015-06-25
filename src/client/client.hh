@@ -54,7 +54,7 @@ namespace client
 
     // Session connected to the master
     // FIXME : Create the session whenever needed
-    network::Session master_session_;
+    std::shared_ptr<network::Session> master_session_;
 
     // Current asynchronous tasks
     std::vector<std::future<void>> tasks_;

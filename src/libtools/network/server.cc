@@ -6,10 +6,10 @@ namespace network
 
   Server::Server(boost::asio::ip::address_v6 addr, uint16_t port,
                  io_service &io_service,
-                 dispatcher_type recv_dispatcher)
+                 dispatcher_type dispatcher)
       : acceptor_{io_service},
         socket_{io_service},
-        recv_dispatcher_{recv_dispatcher}
+        dispatcher_{dispatcher}
   {
     // Use of ipv6 by default, with IPV6_V6ONLY disabled, it will listen to
     // both ipv4 & ipv6.
@@ -56,39 +56,15 @@ namespace network
                                       + s.str() + ").";
 
             size_t id = Session::unique_id();
-            {
-              /* FIXME : A lock might be in need for this operation.
-               * Since the listening happens on multiple threads, concurrent
-               * writing to the map may occur.
-               * Let's say, the map needs to be resized, all the old sessions
-               * are invalidated.
-               * std::lock_guard<std::mutex> lock(m_);
-               */
-              sessions_.emplace(id,
-                Session{std::move(socket_), recv_dispatcher_,
-                  std::bind(&Server::delete_dispatcher, this, std::placeholders::_1),
-                  id
-                }
-              );
 
-              auto& inserted = sessions_.at(id);
-              inserted.receive();
-            }
+            auto session = Session::create(std::move(socket_), dispatcher_, id);
+
+            receive(session);
 
             // At the end of each request & treatment, we call listen again.
             listen();
           }
         }
     );
-  }
-
-  void Server::delete_dispatcher(Session& session)
-  {
-    utils::Logger::cout() << "Removing [" + std::to_string(session.id_get())
-                             + "] from map";
-    /* FIXME : See Server::listen
-     * std::lock_guard<std::mutex> lock(m_);
-     */
-    sessions_.erase(session.id_get());
   }
 }

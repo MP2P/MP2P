@@ -136,8 +136,12 @@ namespace network
 
   using dispatcher_type = std::function<keep_alive(Packet, Session&)>;
 
-  class Session : std::enable_shared_from_this<Session>
+  class Session : public std::enable_shared_from_this<Session>
   {
+
+  public:
+    template <typename... Ts>
+    static std::shared_ptr<Session> create(Ts&&... params);
 
   public:
     // Create a session from an actual socket.
@@ -145,8 +149,7 @@ namespace network
     // The delete_handler is removing the actual session
     // from the container containing it.
     Session(boost::asio::ip::tcp::socket&& socket,
-            dispatcher_type recv_dispatcher,
-            std::function<void(Session&)> delete_dispatcher,
+            dispatcher_type dispatcher,
             size_t id = unique_id());
 
     // Same with the previous one.
@@ -154,11 +157,9 @@ namespace network
     Session(boost::asio::io_service& io_service,
             const std::string& host,
             uint16_t port,
-            dispatcher_type recv_dispatcher
+            dispatcher_type dispatcher
               = [](Packet, Session&)
               { return keep_alive::No; },
-            std::function<void(Session&)> delete_dispatcher
-              = [](Session&) { },
             size_t id = unique_id());
 
     // Moving a session should reset its id.
@@ -168,9 +169,7 @@ namespace network
     // Used for debug
     ~Session();
 
-    // Kill the session. Close the socket and remove from parent container
-    void kill();
-
+    // Returns THE shared_ptr associated to the Session
     std::shared_ptr<Session> ptr();
 
     // Get the corresponding socket
@@ -182,42 +181,17 @@ namespace network
     // Get the buffer containing the header
     std::array<char, sizeof(masks::PACKET_HEADER)>& buff_get();
 
-    // Get the length of the last message
-    size_t length_get() const;
+    // Get the dispatcher
+    dispatcher_type dispatcher_get() const;
 
     // The unique session id
     size_t id_get() const;
-
-    // Recieve a header, then the data according to the header
-    void receive();
-
-    // Receive a header, treat the packet inside a lambda function
-    void receive(dispatcher_type callback);
-
-    // Same as receive, but blocking
-    void blocking_receive();
-
-    // Same as receive, but blocking
-    void blocking_receive(dispatcher_type callback);
-
-    // Send a packet
-    void send(const Packet& packet);
-
-    // Send a packet
-    void send(const Packet& packet, dispatcher_type callback);
-
-    // This operation is blocking. It's using a synchronous send
-    void blocking_send(const Packet& packet);
-
-    // Send a packet using a custom dispatcher
-    void blocking_send(const Packet& packet, dispatcher_type callback);
 
     // Creates an unique id for a socket.
     // It's using an atomic integer
     static size_t unique_id();
 
-  //private:
-    public:
+  private:
     // The socket opened for communication
     boost::asio::ip::tcp::socket socket_;
 
@@ -225,31 +199,11 @@ namespace network
     // FIXME : Why is it part of the session ?
     std::array<char, sizeof (masks::PACKET_HEADER)> buff_;
 
-    // The length of the last received message
-    // FIXME : USeless
-    size_t length_;
-
     // The dispatcher to call right after a complete recieve
-    dispatcher_type recv_dispatcher_;
-
-    // The function to call to remove this session from the parent container
-    // FIXME : Remove if there are no more containers
-    std::function<void(Session&)> delete_dispatcher_;
+    dispatcher_type dispatcher_;
 
     // The unique id of the session
     size_t id_;
-
-
-    // Recieve the header, then call the callback with a packet
-    // and a message size
-    void receive_header(std::function<void(const Packet&,
-                                           dispatcher_type)> receive_body,
-                        dispatcher_type callback);
-
-    // Recieve the message according to the packet
-    void receive_message(const Packet& p, dispatcher_type dispatcher);
-
-    
   };
 
   // Recieve the header, then call the callback with a packet
@@ -288,7 +242,6 @@ namespace network
   // Send a packet using a custom dispatcher
   void blocking_send(std::shared_ptr<Session> s, const Packet& packet, dispatcher_type callback);
 
-
   // Compare two Sessions according to their id
   bool operator==(const Session& lhs, const Session& rhs);
 
@@ -308,12 +261,11 @@ namespace network
   {
   public:
     // Create a server binding addr:port using io_service.
-    // Callback recv_dispatcher after a recieve
-    // Same for send.
+    // Callback dispatcher after a recieve
     Server(boost::asio::ip::address_v6 addr,
            uint16_t port,
            boost::asio::io_service& io_service,
-           dispatcher_type recv_dispatcher);
+           dispatcher_type dispatcher);
 
     // Stop the acceptor
     // FIXME : Is this really necessary? What about RAII?
@@ -328,10 +280,6 @@ namespace network
 
     bool is_running();
 
-    // Delete the session from the map
-    // This allows the memory to be freed, as well as the socket to be closed
-    void delete_dispatcher(Session& session);
-
   private:
     // The acceptor used to accept new connections and create sessions
     boost::asio::ip::tcp::acceptor acceptor_;
@@ -340,10 +288,7 @@ namespace network
     boost::asio::ip::tcp::socket socket_;
 
     // The recieve callback
-    dispatcher_type recv_dispatcher_;
-
-    // Container for the current sessions, based on their ID
-    std::unordered_map<size_t, Session> sessions_;
+    dispatcher_type dispatcher_;
 
     /* FIXME : See Server::listen implementation
      * std::mutex m_;

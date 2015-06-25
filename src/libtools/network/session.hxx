@@ -4,6 +4,11 @@
 
 namespace network
 {
+  template <typename... Ts>
+  std::shared_ptr<Session> Session::create(Ts&&... params)
+  {
+    return std::shared_ptr<Session>(new Session(std::forward<Ts>(params)...));
+  }
 
   inline std::shared_ptr<Session> Session::ptr()
   {
@@ -25,14 +30,14 @@ namespace network
     return buff_;
   }
 
+  inline dispatcher_type Session::dispatcher_get() const
+  {
+    return dispatcher_;
+  }
+
   inline size_t Session::id_get() const
   {
     return id_;
-  }
-
-  inline size_t Session::length_get() const
-  {
-    return length_;
   }
 
   inline bool operator==(const Session& lhs, const Session& rhs)

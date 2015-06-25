@@ -42,15 +42,15 @@ namespace storage
     file.write(part->data, packet.size_get() - sizeof (c_s::up_act));
 
     // First, ACK the master that the file has been received
-    auto master_session = Session{session.socket_get().get_io_service(),
+    auto master_session = Session::create(session.socket_get().get_io_service(),
                                   conf.master_hostname,
-                                  conf.master_port};
+                                  conf.master_port);
 
     utils::Logger::cout() << "Acknoledging master for " + fid_partnum;
     Packet p{s_m::fromto, s_m::part_ack_w};
     const s_m::part_ack response{Storage::id, part->partid, 10};
     p.add_message(&response, sizeof (s_m::part_ack), copy::Yes);
-    master_session.send(p);
+    send(master_session, p);
 
     // Then, ACK the client as well
     send_ack(session, packet, error_code::success);
@@ -83,7 +83,7 @@ namespace storage
     utils::Logger::cout() << "[" + std::to_string(session.id_get()) + "] "
                              "Sending part";
 
-    session.blocking_send(p);
+    blocking_send(session.ptr(), p);
 
     recv_ack(session); // Throws if an error occurs
 

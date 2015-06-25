@@ -27,7 +27,7 @@ namespace client
   }
 
   Client::Client(const std::string& host, uint16_t port)
-    : master_session_{io_service_, host, port}
+    : master_session_{Session::create(io_service_, host, port)}
   {
     // Run the network service, right away
     io_service_.run();
@@ -53,9 +53,9 @@ namespace client
     Packet req_packet{0, 1};
     req_packet.add_message(&request, sizeof (request), copy::No);
     req_packet.add_message(fname.c_str(), fname.size(), copy::No);
-    master_session_.blocking_send(req_packet);
+    blocking_send(master_session_, req_packet);
 
-    master_session_.blocking_receive(
+    blocking_receive(master_session_,
         [&file, this](Packet p, Session& /*recv_session*/)
         {
           if (p.what_get() == 0)
@@ -129,7 +129,7 @@ namespace client
         auto host = network::binary_to_string_ipv6(addr.ipv6,
                                                    network::masks::ipv6_type_size);
         // Create the storage session
-        Session storage{io_service_, host, addr.port};
+        auto storage = Session::create(io_service_, host, addr.port);
 
         // For each part to send, create a Packet and send it synchronously
         for (size_t i = begin_id; i < end_id; ++i)
@@ -153,13 +153,13 @@ namespace client
           // FIXME : part_size may not fit in uint32_t
           to_send.add_message(part_buffer, part_size, copy::No);
 
-          utils::Logger::cout() << "[" + std::to_string(storage.id_get()) + "] " + "Sending part to storage";
+          utils::Logger::cout() << "[" + std::to_string(storage->id_get()) + "] " + "Sending part to storage";
 
-          storage.blocking_send(to_send);
+          blocking_send(storage, to_send);
 
-          recv_ack(storage);
+          recv_ack(*storage);
 
-          utils::Logger::cout() << "[" + std::to_string(storage.id_get()) + "] " + "Storage received part";
+          utils::Logger::cout() << "[" + std::to_string(storage->id_get()) + "] " + "Storage received part";
         }
     };
   }
@@ -172,11 +172,11 @@ namespace client
     Packet request{c_m::fromto, c_m::down_req_w};
     request.add_message(filename.c_str(), filename.size(), copy::No);
 
-    utils::Logger::cout() << "[" + std::to_string(master_session_.id_get()) + "] " + "Requesting file " + filename + " to master.";
-    master_session_.blocking_send(request);
+    utils::Logger::cout() << "[" + std::to_string(master_session_->id_get()) + "] " + "Requesting file " + filename + " to master.";
+    blocking_send(master_session_, request);
 
     // Wait for an answer from the master, then download all parts from storages
-    master_session_.blocking_receive(
+    blocking_receive(master_session_,
         [&filename, this](Packet p, Session& /*recv_session*/)
         {
           if (p.what_get() == 0)
@@ -242,15 +242,15 @@ namespace client
                                + ":" + std::to_string(addr.port) + ".";
 
       // Create the storage session
-      Session storage{io_service_, host, addr.port};
+      auto storage = Session::create(io_service_, host, addr.port);
 
       Packet to_send{c_s::fromto, c_s::down_act_w};
       to_send.add_message(&partid, sizeof (PARTID), copy::No);
 
-      storage.blocking_send(to_send);
+      blocking_send(storage, to_send);
 
       // Receive a part
-      storage.blocking_receive(
+      blocking_receive(storage,
           [&file, part_size](Packet p, Session& session)
           {
             CharT* data = p.message_seq_get().front().data();
