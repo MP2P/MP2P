@@ -101,7 +101,7 @@ namespace storage
       s_m::id_req req{storage::conf.port, (avspace_type)Storage::space_available()};
       Packet to_send{s_m::fromto, s_m::id_req_w};
       to_send.add_message(&req, sizeof (s_m::id_req), copy::No);
-      send(master_session, to_send);
+      blocking_send(master_session, to_send);
 
       blocking_receive(master_session,
           [this](Packet p, Session&)

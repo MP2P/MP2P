@@ -50,7 +50,7 @@ namespace storage
     Packet p{s_m::fromto, s_m::part_ack_w};
     const s_m::part_ack response{Storage::id, part->partid, 10};
     p.add_message(&response, sizeof (s_m::part_ack), copy::Yes);
-    blocking_send(master_session, p);
+    send(master_session, p);
 
     // Then, ACK the client as well
     send_ack(session, packet, error_code::success);

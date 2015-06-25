@@ -134,7 +134,7 @@ namespace master
     response.add_message(&*fields.begin(),
                          fields.size() * sizeof (STPFIELD),
                          copy::Yes);
-    blocking_send(session.ptr(), response);
+    send(session.ptr(), response);
 
     return keep_alive::No;
   }
