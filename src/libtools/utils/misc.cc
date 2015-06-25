@@ -1,14 +1,12 @@
 #include <string>
 #include <sstream>
 
-#include "utils.hh"
-
+#include <utils.hh>
 
 namespace utils
 {
   namespace misc
   {
-
     template<>
     std::string string_from(std::string value)
     {

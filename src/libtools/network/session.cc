@@ -6,36 +6,32 @@ namespace network
 {
   using namespace boost::asio;
   using namespace network::masks;
+  using copy = utils::shared_buffer::copy;
 
   Session::Session(ip::tcp::socket&& socket,
-                   dispatcher_type recv_dispatcher,
-                   dispatcher_type send_dispatcher,
-                   std::function<void(Session&)> delete_dispatcher,
+                   dispatcher_type dispatcher,
                    size_t id)
       : socket_{std::forward<ip::tcp::socket>(socket)},
-        recv_dispatcher_{recv_dispatcher},
-        send_dispatcher_{send_dispatcher},
-        delete_dispatcher_{delete_dispatcher},
+        dispatcher_{dispatcher},
         id_{id}
   {
+    std::ostringstream s;
+    s << std::this_thread::get_id();
+    utils::Logger::cout() << "[" + std::to_string(id_) + "] " + "Opened session (tid=" + s.str() + ")";
   }
 
   Session::Session(io_service& io_service,
                    const std::string& host,
                    uint16_t port,
-                   dispatcher_type recv_dispatcher,
-                   dispatcher_type send_dispatcher,
-                   std::function<void(Session&)> delete_dispatcher,
+                   dispatcher_type dispatcher,
                    size_t id)
     : socket_{io_service},
-      recv_dispatcher_{recv_dispatcher},
-      send_dispatcher_{send_dispatcher},
-      delete_dispatcher_{delete_dispatcher},
+      dispatcher_{dispatcher},
       id_{id}
   {
     ip::tcp::endpoint endpoint = network::endpoint_from_host(host, port);
 
-    utils::Logger::cout() << "Opening session (" + host + " - "
+    utils::Logger::cout() << "[" + std::to_string(id_) + "] " + "Opening session (" + host + " - "
                              + std::to_string(port) + ")";
 
     boost::system::error_code ec;
@@ -46,25 +42,30 @@ namespace network
 
     std::ostringstream s;
     s << std::this_thread::get_id();
-    utils::Logger::cout() << "Opened session (tid=" + s.str() + ")";
+    utils::Logger::cout() << "[" + std::to_string(id_) + "] " + "Opened session (tid=" + s.str() + ")";
   }
 
-  void Session::receive_header(std::function<void(const Packet&,
+  Session::~Session()
+  {
+    utils::Logger::cout() << "[" + std::to_string(id_) + "] " + "Closed session";
+  }
+
+  void receive_header(std::shared_ptr<Session> s, std::function<void(const Packet&,
                                                   dispatcher_type)> receive_body,
                                dispatcher_type callback)
   {
-    async_read(socket_,
-        boost::asio::buffer(&*buff_.begin(), buff_.size()),
+    async_read(s->socket_get(),
+        boost::asio::buffer(&*s->buff_get().begin(), s->buff_get().size()),
         transfer_exactly(sizeof (PACKET_HEADER)),
-        [this, callback, receive_body](boost::system::error_code ec,
+        [s, callback, receive_body](boost::system::error_code ec,
                                        std::size_t size_length)
         {
           if (!ec && size_length == sizeof (PACKET_HEADER))
           {
             const auto* header =
-              reinterpret_cast<const PACKET_HEADER*>(buff_.data());
+              reinterpret_cast<const PACKET_HEADER*>(s->buff_get().data());
 
-            utils::Logger::cout() << "Receiving a message of size: "
+            utils::Logger::cout() << "[" + std::to_string(s->id_get()) + "] " + "Receiving a message of size: "
                                      + std::to_string(header->size);
 
             // We're not using the constructor of packet with the full header
@@ -81,180 +82,182 @@ namespace network
           }
           else if (ec != boost::asio::error::eof)
           {
-            utils::Logger::cerr() << "Error while getting size: "
+            utils::Logger::cerr() << "[" + std::to_string(s->id_get()) + "] " + "Error while getting size: "
                                   + ec.message();
-            // Kill the session if an error occured
-            kill(); // FIXME : Kill is not the right approach.
           }
         }
     );
   }
 
-  void Session::receive_message(const Packet& p,
-                                dispatcher_type callback)
+  void receive_message(std::shared_ptr<Session> s,
+                       const Packet& p,
+                       dispatcher_type callback)
   {
-    async_read(socket_,
-               p.message_seq_get()[0],
-               transfer_exactly(p.size_get()),
-               [this, p, callback](boost::system::error_code ec,
-                                   std::size_t length)
-               {
-                 if (!ec)
-                 {
-                   length_ = length;
-                   auto error = callback(p, *this);
-                   length_ = 0;
-                   if (error == 1)
-                     kill(); // FIXME : Get rid of Kill
-                   else
-                    receive();
-                 }
-                 else
-                 {
-                   utils::Logger::cerr() << "Error: " + ec.message();
-                   kill(); // FIXME : Get rid of Kill
-                 }
-               }
+    async_read(s->socket_get(),
+        p.message_seq_get()[0],
+        transfer_exactly(p.size_get()),
+        [s, p, callback](boost::system::error_code ec,
+                            std::size_t /* length */)
+        {
+          if (!ec)
+          {
+            auto result = callback(p, *s);
+
+            if (result == keep_alive::Yes)
+              receive(s);
+          }
+          else
+          {
+            utils::Logger::cerr() << "[" + std::to_string(s->id_get()) + "] " + "Error: " + ec.message();
+          }
+        }
     );
   }
 
-  void Session::receive()
+  void receive(std::shared_ptr<Session> s)
   {
-    receive(recv_dispatcher_);
+    receive(s, s->dispatcher_get());
   }
 
-  void Session::receive(dispatcher_type callback)
+  void receive(std::shared_ptr<Session> s, dispatcher_type callback)
   {
-    std::ostringstream s;
-    s << std::this_thread::get_id();
-    receive_header(std::bind(&Session::receive_message,
-                             this,
+    std::ostringstream ss;
+    ss << std::this_thread::get_id();
+    receive_header(s, std::bind(receive_message,
+                             s,
                              std::placeholders::_1,
                              std::placeholders::_2),
                    callback
                   );
   }
 
-  void Session::blocking_receive()
+  void blocking_receive(std::shared_ptr<Session> s)
   {
-    blocking_receive(recv_dispatcher_);
+    blocking_receive(s, s->dispatcher_get());
   }
 
-  void Session::blocking_receive(dispatcher_type callback)
+  void blocking_receive(std::shared_ptr<Session> s, dispatcher_type callback)
   {
-    std::ostringstream s;
-    s << std::this_thread::get_id();
+    std::ostringstream ss;
+    ss << std::this_thread::get_id();
 
     std::array<char, sizeof(masks::PACKET_HEADER)> packet_buff;
 
-    read(socket_, boost::asio::buffer(&*packet_buff.begin(), packet_buff.size()));
+    try
+    {
+      read(s->socket_get(), boost::asio::buffer(&*packet_buff.begin(), packet_buff.size()));
+    }
+    catch (std::exception& e)
+    {
+      utils::Logger::cerr() << "[" + std::to_string(s->id_get()) + "] " + "Error while getting size: " + std::string(e.what());
+      return;
+    }
 
     const auto* header =
         reinterpret_cast<const PACKET_HEADER*>(packet_buff.data());
-    utils::Logger::cout() << "Receiving a message of size: "
+    utils::Logger::cout() << "[" + std::to_string(s->id_get()) + "] " + "Receiving a message of size: "
                              + std::to_string(header->size);
     Packet p{header->type.fromto, header->type.what,
              empty_message(header->size)};
-    read(socket_, p.message_seq_get()[0], transfer_exactly(header->size));
-    auto error = callback(p, *this);
-    if (error == 1)
-      kill(); // FIXME : Get rid of Kill
+    try
+    {
+      read(s->socket_get(), p.message_seq_get()[0], transfer_exactly(header->size));
+    }
+    catch (std::exception& e)
+    {
+      utils::Logger::cerr() << "[" + std::to_string(s->id_get()) + "] " + "Error: " + std::string(e.what());
+      return;
+    }
+
+    auto result = callback(p, *s);
+
+    if (result == keep_alive::Yes)
+      blocking_receive(s, callback);
   }
 
-  void Session::send(const Packet& packet)
+
+  void send(std::shared_ptr<Session> s, const Packet& packet)
   {
-    send(packet, send_dispatcher_);
+    send(s, packet, [](auto, auto&){ return keep_alive::No; });
   }
 
-  void Session::send(const Packet& packet, dispatcher_type callback)
+  void send(std::shared_ptr<Session> s, const Packet& packet, dispatcher_type callback)
   {
+    // FIXME : Ugly
     auto p = std::make_shared<Packet>(packet);
     auto& seq = p->message_seq_get();
     seq.insert(seq.begin(), packet.serialize_header());
 
-    async_write(socket_,
+    async_write(s->socket_get(),
         seq,
-        [this, callback, p](boost::system::error_code ec,
-                         std::size_t length)
+        [s, callback, p](boost::system::error_code ec,
+                         std::size_t /* length */)
         {
           if (!ec)
-          {
-            length_ = length;
-            auto error = callback(*p, *this);
-            length_ = 0;
-            if (error == 1)
-              kill(); // FIXME : Get rid of Kill
-            // FIXME : What to do to keep the socket alive?
-          }
+            callback(*p, *s);
           else
-          {
-            utils::Logger::cerr() << "Error while sending: " + ec.message();
-            kill(); // FIXME : Get rid of Kill
-          }
+            utils::Logger::cerr() << "[" + std::to_string(s->id_get()) + "] " + "Error while sending: " + ec.message();
         }
     );
   }
 
-  void Session::blocking_send(const Packet& packet)
+  void blocking_send(std::shared_ptr<Session> s, const Packet& packet)
   {
-    auto seq = packet.message_seq_get();
-    seq.insert(seq.begin(), packet.serialize_header());
-    write(socket_, seq);
-    auto error = send_dispatcher_(packet, *this);
-    if (error == 1)
-      kill(); // FIXME : Get rid of Kill
+    blocking_send(s, packet, [](auto, auto&){ return keep_alive::No; });
   }
 
-  void Session::blocking_send(const Packet& packet, dispatcher_type callback)
+  void blocking_send(std::shared_ptr<Session> s, const Packet& packet, dispatcher_type callback)
   {
     auto seq = packet.message_seq_get();
     seq.insert(seq.begin(), packet.serialize_header());
-    write(socket_, seq);
-    auto error = callback(packet, *this);
-    if (error == 1)
-      kill(); // FIXME : Get rid of Kill
+    try
+    {
+      write(s->socket_get(), seq);
+      callback(packet, *s);
+    }
+    catch (std::exception& e)
+    {
+      utils::Logger::cerr() << "[" + std::to_string(s->id_get()) + "] " + "Error while sending: " + std::string(e.what());
+    }
   }
 
   size_t Session::unique_id()
   {
-    static std::atomic_size_t id;
+    static std::atomic_size_t id{1};
     return id++;
   }
 
-  void Session::kill()
+  void send_ack(Session& session,
+                         const Packet& packet,
+                         enum error_code ack)
   {
-    utils::Logger::cout() << "Closed session";
-    socket_.close(); // Close the socket
-    delete_dispatcher_(*this); // Ask the owner to delete
+    const fromto_type fromto_src = packet.fromto_get();
+
+    const fromto_type fromto_dst = fromto_inverse(fromto_src);
+
+    const masks::ack response{ack};
+    Packet to_send{fromto_dst, ack_w};
+    to_send.add_message(&response, sizeof (response), copy::No);
+    blocking_send(session.ptr(), to_send);
   }
 
-  masks::ack_type
-  Session::send_ack(const Packet& packet, masks::ack_type value, std::string msg)
+  void recv_ack(Session& session)
   {
-    utils::Logger::cerr() << msg;
+    blocking_receive(session.ptr(),
+      [](Packet p, Session&)
+      {
+        CharT* data = p.message_seq_get().front().data();
+        const ack* ack_code = reinterpret_cast<const ack*>(data);
 
-    const fromto_type fromto_src = packet.fromto_get();
-    fromto_type fromto_dst;
-    if (fromto_src == masks::c_m::fromto)
-      fromto_dst = masks::m_c::fromto;
-    else if (fromto_src == masks::m_c::fromto)
-      fromto_dst = masks::c_m::fromto;
-    else if (fromto_src == masks::c_s::fromto)
-      fromto_dst = masks::s_c::fromto;
-    else if (fromto_src == masks::s_c::fromto)
-      fromto_dst = masks::c_s::fromto;
-    else if (fromto_src == masks::s_m::fromto)
-      fromto_dst = masks::m_s::fromto;
-    else if (fromto_src == masks::m_s::fromto)
-      fromto_dst = masks::s_m::fromto;
-    else
-      fromto_dst = fromto_src; // m_m - s_s
+        if (*ack_code != error_code::success)
+        {
+          std::ostringstream ss;
+          ss << "Error : " << (int)*ack_code;
+          throw std::logic_error(ss.str());
+        }
 
-    const m_c::ack response{value};
-    Packet to_send{fromto_dst, m_c::ack_w};
-    to_send.add_message(&response, sizeof (m_c::ack),
-                        utils::shared_buffer::copy::Yes);
-    this->blocking_send(to_send);
-    return value > 0 ? 1 : 0;
+        return keep_alive::No;
+      }
+    );
   }
 }

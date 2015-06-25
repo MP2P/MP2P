@@ -1,3 +1,8 @@
+#include <utils.hh>
+
+#include <sstream>
+#include <ostream>
+
 namespace utils
 {
   namespace misc
@@ -20,7 +25,6 @@ namespace utils
       }
       return o;
     }
-
 
     template <class C, typename S>
     inline Separator<C, S>

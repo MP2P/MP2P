@@ -1,7 +1,6 @@
 #include <utils.hh>
 #include "client.hh"
 
-
 int main(int argc, const char *argv[])
 {
   using namespace client; // Use this namespace inside the function only

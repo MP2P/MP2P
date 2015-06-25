@@ -1,13 +1,15 @@
 #include "storage.hh"
 #include <masks/messages.hh>
 
+#include <fstream>
+
 namespace storage
 {
   using namespace network;
   using namespace network::masks;
   using copy = utils::shared_buffer::copy;
 
-  network::masks::ack_type
+  network::keep_alive
   cs_up_act(network::Packet& packet, network::Session& session)
   {
     CharT* data = packet.message_seq_get().front().data();
@@ -25,19 +27,11 @@ namespace storage
       // Compute the hash of the received buffer
       auto hash = files::hash_buffer_hex(part->data,
                                      packet.size_get() - sizeof (c_s::up_act));
-      //FIXME: send a s_c_ack error to the client.
-      // If the hash is not correct, send a s_c_fail_sha1 to the client
-      // and kill the connection
+      // If the hash is not correct, send an error to the client
+      // and kills the connection
       if(memcmp(hash.data(), part->sha1, 20))
-      {
-        utils::Logger::cerr() << "Hash failed for " + fid_partnum;
-        //FIXME
-        Packet p{s_c::fromto, s_c::ack_w};
-        p.add_message(&part->partid, sizeof (PARTID), copy::No);
-        // FIXME : Use an async_send, but close the session only after the async_send
-        session.blocking_send(p);
-        return 1;
-      }
+        return send_error(session, packet, error_code::hash_failed,
+                          "Hash failed for " + fid_partnum);
     }
 
     // Save the file to disk
@@ -47,20 +41,24 @@ namespace storage
 
     file.write(part->data, packet.size_get() - sizeof (c_s::up_act));
 
-    auto master_session = Session{session.socket_get().get_io_service(),
+    // First, ACK the master that the file has been received
+    auto master_session = Session::create(session.socket_get().get_io_service(),
                                   conf.master_hostname,
-                                  conf.master_port};
+                                  conf.master_port);
 
     utils::Logger::cout() << "Acknoledging master for " + fid_partnum;
     Packet p{s_m::fromto, s_m::part_ack_w};
     const s_m::part_ack response{Storage::id, part->partid, 10};
     p.add_message(&response, sizeof (s_m::part_ack), copy::Yes);
-    master_session.send(p);
+    send(master_session, p);
 
-    return 0;
+    // Then, ACK the client as well
+    send_ack(session, packet, error_code::success);
+
+    return keep_alive::Yes;
   }
 
-  network::masks::ack_type
+  network::keep_alive
   cs_down_act(network::Packet& packet, network::Session& session)
   {
     CharT* data = packet.message_seq_get().front().data();
@@ -81,7 +79,14 @@ namespace storage
     p.add_message(hash.data(), hash.size(), copy::No);
     // Add the data
     p.add_message(part.data(), part.size(), copy::No);
-    session.blocking_send(p);
-    return 0;
+
+    utils::Logger::cout() << "[" + std::to_string(session.id_get()) + "] "
+                             "Sending part";
+
+    blocking_send(session.ptr(), p);
+
+    recv_ack(session); // Throws if an error occurs
+
+    return keep_alive::No;
   }
 }

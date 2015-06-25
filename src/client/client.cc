@@ -11,16 +11,26 @@ namespace client
   using namespace utils;
   using copy = utils::shared_buffer::copy;
 
+  namespace
+  {
+    void process_error(const Packet& p, std::string from)
+    {
+      const CharT* data = p.message_seq_get().front().data();
+      const ack* ack_code = reinterpret_cast<const ack*>(data);
+
+      // FIXME : Error message
+      std::ostringstream ss;
+      ss << "Error received from " << from << " : " << (int)*ack_code;
+
+      throw std::logic_error(ss.str());
+    }
+  }
+
   Client::Client(const std::string& host, uint16_t port)
-    : master_session_{io_service_, host, port}
+    : master_session_{Session::create(io_service_, host, port)}
   {
     // Run the network service, right away
     io_service_.run();
-  }
-
-  Client::~Client()
-  {
-    end_all_tasks();
   }
 
   void
@@ -42,15 +52,14 @@ namespace client
 
     Packet req_packet{0, 1};
     req_packet.add_message(&request, sizeof (request), copy::No);
-
     req_packet.add_message(fname.c_str(), fname.size(), copy::No);
-    master_session_.blocking_send(req_packet);
+    blocking_send(master_session_, req_packet);
 
-    master_session_.blocking_receive(
-        [&file, this](Packet p, Session& /*recv_session*/) -> ack_type
+    blocking_receive(master_session_,
+        [&file, this](Packet p, Session& /*recv_session*/)
         {
           if (p.what_get() == 0)
-            throw std::logic_error("Error received from Master");
+            process_error(p, "master");
 
           CharT* data = p.message_seq_get().front().data();
           m_c::up_pieces_loc* pieces = reinterpret_cast<m_c::up_pieces_loc*>(data);
@@ -74,6 +83,7 @@ namespace client
 
           size_t parts = total_parts;
 
+          utils::Logger::cout() << "Upload started...";
           auto begin = std::chrono::steady_clock::now();
           for (size_t i = 0; i < list_size; ++i)
           {
@@ -90,8 +100,6 @@ namespace client
             parts -= field.nb;
           }
 
-          utils::Logger::cout() << "Upload started...";
-
           end_all_tasks();
 
           auto end = std::chrono::steady_clock::now();
@@ -104,7 +112,7 @@ namespace client
                                    + boost::lexical_cast<std::string>(file.size() / duration)
                                    + "Kio/s).";
 
-          return 0;
+          return keep_alive::No;
         });
   }
 
@@ -121,7 +129,7 @@ namespace client
         auto host = network::binary_to_string_ipv6(addr.ipv6,
                                                    network::masks::ipv6_type_size);
         // Create the storage session
-        Session storage{io_service_, host, addr.port};
+        auto storage = Session::create(io_service_, host, addr.port);
 
         // For each part to send, create a Packet and send it synchronously
         for (size_t i = begin_id; i < end_id; ++i)
@@ -145,7 +153,13 @@ namespace client
           // FIXME : part_size may not fit in uint32_t
           to_send.add_message(part_buffer, part_size, copy::No);
 
-          storage.blocking_send(to_send);
+          utils::Logger::cout() << "[" + std::to_string(storage->id_get()) + "] " + "Sending part to storage";
+
+          blocking_send(storage, to_send);
+
+          recv_ack(*storage);
+
+          utils::Logger::cout() << "[" + std::to_string(storage->id_get()) + "] " + "Storage received part";
         }
     };
   }
@@ -158,19 +172,17 @@ namespace client
     Packet request{c_m::fromto, c_m::down_req_w};
     request.add_message(filename.c_str(), filename.size(), copy::No);
 
-    utils::Logger::cout() << "Requesting file " + filename + " to master.";
-    master_session_.blocking_send(request);
+    utils::Logger::cout() << "[" + std::to_string(master_session_->id_get()) + "] " + "Requesting file " + filename + " to master.";
+    blocking_send(master_session_, request);
 
     // Wait for an answer from the master, then download all parts from storages
-    master_session_.blocking_receive(
-        [&filename, this](Packet p, Session& /*recv_session*/) -> ack_type
+    blocking_receive(master_session_,
+        [&filename, this](Packet p, Session& /*recv_session*/)
         {
-          CharT* data = p.message_seq_get().front().data();
-
           if (p.what_get() == 0)
-            throw std::logic_error("Master returned error: "
-                                   "File " + filename + " does not exists.");
+            process_error(p, "master");
 
+          CharT* data = p.message_seq_get().front().data();
           m_c::down_pieces_loc* pieces = reinterpret_cast<m_c::down_pieces_loc*>(data);
 
           // Get the number of STPFIELDS
@@ -178,10 +190,10 @@ namespace client
                               - sizeof (fid_type) - sizeof (fsize_type))
                              / sizeof (STPFIELD);
 
-          std::cout << "list_size = " + std::to_string(list_size) << std::endl;
+          utils::Logger::cout() << "list_size = " + std::to_string(list_size);
 
-          // list_size == 0 shouldn't happen.
-          assert(list_size);
+          if (list_size == 0) // FIXME : Find one way to treat errors the same
+            throw std::logic_error("Invalid packet from master");
 
           // Get the size of a part
           auto part_size = pieces->fsize / list_size;
@@ -192,7 +204,6 @@ namespace client
           // Create an empty file, resized to the size of the expected file
           auto file = files::File::create_empty_file(filename + "-dl",
                                                      pieces->fsize);
-
 
           for (size_t i = 0; i < list_size; ++i)
           {
@@ -207,9 +218,10 @@ namespace client
                                 part_size))
             );
           }
+
           end_all_tasks();
 
-          return 0;
+          return keep_alive::No;
         });
   }
 
@@ -230,16 +242,16 @@ namespace client
                                + ":" + std::to_string(addr.port) + ".";
 
       // Create the storage session
-      Session storage{io_service_, host, addr.port};
+      auto storage = Session::create(io_service_, host, addr.port);
 
       Packet to_send{c_s::fromto, c_s::down_act_w};
       to_send.add_message(&partid, sizeof (PARTID), copy::No);
 
-      storage.blocking_send(to_send);
+      blocking_send(storage, to_send);
 
       // Receive a part
-      storage.blocking_receive(
-          [&file, part_size](Packet p, Session&) -> ack_type
+      blocking_receive(storage,
+          [&file, part_size](Packet p, Session& session)
           {
             CharT* data = p.message_seq_get().front().data();
             s_c::up_act* upload = reinterpret_cast<s_c::up_act*>(data);
@@ -248,7 +260,11 @@ namespace client
             memcpy(file.data() + upload->partid.partnum * part_size,
                    upload->data,
                    p.size_get() - sizeof (PARTID) - sizeof (sha1_type));
-            return 0;
+
+            // Send ack if the file is received correctly
+            send_ack(session, p, error_code::success);
+
+            return keep_alive::No;
           }
       );
     };

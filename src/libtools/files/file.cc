@@ -1,26 +1,20 @@
-#include <sys/mman.h>
+#include "files.hh"
+
 #include <iomanip>
 #include <sstream>
-#include <openssl/sha.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdexcept>
-#include <unistd.h>
 #include <cmath>
-#include <ios>
-#include <boost/filesystem.hpp>
 #include <array>
+
+#include <boost/filesystem.hpp>
+#include <openssl/sha.h>
 
 // Apple deprecated OpenSSL and provides its own
 // library called CommonCrypto. Use it to avoid warnings on
 // deprecated functions.
 #ifdef __APPLE__
-#define COMMON_DIGEST_FOR_OPENSSL
-#include <CommonCrypto/CommonDigest.h>
+# define COMMON_DIGEST_FOR_OPENSSL
+# include <CommonCrypto/CommonDigest.h>
 #endif
-
-#include "files.hh"
 
 namespace files
 {
@@ -53,8 +47,6 @@ namespace files
     }
   }
 
-  using namespace boost::filesystem;
-
   File::File(const std::string& filepath)
     : filepath_{filepath}
   {
@@ -75,6 +67,17 @@ namespace files
 
     // Map the file
     file_ = boost::iostreams::mapped_file{params};
+
+
+    // Fix permissions added by boost::mapped_file.
+    // 644 should be the right ones.
+
+    using p = boost::filesystem::perms;
+    auto permissions = p::owner_read | p::group_read | p::others_read
+                       | p::owner_write;
+
+    // Set the permissions
+    boost::filesystem::permissions(filename, permissions);
   }
 
   File File::create_empty_file(const std::string& filename, size_t size)
@@ -87,7 +90,7 @@ namespace files
     auto hash = hash_buffer_hex(sbuff, size);
 
     // Create a string using the hash
-    std::stringstream result;
+    std::ostringstream result;
     for (int i = 0; i < 20; ++i)
       result << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
 

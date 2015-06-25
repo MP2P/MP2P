@@ -1,11 +1,9 @@
 #pragma once
 
-#include <ostream>
+#include <iostream>
 #include <string>
-#include <mutex>
 #include <thread>
 #include "concurentqueue.hh"
-#include "boost/date_time/posix_time/posix_time.hpp"
 
 //#define DEBUG true
 
@@ -18,17 +16,18 @@ namespace infos
 
 namespace utils
 {
-  /*--------.
-  | init.cc |
-  `--------*/
+  /*-----.
+  | Init |
+  `-----*/
+
   // Functions throwing exceptions if something goes bad
   void check_system();
   void init();
 
+  /*------.
+  | Color |
+  `------*/
 
-  /*---------.
-  | color.cc |
-  `---------*/
   namespace color
   {
     std::ostream& w(std::ostream& o = std::cout);
@@ -40,30 +39,28 @@ namespace utils
     std::ostream& p(std::ostream& o = std::cout);
   }
 
-
-  /*----------.
-  | logger.cc |
-  `----------*/
+  /*-------.
+  | Logger |
+  `-------*/
 
   class Active
   {
     public:
-      typedef std::function<void()> Message;
+      using Message = std::function<void()>;
 
       Active();
       ~Active();
+      Active(const Active&) = delete;
+      void operator=(const Active&) = delete;
 
       void Send(Message m);
 
     private:
-      Active(const Active&) = delete;
-      void operator=(const Active&) = delete;
-
       void Run();
 
       bool done_;
       moodycamel::ConcurrentQueue<Message> mq_;
-      std::unique_ptr<std::thread> thd_;
+      std::thread thd_;
   };
 
   class Logger

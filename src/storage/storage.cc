@@ -1,8 +1,9 @@
-#include <iostream>
-
-#include <utils.hh>
 #include "storage.hh"
+#include <utils.hh>
 #include <masks/messages.hh>
+
+#include <iostream>
+#include <fstream>
 
 namespace storage
 {
@@ -19,8 +20,6 @@ namespace storage
       : server_{get_ipv6(storage::conf.hostname), storage::conf.port,
                 io_service_,
                 std::bind(&Storage::recv_dispatcher, this,
-                          std::placeholders::_1, std::placeholders::_2),
-                std::bind(&Storage::send_dispatcher, this,
                           std::placeholders::_1, std::placeholders::_2)}
   {
     utils::Logger::cout() << "Concurency level = "
@@ -94,17 +93,17 @@ namespace storage
     if (!id_file)
     {
 
-      auto master_session = Session{io_service_,
-                                    conf.master_hostname,
-                                    conf.master_port};
+      auto master_session = Session::create(io_service_,
+                                            conf.master_hostname,
+                                            conf.master_port);
 
       // Send a request for an id
       s_m::id_req req{storage::conf.port, (avspace_type)Storage::space_available()};
       Packet to_send{s_m::fromto, s_m::id_req_w};
       to_send.add_message(&req, sizeof (s_m::id_req), copy::No);
-      master_session.send(to_send);
+      send(master_session, to_send);
 
-      master_session.blocking_receive(
+      blocking_receive(master_session,
           [this](Packet p, Session&)
           {
             const CharT* data = p.message_seq_get().front().data();
@@ -114,13 +113,9 @@ namespace storage
             std::ofstream id_file(storage::conf.id_path);
             id_file << response->stid;
 
-            return 1;
+            return keep_alive::No;
           }
       );
-
-      // The io_service is ran after the IO operations have been "commited"
-      io_service_.run();
-
     }
     else
       id_file >> id;
@@ -150,11 +145,16 @@ namespace storage
 
   // Handle the session after filling the buffer
   // Errors are defined in the ressources/errors file.
-  masks::ack_type
+  keep_alive
   Storage::recv_dispatcher(Packet packet, Session& session)
   {
     if (packet.size_get() < 1)
-      return 1;
+      return send_error(session, packet, error_code::invalid_packet,
+                        "Recieved an invalid packet");
+
+    // FIXME : Customize for handlers. For now, no action is required
+    if (packet.what_get() == ack_w)
+      return keep_alive::No;
 
     switch (packet.fromto_get())
     {
@@ -166,23 +166,27 @@ namespace storage
           case c_s::down_act_w:
             return cs_down_act(packet, session);
           default:
-            return 1;
+            break;
         }
       default:
-        return 100; // Error
+        break;
     }
-  }
 
-  masks::ack_type
-  Storage::send_dispatcher(Packet packet, Session& session)
-  {
-    (void)packet;
-    (void)session;
-    return 0;
+    return keep_alive::No;
   }
 
   uint64_t Storage::space_available()
   {
     return boost::filesystem::space(storage::conf.storage_path).available;
+  }
+
+  network::keep_alive send_error(network::Session& session,
+                                 const Packet& p,
+                                 enum network::error_code error,
+                                 std::string msg)
+  {
+    utils::Logger::cerr() << msg;
+    send_ack(session, p, error);
+    return keep_alive::No;
   }
 }

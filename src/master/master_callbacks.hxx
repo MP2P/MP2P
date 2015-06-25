@@ -3,9 +3,10 @@
 namespace master
 {
   using copy = utils::shared_buffer::copy;
+  using namespace network;
 
   // May I upload a file?
-  inline masks::ack_type
+  inline keep_alive
   cm_up_req(Packet& packet, Session& session)
   {
     const c_m::up_req* req = reinterpret_cast<c_m::up_req*>
@@ -18,7 +19,7 @@ namespace master
     );
 
     auto fi = DB::FileItem(0, fname, req->fsize, req->rdcy, 0,
-                           "                    ", 0, {});
+                           "                    ", 0, {}); // FIXME : Hash me maybe ?
 
     utils::Logger::cerr() << "Request to upload file " + fi.name_get()
                              + " of size " + std::to_string(fi.file_size_get()) + ".";
@@ -26,18 +27,19 @@ namespace master
     // Compute the number of parts.
     uint32_t nb_parts = DB::tools::number_of_parts(fi.file_size_get());
     if (nb_parts == 0)
-      return session.send_ack(packet, 1, "Add some storages so that clients can"
-                                         " upload!");
+      return send_error(session, packet, error_code::missing_storage,
+                        "Add some storages so that clients can upload!");
 
     // Compute STPFIELD(s) depending on file parts.
     std::vector<STPFIELD> fields = DB::tools::get_stpfields_for_upload(fi.file_size_get());
 
     if (fields.size() < fi.redundancy_get())
-      return session.send_ack(packet, 11, "Client is asking for a redundancy of "
-                                         + std::to_string(fi.redundancy_get())
-                                         + " but there is only "
-                                         + std::to_string(fields.size())
-                                         + " storages available.");
+      return send_error(session, packet, error_code::redundancy,
+                        "Client is asking for a redundancy of "
+                         + std::to_string(fi.redundancy_get())
+                         + " but there is only "
+                         + std::to_string(fields.size())
+                         + " storages available.");
 
     // After all checks, we can now create the file in DB
     DB::tools::create_new_file(fi);
@@ -58,13 +60,13 @@ namespace master
                          copy::Yes);
 
     utils::Logger::cout() << "Responding with m_c::pieces_loc answers for " + fname;
-    session.blocking_send(response);
+    blocking_send(session.ptr(), response);
 
-    return 0;
+    return keep_alive::No;
   }
 
   // May I download this file?
-  inline masks::ack_type
+  inline keep_alive
   cm_down_req(Packet& packet, Session& session)
   {
     const c_m::down_req* req = reinterpret_cast<c_m::down_req*>
@@ -81,7 +83,8 @@ namespace master
     }
     catch (std::logic_error)
     {
-      return session.send_ack(packet, 3, "File " + fname + " does not exists.");
+      return send_error(session, packet, error_code::file_not_found,
+                        "File " + fname + " does not exist.");
     }
 
     DB::FileItem fi = DB::FileItem::deserialize(json);
@@ -94,8 +97,9 @@ namespace master
     for (auto part = fi.parts_get().begin();  part != fi.parts_get().end(); ++part)
     {
       if (part->locations_get().size() == 0)
-        return session.send_ack(packet, 1, "File is not complete on our servers"
-                                           " (wait for full upload).");
+        return send_error(session, packet, error_code::incomplete_file,
+                          "File is not complete on our"
+                          "servers (wait for full upload).");
 
       // For each location of the part
       ADDR addr;
@@ -130,19 +134,17 @@ namespace master
     response.add_message(&*fields.begin(),
                          fields.size() * sizeof (STPFIELD),
                          copy::Yes);
-    session.blocking_send(response);
+    blocking_send(session.ptr(), response);
 
-    return 0;
+    return keep_alive::No;
   }
 
   // Can you delete this file?
-  inline masks::ack_type
+  inline keep_alive
   cm_del_req(Packet& packet, Session& session)
   {
     const c_m::del_req* req = reinterpret_cast<c_m::del_req*>
         (packet.message_seq_get().front().data());
-
-
 
     std::string fname(req->fname, packet.size_get());
 
@@ -155,7 +157,8 @@ namespace master
     }
     catch (std::logic_error&)
     {
-      return session.send_ack(packet, 3,"File " + fname + " does not exists.");
+      return send_error(session, packet, error_code::file_not_found,
+                        "File " + fname + " does not exist.");
     }
 
     DB::FileItem fi = DB::FileItem::deserialize(json);
@@ -166,8 +169,9 @@ namespace master
     for (auto part = fi.parts_get().begin();  part != fi.parts_get().end(); ++part)
     {
       if (part->locations_get().size() == 0)
-        return session.send_ack(packet, 1, "File is not complete on our servers"
-                                           " (wait for full upload).");
+        return send_error(session, packet, error_code::incomplete_file,
+                          "File is not complete on our"
+                          "servers (wait for full upload).");
 
       // For each location of the part
       ADDR addr;
@@ -194,17 +198,18 @@ namespace master
       //FIXME: Where do you send this?
       Packet response{m_s::fromto, m_s::del_act_w};
       //response.add_message(part->num_get(), sizeof (partnum_type), copy::Yes);
-      session.blocking_send(response);
+      blocking_send(session.ptr(), response);
     }
 
-    return 0;
+    return keep_alive::No;
   }
 
 
+  // FIXME : ...
   static std::mutex mutex_part_ack;
 
   // Part successfully received!
-  inline masks::ack_type
+  inline keep_alive
   sm_part_ack(Packet& packet, Session& session)
   {
     std::lock_guard<std::mutex> lock(mutex_part_ack);
@@ -236,10 +241,8 @@ namespace master
 
     if (it->locations_get().size() >= fi.redundancy_get()) // >= -> Why not?
     {
-      const m_s::ack response{0};
-      Packet to_send{m_s::fromto, m_s::ack_w};
-      to_send.add_message(&response, sizeof (m_s::ack), copy::Yes);
-      session.blocking_send(to_send);
+      send_ack(session, packet, error_code::success);
+      return keep_alive::No;
     }
     else // Replication request
     {
@@ -256,16 +259,17 @@ namespace master
           const m_s::part_loc response{req->partid, st.addr_get()};
           Packet to_send{m_s::fromto, m_s::part_loc_w};
           to_send.add_message(&response, sizeof(m_s::part_loc), copy::Yes);
-          session.blocking_send(to_send);
+          blocking_send(session.ptr(), to_send);
           break;
         }
       }
     }
-    return 1;
+
+    return keep_alive::No;
   }
 
   // A new storage poped, and he wants a unique id
-  inline masks::ack_type
+  inline keep_alive
   sm_id_req(Packet& packet, Session& session)
   {
     const CharT* data = packet.message_seq_get().front().data();
@@ -286,8 +290,8 @@ namespace master
     const m_s::fid_info response{si.id_get()};
     Packet to_send{m_s::fromto, m_s::fid_info_w};
     to_send.add_message(&response, sizeof (m_s::fid_info), copy::Yes);
-    session.blocking_send(to_send);
+    blocking_send(session.ptr(), to_send);
 
-    return 1; // Close the connection
+    return keep_alive::No;
   }
 }

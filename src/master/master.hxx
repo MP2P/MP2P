@@ -10,8 +10,8 @@ namespace master
   Master::Master()
       : server_{get_ipv6(master::conf.hostname), master::conf.port,
                 io_service_,
-                std::bind(&Master::recv_dispatcher, this, std::placeholders::_1, std::placeholders::_2),
-                std::bind(&Master::send_dispatcher, this, std::placeholders::_1, std::placeholders::_2)}
+                std::bind(&Master::recv_dispatcher, this,
+                          std::placeholders::_1, std::placeholders::_2)}
   {
     utils::Logger::cout() << "Concurency level = " + std::to_string(master::conf.concurrency);
     utils::Logger::cout() << "Bind port = " + std::to_string(master::conf.port);
@@ -95,19 +95,22 @@ namespace master
 
   // Handle the session after filling the buffer
   // Errors are defined in the ressources/errors file.
-  inline masks::ack_type
+  inline keep_alive
   Master::recv_dispatcher(Packet packet, Session& session)
   {
     if (packet.size_get() < 1)
-      return 1;
+      return send_error(session, packet, error_code::invalid_packet,
+                        "Recieved an invalid packet");
+
+    // FIXME : Customize for handlers. For now, no action is required
+    if (packet.what_get() == ack_w)
+      return keep_alive::No;
 
     switch (packet.fromto_get())
     {
       case c_m::fromto:
         switch (packet.what_get())
         {
-          case c_m::ack_w:
-            return 2; //FIXME
           case c_m::up_req_w:
             return cm_up_req(packet, session);
           case c_m::down_req_w:
@@ -115,36 +118,38 @@ namespace master
           case c_m::del_req_w:
             return cm_del_req(packet, session);
           default:
-            return 3; //FIXME
+            break;
         }
       case s_m::fromto:
         switch (packet.what_get())
         {
-          case s_m::ack_w:
-            return 4; //FIXME
           case s_m::part_ack_w:
             return sm_part_ack(packet, session);
           case s_m::id_req_w:
             return sm_id_req(packet, session);
           default:
-            return 5; //FIXME
+            break;
         }
       case m_m::fromto:
         switch (packet.what_get())
         {
           default:
-            return 6; //FIXME
+            break;
         }
       default:
-        return 1; // Error
+        break;
     }
+
+    return keep_alive::No;
   }
 
-  inline masks::ack_type
-  Master::send_dispatcher(Packet packet, Session& session)
+  network::keep_alive send_error(network::Session& session,
+                                 const Packet& p,
+                                 enum network::error_code error,
+                                 std::string msg)
   {
-    (void)session;
-    (void)packet;
-    return 0;
+    utils::Logger::cerr() << msg;
+    send_ack(session, p, error);
+    return keep_alive::No;
   }
 }

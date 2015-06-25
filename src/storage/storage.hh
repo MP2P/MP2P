@@ -1,13 +1,17 @@
 #pragma once
 
+#include <network.hh>
+
 #include <thread>
 #include <vector>
 #include <boost/asio.hpp>
 
-#include <network.hh>
-
 namespace storage
 {
+  /*--------.
+  | Options |
+  `--------*/
+
   struct Conf
   {
     std::string config_path;
@@ -26,6 +30,10 @@ namespace storage
 
   void parse_options(int argc, const char *argv[]);
 
+  /*--------.
+  | Storage |
+  `---------*/
+
   class Storage
   {
   public:
@@ -35,9 +43,7 @@ namespace storage
     network::Server server_;
     std::vector<std::thread> threads_;
 
-    network::masks::ack_type recv_dispatcher(network::Packet packet,
-                                        network::Session& session);
-    network::masks::ack_type send_dispatcher(network::Packet packet,
+    network::keep_alive recv_dispatcher(network::Packet packet,
                                         network::Session& session);
 
     // Causes the server to stop its running threads if any.
@@ -59,10 +65,16 @@ namespace storage
     static uint64_t space_available();
   };
 
-  network::masks::ack_type cs_up_act(network::Packet& packet,
+  // Send an error and log it
+  network::keep_alive send_error(network::Session& session,
+                                 const network::Packet& p,
+                                 enum network::error_code error,
+                                 std::string msg = "Unknown error occured.");
+
+  network::keep_alive cs_up_act(network::Packet& packet,
                                 network::Session& session);
 
-  network::masks::ack_type cs_down_act(network::Packet& packet,
+  network::keep_alive cs_down_act(network::Packet& packet,
                                   network::Session& session);
 
 }
