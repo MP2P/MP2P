@@ -4,6 +4,12 @@
 
 namespace network
 {
+
+  inline std::shared_ptr<Session> Session::ptr()
+  {
+    return shared_from_this();
+  }
+
   inline boost::asio::ip::tcp::socket& Session::socket_get()
   {
     return socket_;

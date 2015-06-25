@@ -136,7 +136,7 @@ namespace network
 
   using dispatcher_type = std::function<keep_alive(Packet, Session&)>;
 
-  class Session
+  class Session : std::enable_shared_from_this<Session>
   {
 
   public:
@@ -170,6 +170,8 @@ namespace network
 
     // Kill the session. Close the socket and remove from parent container
     void kill();
+
+    std::shared_ptr<Session> ptr();
 
     // Get the corresponding socket
     boost::asio::ip::tcp::socket& socket_get();
@@ -214,20 +216,24 @@ namespace network
     // It's using an atomic integer
     static size_t unique_id();
 
-  private:
+  //private:
+    public:
     // The socket opened for communication
     boost::asio::ip::tcp::socket socket_;
 
     // The array containing the header of the packet
+    // FIXME : Why is it part of the session ?
     std::array<char, sizeof (masks::PACKET_HEADER)> buff_;
 
     // The length of the last received message
+    // FIXME : USeless
     size_t length_;
 
     // The dispatcher to call right after a complete recieve
     dispatcher_type recv_dispatcher_;
 
     // The function to call to remove this session from the parent container
+    // FIXME : Remove if there are no more containers
     std::function<void(Session&)> delete_dispatcher_;
 
     // The unique id of the session
@@ -238,13 +244,50 @@ namespace network
     // and a message size
     void receive_header(std::function<void(const Packet&,
                                            dispatcher_type)> receive_body,
-                                           dispatcher_type callback);
+                        dispatcher_type callback);
 
     // Recieve the message according to the packet
     void receive_message(const Packet& p, dispatcher_type dispatcher);
 
     
   };
+
+  // Recieve the header, then call the callback with a packet
+  // and a message size
+  void receive_header(std::shared_ptr<Session> s,
+                      std::function<void(const Packet&,
+                                         dispatcher_type)> receive_body,
+                      dispatcher_type callback);
+
+  // Recieve the message according to the packet
+  void receive_message(std::shared_ptr<Session> s,
+                       const Packet& p,
+                       dispatcher_type dispatcher);
+
+  // Recieve a header, then the data according to the header
+  void receive(std::shared_ptr<Session> s);
+
+  // Receive a header, treat the packet inside a lambda function
+  void receive(std::shared_ptr<Session> s, dispatcher_type callback);
+
+  // Same as receive, but blocking
+  void blocking_receive(std::shared_ptr<Session> s);
+
+  // Same as receive, but blocking
+  void blocking_receive(std::shared_ptr<Session> s, dispatcher_type callback);
+
+  // Send a packet
+  void send(std::shared_ptr<Session> s, const Packet& packet);
+
+  // Send a packet
+  void send(std::shared_ptr<Session> s, const Packet& packet, dispatcher_type callback);
+
+  // This operation is blocking. It's using a synchronous send
+  void blocking_send(std::shared_ptr<Session> s, const Packet& packet);
+
+  // Send a packet using a custom dispatcher
+  void blocking_send(std::shared_ptr<Session> s, const Packet& packet, dispatcher_type callback);
+
 
   // Compare two Sessions according to their id
   bool operator==(const Session& lhs, const Session& rhs);
