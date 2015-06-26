@@ -114,7 +114,7 @@ namespace storage
             std::ofstream id_file(storage::conf.id_path);
             id_file << response->stid;
 
-            return 1;
+            return std::make_pair(error_code::success, keep_alive::yes);
           }
       );
 
@@ -150,11 +150,11 @@ namespace storage
 
   // Handle the session after filling the buffer
   // Errors are defined in the ressources/errors file.
-  masks::ack_type
+  ack_type
   Storage::recv_dispatcher(Packet packet, Session& session)
   {
     if (packet.size_get() < 1)
-      return 1;
+      return std::make_pair(error_code::error, keep_alive::no);
 
     switch (packet.fromto_get())
     {
@@ -166,19 +166,19 @@ namespace storage
           case c_s::down_act_w:
             return cs_down_act(packet, session);
           default:
-            return 1;
+            return std::make_pair(error_code::error, keep_alive::no); // FIXME
         }
       default:
-        return 100; // Error
+        return std::make_pair(error_code::error, keep_alive::no); // FIXME
     }
   }
 
-  masks::ack_type
+  ack_type
   Storage::send_dispatcher(Packet packet, Session& session)
   {
     (void)packet;
     (void)session;
-    return 0;
+    return std::make_pair(error_code::success, keep_alive::yes); // FIXME
   }
 
   uint64_t Storage::space_available()

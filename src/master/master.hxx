@@ -95,11 +95,11 @@ namespace master
 
   // Handle the session after filling the buffer
   // Errors are defined in the ressources/errors file.
-  inline masks::ack_type
+  inline ack_type
   Master::recv_dispatcher(Packet packet, Session& session)
   {
     if (packet.size_get() < 1)
-      return 1;
+      return std::make_pair(error_code::error, keep_alive::no);
 
     switch (packet.fromto_get())
     {
@@ -107,7 +107,7 @@ namespace master
         switch (packet.what_get())
         {
           case c_m::ack_w:
-            return 2; //FIXME
+            return std::make_pair(error_code::error, keep_alive::no); // FIXME
           case c_m::up_req_w:
             return cm_up_req(packet, session);
           case c_m::down_req_w:
@@ -115,36 +115,36 @@ namespace master
           case c_m::del_req_w:
             return cm_del_req(packet, session);
           default:
-            return 3; //FIXME
+            return std::make_pair(error_code::error, keep_alive::no); // FIXME
         }
       case s_m::fromto:
         switch (packet.what_get())
         {
           case s_m::ack_w:
-            return 4; //FIXME
+            return std::make_pair(error_code::error, keep_alive::no); // FIXME
           case s_m::part_ack_w:
             return sm_part_ack(packet, session);
           case s_m::id_req_w:
             return sm_id_req(packet, session);
           default:
-            return 5; //FIXME
+            return std::make_pair(error_code::error, keep_alive::no); // FIXME
         }
       case m_m::fromto:
         switch (packet.what_get())
         {
           default:
-            return 6; //FIXME
+            return std::make_pair(error_code::error, keep_alive::no); // FIXME
         }
       default:
-        return 1; // Error
+        return std::make_pair(error_code::error, keep_alive::no);
     }
   }
 
-  inline masks::ack_type
+  inline ack_type
   Master::send_dispatcher(Packet packet, Session& session)
   {
     (void)session;
     (void)packet;
-    return 0;
+    return std::make_pair(error_code::success, keep_alive::yes);
   }
 }
