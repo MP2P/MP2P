@@ -15,9 +15,37 @@
 
 namespace network
 {
+  // Error codes according to the protocol
+  enum class error_code : uint8_t
+  {
+    success = 0,
+    error = 1
+  };
+
+  // Keep the connection alive
+  enum class keep_alive
+  {
+    yes,
+    no
+  };
+
+  using ack_type = std::pair<error_code, keep_alive>;
+
+  // Used for std::get from ack_type
+  // Example: std::get<error_code>(ack)
+  // Results in a more verbose and documented code
+  enum ack_result
+  {
+    error_code = 0,
+    keep_alive = 1
+  };
+
   /*----------.
   | packet.cc |
   `----------*/
+
+  class Session;
+
   class Packet
   {
 
@@ -92,7 +120,15 @@ namespace network
   private:
     masks::PACKET_HEADER header_;
     message_container message_seq_;
+
   };
+
+  // FromTo to ToFrom
+  masks::fromto_type fromto_inverse(masks::fromto_type fromto);
+
+  // Send acknowledge (error, or not) to the session according
+  // to the packet's header
+  void send_ack(Session& session, const Packet& packet, ack_type ack);
 
   // Create an empty message of a precise type.
   masks::message_type empty_message(masks::size_type size);
@@ -100,9 +136,8 @@ namespace network
   // Print a packet's header on an output stream
   std::ostream& operator<<(std::ostream& output, const Packet& packet);
 
-  class Session;
 
-  using dispatcher_type = std::function<masks::ack_type(Packet, Session&)>;
+  using dispatcher_type = std::function<ack_type(Packet, Session&)>;
 
   /*-----------.
   | session.cc |
@@ -127,9 +162,11 @@ namespace network
             const std::string& host,
             uint16_t port,
             dispatcher_type recv_dispatcher
-              = [](Packet, Session&) -> masks::ack_type { return 0; },
+              = [](Packet, Session&) -> ack_type
+              { return std::make_pair(error_code::success, keep_alive::yes); },
             dispatcher_type send_dispatcher
-              = [](Packet, Session&) -> masks::ack_type { return 0; },
+              = [](Packet, Session&) -> ack_type
+              { return std::make_pair(error_code::success, keep_alive::yes); },
             std::function<void(Session&)> delete_dispatcher
               = [](Session&) { },
             size_t id = unique_id());
@@ -176,9 +213,6 @@ namespace network
     // Send a packet using a custom dispatcher
     void blocking_send(const Packet& packet, dispatcher_type callback);
 
-    masks::ack_type send_ack(const Packet& packet, masks::ack_type value,
-                             std::string msg);
-
     // Creates an unique id for a socket.
     // It's using an atomic integer
     static size_t unique_id();
@@ -210,7 +244,7 @@ namespace network
     // and a message size
     void receive_header(std::function<void(const Packet&,
                                            dispatcher_type)> receive_body,
-                        dispatcher_type callback);
+                                           dispatcher_type callback);
 
     // Recieve the message according to the packet
     void receive_message(const Packet& p, dispatcher_type dispatcher);
@@ -273,6 +307,8 @@ namespace network
   network::masks::partsize_type get_part_size(network::masks::fsize_type fsize,
                                               network::masks::partnum_type partnum,
                                               network::masks::partnum_type parts);
+
+  network::ack_type make_error(enum error_code error, const std::string& msg);
 }
 
 #include "tools.hxx"

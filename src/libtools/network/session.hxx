@@ -33,4 +33,10 @@ namespace network
   {
     return lhs.id_get() == rhs.id_get();
   }
+
+  inline ack_type make_error(enum error_code error, const std::string& msg)
+  {
+    utils::Logger::cerr() << msg;
+    return std::make_pair(error, keep_alive::no);
+  }
 }

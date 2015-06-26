@@ -11,17 +11,18 @@ namespace network
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Wzero-length-array"
 
+    // X-0 : error ~ ACK message <ERR>
+    static const what_type ack_w = 0;
+    using ack = enum error_code;
+
     // All messages are defined here.
     namespace c_m
     {
       static const fromto_type fromto = 0;
 
-      // 0-0 : error ~ ACK message <ERR>
-      static const what_type ack_w = 0;
-      struct ack
-      {
-        masks::ack_type err;
-      } __attribute__ ((packed));
+      // X-0 : error ~ ACK message <ERR>
+      static const what_type ack_w = masks::ack_w;
+      using ack = masks::ack;
 
       // 0-1 : up_req ~ Upload request <FSIZE|FNAME|RDCY>
       static const what_type up_req_w = 1;
@@ -58,12 +59,9 @@ namespace network
     {
       static const fromto_type fromto = 1;
 
-      // 1-0 : ack ~ ACK message <ERR>
-      static const what_type ack_w = 0;
-      struct ack
-      {
-        masks::ack_type err;
-      } __attribute__ ((packed));
+      // X-0 : error ~ ACK message <ERR>
+      static const what_type ack_w = masks::ack_w;
+      using ack = masks::ack;
 
       // 1-1 : up_pieces_loc ~ The pieces locations <FID<<STID|UINT16>,...>,...>
       static const what_type up_pieces_loc_w = 1;
@@ -85,12 +83,9 @@ namespace network
     {
       static const fromto_type fromto = 2;
 
-      // 2-0 : ack ~ ACK message <ERR>
-      static const what_type ack_w = 0;
-      struct ack
-      {
-        masks::ack_type err;
-      } __attribute__ ((packed));
+      // X-0 : error ~ ACK message <ERR>
+      static const what_type ack_w = masks::ack_w;
+      using ack = masks::ack;
 
       // 2-1 : up_act ~ The client sends a piece <PARTID|SHA1|DATA>
       static const what_type up_act_w = 1;
@@ -113,12 +108,9 @@ namespace network
     {
       static const fromto_type fromto = 3;
 
-      // 3-0 : ack ~ ACK message <ERR>
-      static const what_type ack_w = 0;
-      struct ack
-      {
-        masks::ack_type err;
-      } __attribute__ ((packed));
+      // X-0 : error ~ ACK message <ERR>
+      static const what_type ack_w = masks::ack_w;
+      using ack = masks::ack;
 
       // 3-2 : up_act ~ The storage sends a piece <PARTID|SHA1|DATA>
       static const what_type up_act_w = 2;
@@ -134,12 +126,9 @@ namespace network
     {
       static const fromto_type fromto = 4;
 
-      // 4-0 : ack ~ ACK message <ERR>
-      static const what_type ack_w = 0;
-      struct ack
-      {
-        masks::ack_type err;
-      } __attribute__ ((packed));
+      // X-0 : error ~ ACK message <ERR>
+      static const what_type ack_w = masks::ack_w;
+      using ack = masks::ack;
 
       // 4-1 del_act : The Master deletes a piece <PARTID>
       static const what_type del_act_w = 1;
@@ -175,12 +164,9 @@ namespace network
     {
       static const fromto_type fromto = 5;
 
-      // 5-0 : ack ~ ACK message <ERR>
-      static const what_type ack_w = 0;
-      struct ack
-      {
-        masks::ack_type err;
-      } __attribute__ ((packed));
+      // X-0 : error ~ ACK message <ERR>
+      static const what_type ack_w = masks::ack_w;
+      using ack = masks::ack;
 
       // 5-2 : part_ack ~ Successfully received part <PARTID|AVSPACE>
       static const what_type part_ack_w = 2;
@@ -204,24 +190,18 @@ namespace network
     {
       static const fromto_type fromto = 6;
 
-      // 6-0 : ack ~ ACK message <ERR>
-      static const what_type ack_w = 0;
-      struct ack
-      {
-        masks::ack_type err;
-      } __attribute__ ((packed));
+      // X-0 : error ~ ACK message <ERR>
+      static const what_type ack_w = masks::ack_w;
+      using ack = masks::ack;
     }
 
     namespace s_s
     {
       static const fromto_type fromto = 7;
 
-      // 7-0 : ack ~ ACK message <ERR>
-      static const what_type ack_w = 0;
-      struct ack
-      {
-        masks::ack_type err;
-      } __attribute__ ((packed));
+      // X-0 : error ~ ACK message <ERR>
+      static const what_type ack_w = masks::ack_w;
+      using ack = masks::ack;
 
       // 7-1 : up_act ~ Storage sends a piece <PARTID|SHA1|DATA>
       static const what_type up_act_w = 1;
