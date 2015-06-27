@@ -6,7 +6,6 @@
 #include <iostream>
 #include <thread>
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
 #include <glob.h>
 
 #include <masks/blocks.hh>

@@ -33,9 +33,8 @@ namespace network
                                       const Packet& p,
                                       std::function<void()> callback)
   {
-    auto error = std::get<error_code>(result);
-    if (error != error_code::success)
-      send_ack(*this, p, error);
+    // Send error or success, always ACK.
+    send_ack(*this, p, std::get<error_code>(result));
 
     if (std::get<keep_alive>(result) == keep_alive::no)
       kill(); // FIXME : Get rid of Kill
