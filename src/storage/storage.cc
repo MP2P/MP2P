@@ -114,7 +114,7 @@ namespace storage
             std::ofstream id_file(storage::conf.id_path);
             id_file << response->stid;
 
-            return std::make_pair(error_code::success, keep_alive::yes);
+            return std::make_pair(error_code::success, keep_alive::Yes);
           }
       );
 
@@ -154,7 +154,7 @@ namespace storage
   Storage::recv_dispatcher(Packet packet, Session& session)
   {
     if (packet.size_get() < 1)
-      return std::make_pair(error_code::error, keep_alive::no);
+      return std::make_pair(error_code::error, keep_alive::No);
 
     switch (packet.fromto_get())
     {
@@ -166,10 +166,10 @@ namespace storage
           case c_s::down_act_w:
             return cs_down_act(packet, session);
           default:
-            return std::make_pair(error_code::error, keep_alive::no); // FIXME
+            return std::make_pair(error_code::error, keep_alive::No); // FIXME
         }
       default:
-        return std::make_pair(error_code::error, keep_alive::no); // FIXME
+        return std::make_pair(error_code::error, keep_alive::No); // FIXME
     }
   }
 
@@ -178,7 +178,7 @@ namespace storage
   {
     (void)packet;
     (void)session;
-    return std::make_pair(error_code::success, keep_alive::yes); // FIXME
+    return std::make_pair(error_code::success, keep_alive::Yes); // FIXME
   }
 
   uint64_t Storage::space_available()

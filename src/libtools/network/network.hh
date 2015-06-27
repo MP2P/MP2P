@@ -24,8 +24,8 @@ namespace network
   // Keep the connection alive
   enum class keep_alive
   {
-    yes,
-    no
+    Yes,
+    No
   };
 
   using ack_type = std::pair<error_code, keep_alive>;
@@ -158,10 +158,10 @@ namespace network
             uint16_t port,
             dispatcher_type recv_dispatcher
               = [](Packet, Session&) -> ack_type
-              { return std::make_pair(error_code::success, keep_alive::yes); },
+              { return std::make_pair(error_code::success, keep_alive::Yes); },
             dispatcher_type send_dispatcher
               = [](Packet, Session&) -> ack_type
-              { return std::make_pair(error_code::success, keep_alive::yes); },
+              { return std::make_pair(error_code::success, keep_alive::Yes); },
             std::function<void(Session&)> delete_dispatcher
               = [](Session&) { },
             size_t id = unique_id());

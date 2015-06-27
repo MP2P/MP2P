@@ -104,7 +104,7 @@ namespace client
                                    + boost::lexical_cast<std::string>(file.size() / duration)
                                    + "Kio/s).";
 
-          return std::make_pair(error_code::success, keep_alive::yes);
+          return std::make_pair(error_code::success, keep_alive::Yes);
         });
   }
 
@@ -209,7 +209,7 @@ namespace client
           }
           end_all_tasks();
 
-          return std::make_pair(error_code::success, keep_alive::yes);
+          return std::make_pair(error_code::success, keep_alive::Yes);
         });
   }
 
@@ -248,7 +248,7 @@ namespace client
             memcpy(file.data() + upload->partid.partnum * part_size,
                    upload->data,
                    p.size_get() - sizeof (PARTID) - sizeof (sha1_type));
-            return std::make_pair(error_code::success, keep_alive::yes);
+            return std::make_pair(error_code::success, keep_alive::Yes);
           }
       );
     };

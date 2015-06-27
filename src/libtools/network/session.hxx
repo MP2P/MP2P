@@ -36,7 +36,7 @@ namespace network
     // Send error or success, always ACK.
     send_ack(*this, p, std::get<error_code>(result));
 
-    if (std::get<keep_alive>(result) == keep_alive::no)
+    if (std::get<keep_alive>(result) == keep_alive::No)
       kill(); // FIXME : Get rid of Kill
     else
       callback();
@@ -50,6 +50,6 @@ namespace network
   inline ack_type make_error(enum error_code error, const std::string& msg)
   {
     utils::Logger::cerr() << msg;
-    return std::make_pair(error, keep_alive::no);
+    return std::make_pair(error, keep_alive::No);
   }
 }

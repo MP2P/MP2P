@@ -99,7 +99,7 @@ namespace master
   Master::recv_dispatcher(Packet packet, Session& session)
   {
     if (packet.size_get() < 1)
-      return std::make_pair(error_code::error, keep_alive::no);
+      return std::make_pair(error_code::error, keep_alive::No);
 
     switch (packet.fromto_get())
     {
@@ -107,7 +107,7 @@ namespace master
         switch (packet.what_get())
         {
           case c_m::ack_w:
-            return std::make_pair(error_code::error, keep_alive::no); // FIXME
+            return std::make_pair(error_code::error, keep_alive::No); // FIXME
           case c_m::up_req_w:
             return cm_up_req(packet, session);
           case c_m::down_req_w:
@@ -115,28 +115,28 @@ namespace master
           case c_m::del_req_w:
             return cm_del_req(packet, session);
           default:
-            return std::make_pair(error_code::error, keep_alive::no); // FIXME
+            return std::make_pair(error_code::error, keep_alive::No); // FIXME
         }
       case s_m::fromto:
         switch (packet.what_get())
         {
           case s_m::ack_w:
-            return std::make_pair(error_code::error, keep_alive::no); // FIXME
+            return std::make_pair(error_code::error, keep_alive::No); // FIXME
           case s_m::part_ack_w:
             return sm_part_ack(packet, session);
           case s_m::id_req_w:
             return sm_id_req(packet, session);
           default:
-            return std::make_pair(error_code::error, keep_alive::no); // FIXME
+            return std::make_pair(error_code::error, keep_alive::No); // FIXME
         }
       case m_m::fromto:
         switch (packet.what_get())
         {
           default:
-            return std::make_pair(error_code::error, keep_alive::no); // FIXME
+            return std::make_pair(error_code::error, keep_alive::No); // FIXME
         }
       default:
-        return std::make_pair(error_code::error, keep_alive::no);
+        return std::make_pair(error_code::error, keep_alive::No);
     }
   }
 
@@ -145,6 +145,6 @@ namespace master
   {
     (void)session;
     (void)packet;
-    return std::make_pair(error_code::success, keep_alive::yes);
+    return std::make_pair(error_code::success, keep_alive::Yes);
   }
 }

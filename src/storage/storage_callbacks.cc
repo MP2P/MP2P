@@ -36,7 +36,7 @@ namespace storage
         p.add_message(&part->partid, sizeof (PARTID), copy::No);
         // FIXME : Use an async_send, but close the session only after the async_send
         session.blocking_send(p);
-        return std::make_pair(error_code::success, keep_alive::no);
+        return std::make_pair(error_code::success, keep_alive::No);
       }
     }
 
@@ -57,7 +57,7 @@ namespace storage
     p.add_message(&response, sizeof (s_m::part_ack), copy::Yes);
     master_session.send(p);
 
-    return std::make_pair(error_code::success, keep_alive::yes);
+    return std::make_pair(error_code::success, keep_alive::Yes);
   }
 
   network::ack_type
@@ -82,6 +82,6 @@ namespace storage
     // Add the data
     p.add_message(part.data(), part.size(), copy::No);
     session.blocking_send(p);
-    return std::make_pair(error_code::success, keep_alive::yes);
+    return std::make_pair(error_code::success, keep_alive::Yes);
   }
 }
