@@ -29,6 +29,20 @@ namespace network
     return length_;
   }
 
+  inline void Session::process_result(ack_type result,
+                                      const Packet& p,
+                                      std::function<void()> callback)
+  {
+    auto error = std::get<error_code>(result);
+    if (error != error_code::success)
+      send_ack(*this, p, error);
+
+    if (std::get<keep_alive>(result) == keep_alive::no)
+      kill(); // FIXME : Get rid of Kill
+    else
+      callback();
+  }
+
   inline bool operator==(const Session& lhs, const Session& rhs)
   {
     return lhs.id_get() == rhs.id_get();

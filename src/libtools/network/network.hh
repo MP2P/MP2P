@@ -126,10 +126,6 @@ namespace network
   // FromTo to ToFrom
   masks::fromto_type fromto_inverse(masks::fromto_type fromto);
 
-  // Send acknowledge (error, or not) to the session according
-  // to the packet's header
-  void send_ack(Session& session, const Packet& packet, ack_type ack);
-
   // Create an empty message of a precise type.
   masks::message_type empty_message(masks::size_type size);
 
@@ -248,6 +244,16 @@ namespace network
 
     // Recieve the message according to the packet
     void receive_message(const Packet& p, dispatcher_type dispatcher);
+
+    // Send acknowledge (error, or not) to the session according
+    // to the packet's header
+    void send_ack(Session& session, const Packet& packet, enum error_code ack);
+
+    // Process the result of a receive method
+    // Send ack and kill if the keep_alive == no
+    void process_result(ack_type result,
+                        const Packet& p,
+                        std::function<void()> receive);
   };
 
   // Compare two Sessions according to their id
