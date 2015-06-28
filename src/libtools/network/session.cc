@@ -104,7 +104,7 @@ namespace network
 
             if (result == keep_alive::Yes)
               receive();
-            else
+            else if (result == keep_alive::No)
               kill();
           }
           else
@@ -177,13 +177,13 @@ namespace network
 
     if (result == keep_alive::Yes)
       blocking_receive(callback);
-    else
+    else if (result == keep_alive::No)
       kill(); // FIXME
   }
 
   void Session::send(const Packet& packet)
   {
-    send(packet, [](auto, auto&){ return keep_alive::Yes; });
+    send(packet, [](auto, auto&){ return keep_alive::Ignore; });
   }
 
   void Session::send(const Packet& packet, dispatcher_type callback)
@@ -217,7 +217,7 @@ namespace network
 
   void Session::blocking_send(const Packet& packet)
   {
-    blocking_send(packet, [](auto, auto&){ return keep_alive::Yes; });
+    blocking_send(packet, [](auto, auto&){ return keep_alive::Ignore; });
   }
 
   void Session::blocking_send(const Packet& packet, dispatcher_type callback)
@@ -282,7 +282,7 @@ namespace network
             throw std::logic_error(ss.str());
           }
 
-          return keep_alive::No;
+          return keep_alive::Ignore;
         }
     );
   }
