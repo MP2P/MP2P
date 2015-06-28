@@ -55,7 +55,7 @@ namespace storage
     // Then, ACK the client as well
     send_ack(session, packet, error_code::success);
 
-    return keep_alive::No;
+    return keep_alive::Yes;
   }
 
   network::keep_alive
@@ -83,6 +83,6 @@ namespace storage
 
     recv_ack(session); // Throws if an error occurs
 
-    return keep_alive::No;
+    return keep_alive::Yes;
   }
 }

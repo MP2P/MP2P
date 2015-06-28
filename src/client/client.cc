@@ -153,9 +153,13 @@ namespace client
           // FIXME : part_size may not fit in uint32_t
           to_send.add_message(part_buffer, part_size, copy::No);
 
+          utils::Logger::cout() << "Sending part to storage";
+
           storage.blocking_send(to_send);
 
           recv_ack(storage);
+
+          utils::Logger::cout() << "Storage received part";
         }
     };
   }
@@ -256,7 +260,7 @@ namespace client
             memcpy(file.data() + upload->partid.partnum * part_size,
                    upload->data,
                    p.size_get() - sizeof (PARTID) - sizeof (sha1_type));
-            return keep_alive::No;
+            return keep_alive::Yes;
           }
       );
     };

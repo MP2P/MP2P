@@ -9,6 +9,12 @@
 namespace utils
 {
   template <typename T>
+  void clog(T t)
+  {
+    std::clog << color::g << "<" << "> " << color::w << t << std::endl;
+  }
+
+  template <typename T>
   void Logger::Print(T t)
   {
     a_.Send( [=]
