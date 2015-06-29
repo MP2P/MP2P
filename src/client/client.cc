@@ -103,9 +103,7 @@ namespace client
           end_all_tasks();
 
           auto end = std::chrono::steady_clock::now();
-
           auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-
           utils::Logger::cout() << "Upload took "
                                    + boost::lexical_cast<std::string>(duration)
                                    + " milliseconds ("
@@ -205,6 +203,7 @@ namespace client
           auto file = files::File::create_empty_file(filename + "-dl",
                                                      pieces->fsize);
 
+          auto begin = std::chrono::steady_clock::now();
           for (size_t i = 0; i < list_size; ++i)
           {
             // Recieve a part directly into the file
@@ -219,7 +218,17 @@ namespace client
             );
           }
 
+          utils::Logger::cout() << "Download started...";
+
           end_all_tasks();
+
+          auto end = std::chrono::steady_clock::now();
+          auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+          utils::Logger::cout() << "Download took "
+                                   + boost::lexical_cast<std::string>(duration)
+                                   + " milliseconds ("
+                                   + boost::lexical_cast<std::string>(file.size() / duration)
+                                   + "Kio/s).";
 
           return keep_alive::No;
         });
