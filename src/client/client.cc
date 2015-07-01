@@ -3,6 +3,8 @@
 #include <utils.hh>
 #include <files.hh>
 #include <masks/messages.hh>
+#include <thread>
+#include <chrono>
 
 namespace client
 {
@@ -111,11 +113,11 @@ namespace client
           auto end = std::chrono::steady_clock::now();
           auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
           if (duration)
-          utils::Logger::cout() << "Upload took "
-                                   + boost::lexical_cast<std::string>(duration)
-                                   + " milliseconds ("
-                                   + boost::lexical_cast<std::string>(file.size() / duration)
-                                   + "Kio/s).";
+            utils::Logger::cout() << "Upload took "
+                                     + boost::lexical_cast<std::string>(duration)
+                                     + " milliseconds ("
+                                     + boost::lexical_cast<std::string>(file.size() / duration)
+                                     + "Kio/s).";
 
           return keep_alive::No;
         });
@@ -213,21 +215,34 @@ namespace client
                                                      pieces->fsize);
 
           auto begin = std::chrono::steady_clock::now();
+
+          std::atomic<size_t> progress{1}; // The global progress of the file
+
           for (size_t i = 0; i < list_size; ++i)
           {
             // Recieve a part directly into the file
             STPFIELD& field = pieces->fdetails.stplist[i];
             PARTID partid{ pieces->fdetails.fid, field.nb };
             tasks_.emplace_back(std::async(std::launch::async,
-                                recv_part(
-                                file,
-                                field.addr,
-                                partid,
-                                part_size))
+                                recv_part(file,
+                                          field.addr,
+                                          partid,
+                                          part_size,
+                                          progress))
             );
           }
 
           utils::Logger::cout() << "Download started...";
+
+          while (progress < list_size)
+          {
+            utils::Logger::cout() << "PROGRESS: "
+                      + std::to_string((static_cast<double>(progress) / list_size) * 100)
+                      + "%";
+
+            using namespace std::literals;
+            std::this_thread::sleep_for(200ms);
+          }
 
           end_all_tasks();
 
@@ -247,9 +262,10 @@ namespace client
   Client::recv_part(files::File& file,
                     ADDR addr,
                     PARTID partid,
-                    size_t part_size)
+                    size_t part_size,
+                    std::atomic<size_t>& progress)
   {
-    return [&file, this, addr, partid, part_size]()
+    return [&file, this, addr, partid, part_size, &progress]()
     {
       auto host = network::binary_to_string_ipv6(addr.ipv6,
                                                  network::masks::ipv6_type_size);
@@ -269,7 +285,7 @@ namespace client
 
       // Receive a part
       blocking_receive(storage,
-          [&file, part_size](Packet p, Session& session)
+          [&progress, &file, part_size](Packet p, Session& session)
           {
             CharT* data = p.message_seq_get().front().data();
             s_c::up_act* upload = reinterpret_cast<s_c::up_act*>(data);
@@ -281,6 +297,8 @@ namespace client
 
             // Send ack if the file is received correctly
             send_ack(session, p, error_code::success);
+
+            ++progress;
 
             return keep_alive::No;
           }
