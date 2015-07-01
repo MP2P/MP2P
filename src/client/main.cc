@@ -22,7 +22,7 @@ int main(int argc, const char *argv[])
 
   try
   {
-    Client client{client::conf.master_hostname, client::conf.master_port};
+    Client client;
 
     if (client::conf.action == action::upload)
     {

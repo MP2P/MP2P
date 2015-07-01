@@ -24,10 +24,14 @@ namespace client
 
       throw std::logic_error(ss.str());
     }
+
+    auto master_session_create(boost::asio::io_service& io_service)
+    {
+      return Session::create(io_service, conf.master_hostname, conf.master_port);
+    }
   }
 
-  Client::Client(const std::string& host, uint16_t port)
-    : master_session_{Session::create(io_service_, host, port)}
+  Client::Client()
   {
     // Run the network service, right away
     io_service_.run();
@@ -50,12 +54,14 @@ namespace client
 
     c_m::up_req request{fsize, rdcy, {}}; // The request message
 
+    auto master_session = master_session_create(io_service_);
+
     Packet req_packet{0, 1};
     req_packet.add_message(&request, sizeof (request), copy::No);
     req_packet.add_message(fname.c_str(), fname.size(), copy::No);
-    blocking_send(master_session_, req_packet);
+    blocking_send(master_session, req_packet);
 
-    blocking_receive(master_session_,
+    blocking_receive(master_session,
         [&file, this](Packet p, Session& /*recv_session*/)
         {
           if (p.what_get() == 0)
@@ -104,6 +110,7 @@ namespace client
 
           auto end = std::chrono::steady_clock::now();
           auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+          if (duration)
           utils::Logger::cout() << "Upload took "
                                    + boost::lexical_cast<std::string>(duration)
                                    + " milliseconds ("
@@ -165,16 +172,18 @@ namespace client
   // Send a c_m::down_req to the master
   void Client::request_download(const std::string& filename)
   {
+    auto master_session = master_session_create(io_service_);
+
+    utils::Logger::cout() << "[" + std::to_string(master_session->id_get()) + "] " + "Requesting file " + filename + " to master.";
+
     // Prepare the request packet: contains only the filename.
     // There is no need for a custom structure
     Packet request{c_m::fromto, c_m::down_req_w};
     request.add_message(filename.c_str(), filename.size(), copy::No);
-
-    utils::Logger::cout() << "[" + std::to_string(master_session_->id_get()) + "] " + "Requesting file " + filename + " to master.";
-    blocking_send(master_session_, request);
+    blocking_send(master_session, request);
 
     // Wait for an answer from the master, then download all parts from storages
-    blocking_receive(master_session_,
+    blocking_receive(master_session,
         [&filename, this](Packet p, Session& /*recv_session*/)
         {
           if (p.what_get() == 0)

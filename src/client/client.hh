@@ -39,7 +39,7 @@ namespace client
   class Client
   {
   public:
-    Client(const std::string& host, uint16_t port);
+    Client();
 
     // Send a c_m::up_req to the master
     void request_upload(const files::File& file,
@@ -51,10 +51,6 @@ namespace client
   private:
     // One io_service per app
     boost::asio::io_service io_service_;
-
-    // Session connected to the master
-    // FIXME : Create the session whenever needed
-    std::shared_ptr<network::Session> master_session_;
 
     // Current asynchronous tasks
     std::vector<std::future<void>> tasks_;
