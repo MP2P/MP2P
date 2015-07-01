@@ -279,8 +279,9 @@ namespace master
     std::string json = DB::Connector::get_instance().cmd_get("storages");
     DB::MetaOnStoragesItem mos = DB::MetaOnStoragesItem::deserialize(json);
 
-    // FIXME Get ip of remote storage
-    DB::StorageItem si{mos.count_get(), "::1", req->port, req->avspace};
+    DB::StorageItem si{mos.count_get(),
+                       session.remote_address_get().to_string(),
+                       req->port, req->avspace};
     DB::Connector::get_instance().cmd_put("st." + std::to_string(si.id_get()), si.serialize());
 
     mos.count_set(mos.count_get() + 1);
