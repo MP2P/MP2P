@@ -6,6 +6,8 @@
 #include <thread>
 #include <chrono>
 
+//#define DEBUG
+
 namespace client
 {
   using namespace network;
@@ -30,6 +32,36 @@ namespace client
     auto master_session_create(boost::asio::io_service& io_service)
     {
       return Session::create(io_service, conf.master_hostname, conf.master_port);
+    }
+
+    void progress_while(const std::atomic<size_t>& prog, unsigned limit)
+    {
+      std::cout << std::endl;
+      std::cout << utils::color::g;
+      constexpr int width = 70;
+      while (prog < limit)
+      {
+        size_t i_progress = prog;
+
+        auto p_progress = static_cast<double>(i_progress) / limit;
+
+        int pos = width * p_progress;
+
+        std::cout << "[";
+        for (int i = 0; i < width; ++i)
+        {
+          if (i < pos)
+            std::cout << "=";
+          else if (i == pos)
+            std::cout << ">";
+          else
+            std::cout << " ";
+        }
+        std::cout << "] " << int(p_progress * 100.0) << " %\r";
+        std::cout.flush();
+      }
+      std::cout << std::endl << std::endl;
+      std::cout << utils::color::w;
     }
   }
 
@@ -91,25 +123,32 @@ namespace client
 
           size_t parts = total_parts;
 
+          progress_.store(1);
+
+#ifdef DEBUG
           utils::Logger::cout() << "Upload started...";
           auto begin = std::chrono::steady_clock::now();
+#endif
           for (size_t i = 0; i < list_size; ++i)
           {
             STPFIELD& field = pieces->fdetails.stplist[i];
             tasks_.emplace_back(std::async(std::launch::async,
                                 send_parts(
-                                pieces->fdetails.fid,
-                                file,
-                                field.addr,
-                                total_parts,
-                                parts - field.nb,
-                                parts))
+                                  pieces->fdetails.fid,
+                                  file,
+                                  field.addr,
+                                  total_parts,
+                                  parts - field.nb,
+                                  parts))
             );
             parts -= field.nb;
           }
 
+          progress_while(progress_, total_parts);
+
           end_all_tasks();
 
+#ifdef DEBUG
           auto end = std::chrono::steady_clock::now();
           auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
           if (duration)
@@ -118,6 +157,7 @@ namespace client
                                      + " milliseconds ("
                                      + boost::lexical_cast<std::string>(file.size() / duration)
                                      + "Kio/s).";
+#endif
 
           return keep_alive::No;
         });
@@ -166,6 +206,8 @@ namespace client
 
           recv_ack(*storage);
 
+          ++progress_;
+
           utils::Logger::cout() << "[" + std::to_string(storage->id_get()) + "] " + "Storage received part";
         }
     };
@@ -201,6 +243,7 @@ namespace client
 
           utils::Logger::cout() << "list_size = " + std::to_string(list_size);
 
+
           if (list_size == 0) // FIXME : Find one way to treat errors the same
             throw std::logic_error("Invalid packet from master");
 
@@ -214,9 +257,8 @@ namespace client
           auto file = files::File::create_empty_file(filename + "-dl",
                                                      pieces->fsize);
 
-          auto begin = std::chrono::steady_clock::now();
-
-          std::atomic<size_t> progress{1}; // The global progress of the file
+          //auto begin = std::chrono::steady_clock::now();
+          progress_.store(1);
 
           for (size_t i = 0; i < list_size; ++i)
           {
@@ -227,25 +269,17 @@ namespace client
                                 recv_part(file,
                                           field.addr,
                                           partid,
-                                          part_size,
-                                          progress))
+                                          part_size))
             );
           }
 
           utils::Logger::cout() << "Download started...";
 
-          while (progress < list_size)
-          {
-            utils::Logger::cout() << "PROGRESS: "
-                      + std::to_string((static_cast<double>(progress) / list_size) * 100)
-                      + "%";
-
-            using namespace std::literals;
-            std::this_thread::sleep_for(200ms);
-          }
+          progress_while(progress_, list_size);
 
           end_all_tasks();
 
+#ifdef DEBUG
           auto end = std::chrono::steady_clock::now();
           auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
           utils::Logger::cout() << "Download took "
@@ -253,6 +287,7 @@ namespace client
                                    + " milliseconds ("
                                    + boost::lexical_cast<std::string>(file.size() / duration)
                                    + "Kio/s).";
+#endif
 
           return keep_alive::No;
         });
@@ -262,10 +297,9 @@ namespace client
   Client::recv_part(files::File& file,
                     ADDR addr,
                     PARTID partid,
-                    size_t part_size,
-                    std::atomic<size_t>& progress)
+                    size_t part_size)
   {
-    return [&file, this, addr, partid, part_size, &progress]()
+    return [&file, this, addr, partid, part_size]()
     {
       auto host = network::binary_to_string_ipv6(addr.ipv6,
                                                  network::masks::ipv6_type_size);
@@ -285,7 +319,7 @@ namespace client
 
       // Receive a part
       blocking_receive(storage,
-          [&progress, &file, part_size](Packet p, Session& session)
+          [this, &file, part_size](Packet p, Session& session)
           {
             CharT* data = p.message_seq_get().front().data();
             s_c::up_act* upload = reinterpret_cast<s_c::up_act*>(data);
@@ -298,7 +332,7 @@ namespace client
             // Send ack if the file is received correctly
             send_ack(session, p, error_code::success);
 
-            ++progress;
+            ++progress_;
 
             return keep_alive::No;
           }

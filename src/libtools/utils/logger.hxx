@@ -34,7 +34,10 @@ namespace utils
   template <typename T>
   Logger& Logger::operator<<(T t)
   {
+#ifdef DEBUG
     Print(t);
+#endif
+    (void)t;
     return *this;
   }
 }

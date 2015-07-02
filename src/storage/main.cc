@@ -1,3 +1,5 @@
+#define DEBUG
+
 #include "storage.hh"
 
 #include <utils.hh>

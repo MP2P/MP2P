@@ -55,6 +55,9 @@ namespace client
     // Current asynchronous tasks
     std::vector<std::future<void>> tasks_;
 
+    // Current task progress
+    std::atomic<size_t> progress_;
+
     // End all std::async tasks
     void end_all_tasks();
 
@@ -72,7 +75,6 @@ namespace client
     recv_part(files::File& file,
               network::masks::ADDR addr,
               network::masks::PARTID partid,
-              size_t part_size,
-              std::atomic<size_t>& progress);
+              size_t part_size);
   };
 }

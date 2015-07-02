@@ -1,9 +1,10 @@
 #include <ostream>
+#include <fcntl.h>
+
+#define DEBUG
 
 #include <utils.hh>
 #include "master.hh"
-#include <fcntl.h>
-
 
 int main(int argc, const char *argv[])
 {
