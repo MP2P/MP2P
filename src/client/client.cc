@@ -60,6 +60,15 @@ namespace client
         std::cout << "] " << int(p_progress * 100.0) << " %\r";
         std::cout.flush();
       }
+
+      // One last pass, to print the 100%.
+      {
+        std::cout << "[";
+        for (int i = 0; i < width; ++i)
+          std::cout << "=";
+        std::cout << "] " << "100 %\r";
+      }
+
       std::cout << std::endl << std::endl;
       std::cout << utils::color::w;
     }
@@ -125,10 +134,8 @@ namespace client
 
           progress_.store(1);
 
-#ifdef DEBUG
           utils::Logger::cout() << "Upload started...";
           auto begin = std::chrono::steady_clock::now();
-#endif
           for (size_t i = 0; i < list_size; ++i)
           {
             STPFIELD& field = pieces->fdetails.stplist[i];
@@ -148,16 +155,14 @@ namespace client
 
           end_all_tasks();
 
-#ifdef DEBUG
           auto end = std::chrono::steady_clock::now();
           auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
           if (duration)
-            utils::Logger::cout() << "Upload took "
+            std::cout << "Upload took "
                                      + boost::lexical_cast<std::string>(duration)
                                      + " milliseconds ("
                                      + boost::lexical_cast<std::string>(file.size() / duration)
-                                     + "Kio/s).";
-#endif
+                                     + "Kio/s)." << std::endl;
 
           return keep_alive::No;
         });
@@ -257,7 +262,7 @@ namespace client
           auto file = files::File::create_empty_file(filename + "-dl",
                                                      pieces->fsize);
 
-          //auto begin = std::chrono::steady_clock::now();
+          auto begin = std::chrono::steady_clock::now();
           progress_.store(1);
 
           for (size_t i = 0; i < list_size; ++i)
@@ -279,15 +284,13 @@ namespace client
 
           end_all_tasks();
 
-#ifdef DEBUG
           auto end = std::chrono::steady_clock::now();
           auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-          utils::Logger::cout() << "Download took "
+          std::cout << "Download took "
                                    + boost::lexical_cast<std::string>(duration)
                                    + " milliseconds ("
                                    + boost::lexical_cast<std::string>(file.size() / duration)
-                                   + "Kio/s).";
-#endif
+                                   + "Kio/s)." << std::endl;
 
           return keep_alive::No;
         });
