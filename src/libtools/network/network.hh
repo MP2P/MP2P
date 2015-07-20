@@ -76,7 +76,7 @@ namespace network
     // The shared_ptr is going to be passed to a shared_buffer.
     Packet(masks::fromto_type fromto,
            masks::what_type what,
-           const std::shared_ptr<std::vector<masks::CharT>>& data);
+           std::vector<masks::CharT>&& data);
 
     // Create an empty packet without any message.
     // In order to add new messages, use add_message.

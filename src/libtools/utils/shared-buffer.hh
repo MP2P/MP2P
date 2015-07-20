@@ -1,11 +1,13 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include <boost/asio/buffer.hpp>
 
 namespace utils
 {
-  /* A shared buffer is a buffer containing a vector as a container.
+  /*
+   * A shared buffer is a buffer containing a vector as a container.
    * It should be used to be copied around and shared between multiple objects
    * and operations.
    */
@@ -26,14 +28,11 @@ namespace utils
         No
       };
 
-      // Construct an empty buffer. It allocates `size` bytes
+      // Construct an empty buffer
       explicit shared_buffer(size_t size);
 
-      // Construct a buffer with a preallocated container. No copy occurs
-      explicit shared_buffer(const std::shared_ptr<container_type>& data);
-
-      // Construct a buffer by moving a container inside the current one
-      explicit shared_buffer(container_type&& data);
+      // Construct a shared_buffer from a moved container
+      explicit shared_buffer(container_type&& container);
 
       // Construct a buffer by copying (or not) the data from a pointer to POD
       // If your data is going to be invalidated, copy::Yes should be used.
@@ -78,23 +77,16 @@ namespace utils
       operator boost::asio::const_buffer() const;
 
     private:
-      // The possible underlaying container.
-      // Used if copy is needed, or pre-allocated space
-      std::shared_ptr<container_type> data_;
-      // The mutable_buffer used for interaction with boost::asio
-      boost::asio::mutable_buffer buffer_;
+      // Pointer to the implementation of the buffer
+      // It can be a strong implementation that owns the data
+      // Or a weak implementation that only uses it
+      struct shared_buffer_impl; // Forward declaration
+      std::shared_ptr<shared_buffer_impl> pimpl_;
 
-      // Copy the data from the pointer to a new allocated buffer
-      void copy_helper(const CharT* data, size_t size);
-
-      // Overload buffer_cast for the shared_buffer
-      template <typename PointerToPodType>
-      friend PointerToPodType buffer_cast(const shared_buffer& b);
+      // Forward declaration of the different types of implementation
+      friend struct owning_impl;
+      friend struct weak_impl;
   };
-
-  // Overload buffer_cast for the shared_buffer
-  template <typename PointerToPodType>
-  PointerToPodType buffer_cast(const shared_buffer& b);
 }
 
 #include "shared-buffer.hxx"

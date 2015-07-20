@@ -5,45 +5,28 @@
 namespace utils
 {
   shared_buffer::shared_buffer(size_t size)
-    : data_{std::make_shared<container_type>(size)},
-      buffer_{&*data_->begin(), size}
+    : pimpl_{std::make_shared<owning_impl>(size)}
   {
   }
 
-  shared_buffer::shared_buffer(const std::shared_ptr<container_type>& data)
-    : data_{data},
-      buffer_{&*data_->begin(), data->size()}
-  {
-  }
-
-  shared_buffer::shared_buffer(container_type&& data)
-    : data_{std::make_shared<container_type>(
-        std::forward<container_type>(data))},
-      buffer_{&*data_->begin(), data.size()}
+  shared_buffer::shared_buffer(container_type&& container)
+    : pimpl_{std::make_shared<owning_impl>(std::move(container))}
   {
   }
 
   shared_buffer::shared_buffer(CharT* data, size_t size, copy to_copy)
-    : data_{nullptr},
-      buffer_{data, size}
   {
     if (to_copy == copy::Yes)
-      copy_helper(data, size);
+      pimpl_ = std::make_shared<owning_impl>(data, size);
+    else
+      pimpl_ = std::make_shared<weak_impl>(data, size);
   }
 
- shared_buffer::shared_buffer(const CharT* data, size_t size, copy to_copy)
-    : data_{nullptr},
-      buffer_{const_cast<CharT*>(data), size}
+  shared_buffer::shared_buffer(const CharT* data, size_t size, copy to_copy)
   {
     if (to_copy == copy::Yes)
-      copy_helper(data, size);
-  }
-
-  void
-  shared_buffer::copy_helper(const CharT* data, size_t size)
-  {
-    data_ = std::make_shared<container_type>(size, '\0');
-    memcpy(&*data_->begin(), data, size);
-    buffer_ = boost::asio::mutable_buffer(&*data_->begin(), size);
+      pimpl_ = std::make_shared<owning_impl>(data, size);
+    else
+      pimpl_ = std::make_shared<weak_impl>(data, size);
   }
 }

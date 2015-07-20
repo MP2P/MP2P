@@ -26,12 +26,6 @@ TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
       REQUIRE_NOTHROW(utils::shared_buffer{9});
     }
 
-    SECTION("Shared_ptr")
-    {
-      auto vector_ptr = std::make_shared<utils::shared_buffer::container_type>();
-      REQUIRE_NOTHROW(utils::shared_buffer{vector_ptr});
-    }
-
     SECTION("Move container")
     {
       std::vector<char> vector;
@@ -61,7 +55,7 @@ TEST_CASE("Shared-buffer", "[libtools][shared-buffer]")
       shared_buffer::copy to_copy = copy::No;
 
       utils::shared_buffer buffer(text, size, to_copy);
-      REQUIRE(utils::buffer_cast<char*>(buffer) == text);
+      REQUIRE(buffer.data() == text);
       REQUIRE(buffer.size() == size);
     }
   }
@@ -184,8 +178,8 @@ TEST_CASE("Packet", "[libtools][packet]")
     const CharT* str = "MP2P\n";
     REQUIRE_NOTHROW((Packet{5, fromto, what, str}));
 
-    auto vector = std::make_shared<std::vector<masks::CharT>>(5, 'O');
-    REQUIRE_NOTHROW((Packet{fromto, what, vector}));
+    auto vector = std::vector<masks::CharT>(5, 'O');
+    REQUIRE_NOTHROW((Packet{fromto, what, std::move(vector)}));
 
     SECTION("No message")
     {
